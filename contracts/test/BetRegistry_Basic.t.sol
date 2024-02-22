@@ -27,4 +27,12 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
         assertEq(market.totalHigher, 100);
         assertEq(market.totalLower, 0);
     }
+
+    function test_placeBet_lower() public {
+        _createMarket(1 days, 1000);
+        _placeBet(0, 0, 100);
+        IBetRegistry.Market memory market = _getMarket(0);
+        assertEq(market.totalHigher, 0);
+        assertEq(market.totalLower, 100);
+    }
 }
