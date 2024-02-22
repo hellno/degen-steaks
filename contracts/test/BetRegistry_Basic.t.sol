@@ -11,12 +11,20 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
     }
 
     function testCreateMarket() public {
-        _createMarket(100, 1000);
+        _createMarket(1 days, 1000);
         IBetRegistry.Market memory market = _getMarket(0);
         assertEq(market.creator, address(this));
-        assertEq(market.endTime, 100);
+        assertEq(market.endTime, 1 days);
         assertEq(market.targetPrice, 1000);
         assertEq(market.totalHigher, 0);
+        assertEq(market.totalLower, 0);
+    }
+
+    function test_placeBet_higher() public {
+        _createMarket(1 days, 1000);
+        _placeBet(0, 100, 0);
+        IBetRegistry.Market memory market = _getMarket(0);
+        assertEq(market.totalHigher, 100);
         assertEq(market.totalLower, 0);
     }
 }

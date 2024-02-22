@@ -14,12 +14,12 @@ contract BetRegistry is IBetRegistry {
         return markets[marketId_];
     }
 
-    function createMarket(uint40 endTime, uint256 targetPrice) public {
+    function createMarket(uint40 endTime_, uint256 targetPrice_) public {
         markets.push(
-            Market({creator: msg.sender, endTime: endTime, targetPrice: targetPrice, totalHigher: 0, totalLower: 0})
+            Market({creator: msg.sender, endTime: endTime_, targetPrice: targetPrice_, totalHigher: 0, totalLower: 0})
         );
 
-        emit MarketCreated(markets.length - 1, msg.sender, endTime, targetPrice);
+        emit MarketCreated(markets.length - 1, msg.sender, endTime_, targetPrice_);
     }
 
     function placeBet(uint256 marketId_, uint256 amountHigher_, uint256 amountLower_) public {
