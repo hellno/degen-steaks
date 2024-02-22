@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {Test, console2} from "forge-std/Test.sol";
+import "test/setup/Constants.sol";
 import {IBetRegistry, BetRegistry} from "src/BetRegistry.sol";
 
 contract WithUtility is Test {
