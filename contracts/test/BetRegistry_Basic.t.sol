@@ -2,13 +2,12 @@
 pragma solidity ^0.8.13;
 
 import {Test, console2} from "forge-std/Test.sol";
-import {IBetRegistry, BetRegistry} from "../src/BetRegistry.sol";
+import {WithUtility} from "test/setup/WithUtility.t.sol";
+import {IBetRegistry, BetRegistry} from "src/BetRegistry.sol";
 
-contract BetRegistry_Basic_Test is Test {
-    BetRegistry betRegistry;
-
+contract BetRegistry_Basic_Test is Test, WithUtility {
     function setUp() public {
-        betRegistry = new BetRegistry();
+        deploy();
     }
 
     function testCreateMarket() public {
