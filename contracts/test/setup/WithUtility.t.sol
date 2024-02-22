@@ -17,4 +17,8 @@ contract WithUtility is Test {
     function _createMarket(uint40 endTime, uint256 targetPrice) public {
         betRegistry.createMarket(endTime, targetPrice);
     }
+
+    function _getMarket(uint256 marketId) public view returns (IBetRegistry.Market memory) {
+        return betRegistry.getMarket(marketId);
+    }
 }
