@@ -67,6 +67,13 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
         _placeBet(1, 100, 100);
     }
 
+    function test_placeBet_fail_marketEnded() public {
+        _createMarket(1 days, 1000);
+        vm.warp(2 days);
+        vm.expectRevert("BetRegistry::placeBet: market has ended.");
+        _placeBet(0, 100, 100);
+    }
+
     function test_getMarket_fail_outOfRange() public {
         vm.expectRevert("BetRegistry::getMarket: marketId out of range.");
         _getMarket(1);
