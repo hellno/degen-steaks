@@ -1,1 +1,2 @@
-# degen-steaks
+# degen steaks 🥩
+
