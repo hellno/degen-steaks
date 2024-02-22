@@ -14,6 +14,10 @@ contract BetRegistry is IBetRegistry {
         return markets[marketId_];
     }
 
+    function getBet(uint256 marketId_, address user_) public view returns (Bet memory) {
+        return marketToUserToBet[marketId_][user_];
+    }
+
     function createMarket(uint40 endTime_, uint256 targetPrice_) public {
         markets.push(
             Market({creator: msg.sender, endTime: endTime_, targetPrice: targetPrice_, totalHigher: 0, totalLower: 0})

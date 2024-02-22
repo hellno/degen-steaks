@@ -23,24 +23,36 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
     function test_placeBet_higher() public {
         _createMarket(1 days, 1000);
         _placeBet(0, 100, 0);
+
         IBetRegistry.Market memory market = _getMarket(0);
         assertEq(market.totalHigher, 100);
         assertEq(market.totalLower, 0);
+
+        IBetRegistry.Bet memory bet = _getBet(0, address(this));
+        assertEq(bet.amountHigher, 100);
+        assertEq(bet.amountLower, 0);
     }
 
     function test_placeBet_lower() public {
         _createMarket(1 days, 1000);
         _placeBet(0, 0, 100);
         IBetRegistry.Market memory market = _getMarket(0);
+
         assertEq(market.totalHigher, 0);
         assertEq(market.totalLower, 100);
+
+        IBetRegistry.Bet memory bet = _getBet(0, address(this));
+        assertEq(bet.amountHigher, 0);
+        assertEq(bet.amountLower, 100);
     }
 
     function test_placeBet_multiple() public {
         _createMarket(1 days, 1000);
+
         _placeBet(0, 100, 100);
         _placeBet(0, 100, 0);
         _placeBet(0, 0, 100);
+
         IBetRegistry.Market memory market = _getMarket(0);
         assertEq(market.totalHigher, 200);
         assertEq(market.totalLower, 200);

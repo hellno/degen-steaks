@@ -26,4 +26,8 @@ contract WithUtility is Test {
     function _placeBet(uint256 marketId, uint256 amountHigher, uint256 amountLower) public {
         betRegistry.placeBet(marketId, amountHigher, amountLower);
     }
+
+    function _getBet(uint256 marketId, address user) public view returns (IBetRegistry.Bet memory) {
+        return betRegistry.getBet(marketId, user);
+    }
 }
