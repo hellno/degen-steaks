@@ -54,7 +54,11 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
         _placeBet(0, 0, 100);
 
         IBetRegistry.Market memory market = _getMarket(0);
-        assertEq(market.totalHigher, 200);
-        assertEq(market.totalLower, 200);
+        assertEq(market.totalHigher, 200, "totalHigher");
+        assertEq(market.totalLower, 200, "totalLower");
+
+        IBetRegistry.Bet memory bet = _getBet(0, address(this));
+        assertEq(bet.amountHigher, 200, "amountHigher");
+        assertEq(bet.amountLower, 200, "amountLower");
     }
 }

@@ -31,8 +31,8 @@ contract BetRegistry is IBetRegistry {
         require(block.timestamp < markets[marketId_].endTime, "BetRegistry: market has ended");
 
         Bet storage bet = marketToUserToBet[marketId_][msg.sender];
-        bet.amountHigher = amountHigher_;
-        bet.amountLower = amountLower_;
+        bet.amountHigher += amountHigher_;
+        bet.amountLower += amountLower_;
 
         // @dev up only
         if (amountHigher_ > 0) {
