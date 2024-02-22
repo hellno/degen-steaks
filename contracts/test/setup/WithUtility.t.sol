@@ -5,17 +5,22 @@ import {Test, console2} from "forge-std/Test.sol";
 import "test/setup/Constants.t.sol";
 import {IBetRegistry, BetRegistry} from "src/BetRegistry.sol";
 import {FaucetToken} from "src/auxiliary/FaucetToken.sol";
+import {SteakedDegen} from "src/SteakedDegen.sol";
+import "openzeppelin/token/ERC20/IERC20.sol";
+import "openzeppelin/interfaces/IERC4626.sol";
 
 contract WithUtility is Test {
     IBetRegistry betRegistry;
-    FaucetToken faucetToken;
+    IERC20 faucetToken;
+    IERC4626 steakedDegen;
 
     /// @dev This function removes this contract from coverage reports
     function test_WithUtility() public {}
 
     function deploy() public {
         faucetToken = new FaucetToken("Degen Token", "DEGEN");
-        betRegistry = new BetRegistry(address(faucetToken));
+        steakedDegen = new SteakedDegen("Steaked Degen", "SDEGEN", faucetToken);
+        betRegistry = new BetRegistry(faucetToken, steakedDegen, DEGEN_UTILITY_DAO);
     }
 
     function _createMarket(uint40 endTime, uint256 targetPrice) public {
