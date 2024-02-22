@@ -13,4 +13,8 @@ contract WithUtility is Test {
     function deploy() public {
         betRegistry = new BetRegistry();
     }
+
+    function _createMarket(uint40 endTime, uint256 targetPrice) public {
+        betRegistry.createMarket(endTime, targetPrice);
+    }
 }

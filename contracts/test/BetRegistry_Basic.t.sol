@@ -11,7 +11,7 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
     }
 
     function testCreateMarket() public {
-        betRegistry.createMarket(100, 1000);
+        _createMarket(100, 1000);
         IBetRegistry.Market memory market = betRegistry.getMarket(0);
         assertEq(market.creator, address(this));
         assertEq(market.endTime, 100);
