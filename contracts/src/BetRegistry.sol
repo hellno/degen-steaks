@@ -9,7 +9,7 @@ contract BetRegistry is IBetRegistry {
 
     function getMarket(uint256 marketId_) public view returns (Market memory) {
         if (marketId_ >= markets.length) {
-            revert("BetRegistry::getMarket marketId out of range");
+            revert("BetRegistry::getMarket: marketId out of range.");
         }
         return markets[marketId_];
     }
@@ -27,8 +27,8 @@ contract BetRegistry is IBetRegistry {
     }
 
     function placeBet(uint256 marketId_, uint256 amountHigher_, uint256 amountLower_) public {
-        require(marketId_ < markets.length, "BetRegistry: marketId out of range");
-        require(block.timestamp < markets[marketId_].endTime, "BetRegistry: market has ended");
+        require(marketId_ < markets.length, "BetRegistry::placeBet: marketId out of range.");
+        require(block.timestamp < markets[marketId_].endTime, "BetRegistry::placeBet: market has ended.");
 
         Bet storage bet = marketToUserToBet[marketId_][msg.sender];
         bet.amountHigher += amountHigher_;

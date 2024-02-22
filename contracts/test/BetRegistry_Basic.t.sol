@@ -61,4 +61,9 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
         assertEq(bet.amountHigher, 200, "amountHigher");
         assertEq(bet.amountLower, 200, "amountLower");
     }
+
+    function test_placeBet_fail_outOfRange() public {
+        vm.expectRevert("BetRegistry::placeBet: marketId out of range.");
+        _placeBet(1, 100, 100);
+    }
 }
