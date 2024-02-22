@@ -14,8 +14,8 @@ contract WithUtility is Test {
     function test_WithUtility() public {}
 
     function deploy() public {
-        betRegistry = new BetRegistry();
         faucetToken = new FaucetToken("Degen Token", "DEGEN");
+        betRegistry = new BetRegistry(address(faucetToken));
     }
 
     function _createMarket(uint40 endTime, uint256 targetPrice) public {
@@ -26,7 +26,13 @@ contract WithUtility is Test {
         return betRegistry.getMarket(marketId);
     }
 
+    function _dealAndApprove(address account, uint256 amount) public {
+        deal(address(faucetToken), account, amount);
+        faucetToken.approve(address(betRegistry), amount);
+    }
+
     function _placeBet(uint256 marketId, uint256 amountHigher, uint256 amountLower) public {
+        _dealAndApprove(address(this), amountHigher + amountLower);
         betRegistry.placeBet(marketId, amountHigher, amountLower);
     }
 

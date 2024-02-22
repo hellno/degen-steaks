@@ -63,15 +63,17 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
     }
 
     function test_placeBet_fail_outOfRange() public {
+        _dealAndApprove(address(this), 200);
         vm.expectRevert("BetRegistry::placeBet: marketId out of range.");
-        _placeBet(1, 100, 100);
+        betRegistry.placeBet(0, 100, 100);
     }
 
     function test_placeBet_fail_marketEnded() public {
         _createMarket(1 days, 1000);
         vm.warp(2 days);
+        _dealAndApprove(address(this), 200);
         vm.expectRevert("BetRegistry::placeBet: market has ended.");
-        _placeBet(0, 100, 100);
+        betRegistry.placeBet(0, 100, 100);
     }
 
     function test_getMarket_fail_outOfRange() public {
