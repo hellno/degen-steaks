@@ -4,15 +4,18 @@ pragma solidity ^0.8.13;
 import {Test, console2} from "forge-std/Test.sol";
 import "test/setup/Constants.t.sol";
 import {IBetRegistry, BetRegistry} from "src/BetRegistry.sol";
+import {FaucetToken} from "src/auxiliary/FaucetToken.sol";
 
 contract WithUtility is Test {
     IBetRegistry betRegistry;
+    FaucetToken faucetToken;
 
     /// @dev This function removes this contract from coverage reports
     function test_WithUtility() public {}
 
     function deploy() public {
         betRegistry = new BetRegistry();
+        faucetToken = new FaucetToken("Degen Token", "DEGEN");
     }
 
     function _createMarket(uint40 endTime, uint256 targetPrice) public {
