@@ -5,19 +5,17 @@ import "src/auxiliary/EthDegenPool.sol";
 import "src/auxiliary/EthUsdcPool.sol";
 import "lib/uniswap-v3/OracleLibrary.sol";
 
-import "forge-std/console2.sol";
-
 address constant WETH_BASE = 0x4200000000000000000000000000000000000006;
 address constant DEGEN_BASE = 0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed;
 address constant USDC_BASE = 0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA;
 
 contract PriceFeed {
-    EthDegenPool public ethDegenPool;
-    EthUsdcPool public ethUsdcPool;
+    IUniswapV3Pool public ethDegenPool;
+    IUniswapV3Pool public ethUsdcPool;
 
-    constructor(EthDegenPool ethDegenPool_, EthUsdcPool ethUsdcPool_) {
-        ethDegenPool = ethDegenPool_;
-        ethUsdcPool = ethUsdcPool_;
+    constructor(address ethDegenPool_, address ethUsdcPool_) {
+        ethDegenPool = IUniswapV3Pool(ethDegenPool_);
+        ethUsdcPool = IUniswapV3Pool(ethUsdcPool_);
     }
 
     /// @dev returns the usdc value of 1 mio DEGEN

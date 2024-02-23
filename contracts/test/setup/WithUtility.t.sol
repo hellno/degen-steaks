@@ -31,7 +31,7 @@ contract WithUtility is Test {
 
         ethDegenPool = new EthDegenPool();
         ethUsdcPool = new EthUsdcPool();
-        priceFeed = new PriceFeed(ethDegenPool, ethUsdcPool);
+        priceFeed = new PriceFeed(address(ethDegenPool), address(ethUsdcPool));
 
         _initialDeposit(INITIAL_STAKE, DEGEN_UTILITY_DAO);
     }
