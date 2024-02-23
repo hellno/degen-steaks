@@ -11,7 +11,7 @@ import "openzeppelin/access/Ownable.sol";
 contract SteakedDegen is ISteakedDegen, ERC4626, Ownable {
     using SafeERC20 for IERC20;
 
-    uint256 steakFee = 69 * 1e2; // 0.69%
+    uint256 public steakFee = 69 * 1e2; // 0.69%
     uint256 constant FEE_DIVISOR = 1e6; // 1% = 1e4: 1 BPS = 1e2
 
     event SteakFeePaid(address indexed caller, uint256 amount);

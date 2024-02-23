@@ -6,4 +6,5 @@ import "openzeppelin/interfaces/IERC4626.sol";
 interface ISteakedDegen is IERC4626 {
     function setFan(address user, bool isFan) external;
     function isFan(address user) external view returns (bool);
+    function steakFee() external view returns (uint256);
 }
