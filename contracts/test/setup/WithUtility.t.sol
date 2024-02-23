@@ -51,9 +51,9 @@ contract WithUtility is Test {
         degenToken.approve(address(betRegistry), amount);
     }
 
-    function _placeBet(uint256 marketId, uint256 amountHigher, uint256 amountLower) public {
-        _dealAndApprove(address(this), amountHigher + amountLower);
-        betRegistry.placeBet(marketId, amountHigher, amountLower);
+    function _placeBet(uint256 marketId, uint256 amount, IBetRegistry.BetDirection direction) public {
+        _dealAndApprove(address(this), amount);
+        betRegistry.placeBet(marketId, amount, direction);
     }
 
     function _getBet(uint256 marketId, address user) public view returns (IBetRegistry.Bet memory) {

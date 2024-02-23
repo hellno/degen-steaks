@@ -22,7 +22,7 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
 
     function test_placeBet_higher() public {
         _createMarket(1 days, 1000);
-        _placeBet(0, 100, 0);
+        _placeBet(0, 100, IBetRegistry.BetDirection.HIGHER);
 
         IBetRegistry.Market memory market = _getMarket(0);
         assertEq(market.totalHigher, 100);
@@ -35,7 +35,7 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
 
     function test_placeBet_lower() public {
         _createMarket(1 days, 1000);
-        _placeBet(0, 0, 100);
+        _placeBet(0, 100, IBetRegistry.BetDirection.LOWER);
         IBetRegistry.Market memory market = _getMarket(0);
 
         assertEq(market.totalHigher, 0);
@@ -49,9 +49,10 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
     function test_placeBet_multiple() public {
         _createMarket(1 days, 1000);
 
-        _placeBet(0, 100, 100);
-        _placeBet(0, 100, 0);
-        _placeBet(0, 0, 100);
+        _placeBet(0, 100, IBetRegistry.BetDirection.HIGHER);
+        _placeBet(0, 100, IBetRegistry.BetDirection.LOWER);
+        _placeBet(0, 100, IBetRegistry.BetDirection.HIGHER);
+        _placeBet(0, 100, IBetRegistry.BetDirection.LOWER);
 
         IBetRegistry.Market memory market = _getMarket(0);
         assertEq(market.totalHigher, 200, "totalHigher");
@@ -65,7 +66,7 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
     function test_placeBet_fail_outOfRange() public {
         _dealAndApprove(address(this), 200);
         vm.expectRevert("BetRegistry::placeBet: marketId out of range.");
-        betRegistry.placeBet(0, 100, 100);
+        betRegistry.placeBet(0, 100, IBetRegistry.BetDirection.HIGHER);
     }
 
     function test_placeBet_fail_marketEnded() public {
@@ -73,7 +74,7 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
         vm.warp(2 days);
         _dealAndApprove(address(this), 200);
         vm.expectRevert("BetRegistry::placeBet: market has ended.");
-        betRegistry.placeBet(0, 100, 100);
+        betRegistry.placeBet(0, 100, IBetRegistry.BetDirection.HIGHER);
     }
 
     function test_getMarket_fail_outOfRange() public {

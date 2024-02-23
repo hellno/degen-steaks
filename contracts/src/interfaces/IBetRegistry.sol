@@ -2,12 +2,18 @@
 pragma solidity ^0.8.18;
 
 interface IBetRegistry {
+    enum BetDirection {
+        HIGHER,
+        LOWER
+    }
+
     struct Market {
         address creator;
         uint40 endTime;
         uint256 targetPrice;
-        uint256 totalHigher;
-        uint256 totalLower;
+        uint256 totalHigher; // virtual shares
+        uint256 totalLower; // virtual shares
+        uint256 totalSteakedDegen;
     }
 
     struct Bet {
@@ -19,6 +25,6 @@ interface IBetRegistry {
 
     function createMarket(uint40 endTime, uint256 targetPrice) external;
     function getMarket(uint256 marketId) external view returns (Market memory);
-    function placeBet(uint256 marketId, uint256 amountHigher, uint256 amountLower) external;
+    function placeBet(uint256 marketId, uint256 amount, BetDirection direction) external;
     function getBet(uint256 marketId, address user) external view returns (Bet memory);
 }

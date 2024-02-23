@@ -16,12 +16,12 @@ contract BetRegistry is IBetRegistry {
     mapping(uint256 marketId => mapping(address user => Bet)) public marketToUserToBet;
     IERC20 public degenToken;
 
-    IERC4626 vault;
+    IERC4626 steakedDegen;
     address public degenUtilityDao;
 
-    constructor(IERC20 degenToken_, IERC4626 vault_, address degenUtilityDao_) {
+    constructor(IERC20 degenToken_, IERC4626 steakedDegen_, address degenUtilityDao_) {
         degenToken = IERC20(degenToken_);
-        vault = vault_;
+        steakedDegen = steakedDegen_;
         degenUtilityDao = degenUtilityDao_;
     }
 
@@ -38,42 +38,45 @@ contract BetRegistry is IBetRegistry {
 
     function createMarket(uint40 endTime_, uint256 targetPrice_) public {
         markets.push(
-            Market({creator: msg.sender, endTime: endTime_, targetPrice: targetPrice_, totalHigher: 0, totalLower: 0})
+            Market({
+                creator: msg.sender,
+                endTime: endTime_,
+                targetPrice: targetPrice_,
+                totalHigher: 0,
+                totalLower: 0,
+                totalSteakedDegen: 0
+            })
         );
 
         emit MarketCreated(markets.length - 1, msg.sender, endTime_, targetPrice_);
     }
 
-    function placeBet(uint256 marketId_, uint256 amountHigher_, uint256 amountLower_) public {
+    function placeBet(uint256 marketId_, uint256 amount_, BetDirection direction_) public {
         require(marketId_ < markets.length, "BetRegistry::placeBet: marketId out of range.");
+        require(amount_ > 0, "BetRegistry::placeBet: amount must be greater than 0.");
         require(block.timestamp < markets[marketId_].endTime, "BetRegistry::placeBet: market has ended.");
 
-        degenToken.safeTransferFrom(msg.sender, address(this), amountHigher_ + amountLower_);
+        degenToken.safeTransferFrom(msg.sender, address(this), amount_);
 
-        // send fee to vault
-        // deposit to vault
+        // deposit to steakedDegen
 
         // send staeked degen to DUDE (degen utility dao external wallet)
 
         // pay fee to totalStDegen in Market
 
-        // virtual deposit of stDegen to vault
+        // virtual deposit of stDegen to steakedDegen
 
         // increase totalStDegen and totalSharesHigh and totalSharesLow in Market
 
         // increase totalSharesHigh and totalSharesLow in Bet of user
 
         Bet storage bet = marketToUserToBet[marketId_][msg.sender];
-        bet.amountHigher += amountHigher_;
-        bet.amountLower += amountLower_;
-
-        // @dev up only
-        if (amountHigher_ > 0) {
-            markets[marketId_].totalHigher += amountHigher_;
-        }
-
-        if (amountLower_ > 0) {
-            markets[marketId_].totalLower += amountLower_;
+        if (direction_ == BetDirection.HIGHER) {
+            bet.amountHigher += amount_;
+            markets[marketId_].totalHigher += amount_;
+        } else {
+            bet.amountLower += amount_;
+            markets[marketId_].totalLower += amount_;
         }
     }
 }
