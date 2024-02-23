@@ -22,6 +22,11 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
         assertEq(market.totalSteakedDegen, 0);
     }
 
+    function test_getMarket_fail_outOfRange() public {
+        vm.expectRevert("BetRegistry::getMarket: marketId out of range.");
+        _getMarket(1);
+    }
+
     function test_placeBet_higher() public {
         _createMarket(1 days, 1000);
         _placeBet(0, BET, IBetRegistry.BetDirection.HIGHER);
@@ -92,10 +97,5 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
         _dealAndApprove(address(this), 200);
         vm.expectRevert("BetRegistry::placeBet: market has ended.");
         betRegistry.placeBet(0, BET, IBetRegistry.BetDirection.HIGHER);
-    }
-
-    function test_getMarket_fail_outOfRange() public {
-        vm.expectRevert("BetRegistry::getMarket: marketId out of range.");
-        _getMarket(1);
     }
 }
