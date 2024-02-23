@@ -8,11 +8,15 @@ import {DegenToken} from "src/auxiliary/DegenToken.sol";
 import {SteakedDegen} from "src/SteakedDegen.sol";
 import "openzeppelin/token/ERC20/IERC20.sol";
 import "src/interfaces/ISteakedDegen.sol";
+import "src/auxiliary/DegenPool.sol";
+import "src/PriceFeed.sol";
 
 contract WithUtility is Test {
     IBetRegistry betRegistry;
     IERC20 degenToken;
     ISteakedDegen steakedDegen;
+    DegenPool pool;
+    PriceFeed priceFeed;
 
     /// @dev This function removes this contract from coverage reports
     function test_WithUtility() public {}
@@ -22,6 +26,9 @@ contract WithUtility is Test {
         steakedDegen = new SteakedDegen("Steaked Degen", "SDEGEN", degenToken, DEGEN_UTILITY_DAO);
         betRegistry = new BetRegistry(degenToken, steakedDegen, DEGEN_UTILITY_DAO);
         steakedDegen.setFan(address(betRegistry), true);
+
+        pool = new DegenPool();
+        priceFeed = new PriceFeed(pool);
 
         _initialDeposit(INITIAL_STAKE, DEGEN_UTILITY_DAO);
     }
