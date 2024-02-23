@@ -67,6 +67,17 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
         );
     }
 
+    function test_deposit_fail_notInitialized() public {
+        deployWithoutInitialDeposit();
+
+        steakedDegen.setFan(ALICE, true);
+        _dealAndApprove(ALICE, address(steakedDegen), INITIAL_STAKE);
+        vm.prank(ALICE);
+
+        vm.expectRevert("SteakedDegen::whenInitialized: not initialized.");
+        steakedDegen.deposit(INITIAL_STAKE, ALICE);
+    }
+
     function test_withdraw_basic() public {
         _deposit(ALICE, 100 * 1e18);
         _withdraw(ALICE, steakedDegen.maxWithdraw(ALICE));

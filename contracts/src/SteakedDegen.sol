@@ -36,12 +36,13 @@ contract SteakedDegen is ISteakedDegen, ERC4626, Ownable {
         _;
     }
 
-    function setFan(address fan_, bool isFan_) public onlyOwner {
-        isFan[fan_] = isFan_;
+    modifier whenInitialized() {
+        require(isInitialized, "SteakedDegen::whenInitialized: not initialized.");
+        _;
     }
 
-    function whenInitialized() public view {
-        require(isInitialized, "SteakedDegen::whenInitialized: not initialized.");
+    function setFan(address fan_, bool isFan_) public onlyOwner {
+        isFan[fan_] = isFan_;
     }
 
     function initialDeposit(uint256 assets_, address receiver_) public onlyOwner {
@@ -59,7 +60,13 @@ contract SteakedDegen is ISteakedDegen, ERC4626, Ownable {
      * A steak fee is taken _before_ the deposit to be paid to all other token holders.
      * The fee increases the totalAssets in the pool. This increases the price for all share token holders.
      */
-    function deposit(uint256 assets, address receiver) public override(ERC4626, IERC4626) onlyFans returns (uint256) {
+    function deposit(uint256 assets, address receiver)
+        public
+        override(ERC4626, IERC4626)
+        onlyFans
+        whenInitialized
+        returns (uint256)
+    {
         uint256 maxAssets = maxDeposit(receiver);
         if (assets > maxAssets) {
             revert ERC4626ExceededMaxDeposit(receiver, assets, maxAssets);

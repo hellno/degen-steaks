@@ -25,6 +25,12 @@ contract WithUtility is Test {
         _initialDeposit(INITIAL_STAKE, DEGEN_UTILITY_DAO);
     }
 
+    function deployWithoutInitialDeposit() public {
+        degenToken = new DegenToken("Degen Token", "DEGEN");
+        steakedDegen = new SteakedDegen("Steaked Degen", "SDEGEN", degenToken, DEGEN_UTILITY_DAO);
+        betRegistry = new BetRegistry(degenToken, steakedDegen, DEGEN_UTILITY_DAO);
+    }
+
     function _createMarket(uint40 endTime, uint256 targetPrice) public {
         betRegistry.createMarket(endTime, targetPrice);
     }
