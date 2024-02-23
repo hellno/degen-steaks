@@ -122,4 +122,9 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
         );
         assertEq(steakedDegen.totalSupply(), INITIAL_STAKE, "SteakedDegen.totalSupply() should be 1000*1e18 SDEGEN");
     }
+
+    function test_initialDeposit_fail_alreadyInitialized() public {
+        vm.expectRevert("SteakedDegen::initialDeposit: already initialized.");
+        steakedDegen.initialDeposit(INITIAL_STAKE, DEGEN_UTILITY_DAO);
+    }
 }
