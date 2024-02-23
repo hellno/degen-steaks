@@ -89,6 +89,6 @@ contract BetRegistry is IBetRegistry {
             market.totalLower += betShares;
         }
 
-        emit BetPlaced(marketId_, msg.sender, amount_, steaks, betShares, direction_);
+        emit BetPlaced(marketId_, msg.sender, amount_, steaks, betShares, feeAmount, direction_);
     }
 }

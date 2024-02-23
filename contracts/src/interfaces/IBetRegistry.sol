@@ -28,6 +28,7 @@ interface IBetRegistry {
         uint256 amount,
         uint256 steaks,
         uint256 betShares,
+        uint256 feeAmount,
         BetDirection direction
     );
 
