@@ -76,17 +76,19 @@ contract BetRegistry is IBetRegistry {
 
         // virtual shares of the market
         // market.totalHigher + market.totalLower == 0 means this is the first bet
-        uint256 virtualShares = market.totalHigher + market.totalLower == 0
+        uint256 betShares = market.totalHigher + market.totalLower == 0
             ? steaks
             : steaks.mulDiv(market.totalHigher + market.totalLower, market.totalSteakedDegen);
         market.totalSteakedDegen += steaks;
 
         if (direction_ == BetDirection.HIGHER) {
-            bet.amountHigher += virtualShares;
-            market.totalHigher += virtualShares;
+            bet.amountHigher += betShares;
+            market.totalHigher += betShares;
         } else {
-            bet.amountLower += virtualShares;
-            market.totalLower += virtualShares;
+            bet.amountLower += betShares;
+            market.totalLower += betShares;
         }
+
+        emit BetPlaced(marketId_, msg.sender, amount_, steaks, betShares, direction_);
     }
 }

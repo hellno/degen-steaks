@@ -22,6 +22,14 @@ interface IBetRegistry {
     }
 
     event MarketCreated(uint256 indexed betId, address indexed creator, uint40 endTime, uint256 targetPrice);
+    event BetPlaced(
+        uint256 indexed betId,
+        address indexed user,
+        uint256 amount,
+        uint256 steaks,
+        uint256 betShares,
+        BetDirection direction
+    );
 
     function createMarket(uint40 endTime, uint256 targetPrice) external;
     function getMarket(uint256 marketId) external view returns (Market memory);
