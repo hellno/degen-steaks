@@ -61,7 +61,7 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
         );
         assertEq(
             steakedDegen.balanceOf(BOB),
-            STAKE_AFTER_FEES * (INITIAL_STAKE + SECOND_DEPOSIT_DEGENS)
+            STAKE_AFTER_FEES * (INITIAL_STAKE + SDEGENS_SECOND_DEPOSIT)
                 / (2 * INITIAL_STAKE - DAO_FEE_AMOUNT + STEAK_FEE_AMOUNT),
             "BOB SDEGEN"
         );
@@ -92,5 +92,34 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
             "SteakedDegen should have received 1000*1e18 DEGEN"
         );
         assertEq(steakedDegen.totalSupply(), INITIAL_STAKE, "SteakedDegen.totalSupply() should be 1000*1e18 SDEGEN");
+    }
+
+    function test_withdraw_multiple() public {
+        _deposit(ALICE, INITIAL_STAKE);
+        _deposit(BOB, INITIAL_STAKE);
+
+        _withdraw(ALICE, steakedDegen.maxWithdraw(ALICE));
+        _withdraw(BOB, steakedDegen.maxWithdraw(BOB));
+
+        assertEq(steakedDegen.balanceOf(ALICE), 0, "ALICE should have 0 steakedDegen");
+        assertEq(steakedDegen.balanceOf(BOB), 0, "BOB should have 0 steakedDegen");
+        assertEq(
+            faucetToken.balanceOf(address(ALICE)),
+            STAKE_AFTER_FEES + STEAK_FEE_AMOUNT * SDEGENS_SECOND_DEPOSIT / (INITIAL_STAKE + SDEGENS_SECOND_DEPOSIT),
+            "Alice SDEGEN"
+        );
+        assertEq(faucetToken.balanceOf(address(BOB)), STAKE_AFTER_FEES, "BOB SDEGEN");
+        assertEq(
+            faucetToken.balanceOf(address(ALICE))
+                - STEAK_FEE_AMOUNT * SDEGENS_SECOND_DEPOSIT / (INITIAL_STAKE + SDEGENS_SECOND_DEPOSIT),
+            faucetToken.balanceOf(address(BOB)),
+            "Alice should have more DEGEN than Bob"
+        );
+        assertEq(
+            faucetToken.balanceOf(address(steakedDegen)),
+            INITIAL_STAKE + STEAK_FEE_AMOUNT
+                + STEAK_FEE_AMOUNT * INITIAL_STAKE / (INITIAL_STAKE + SDEGENS_SECOND_DEPOSIT) + 1,
+            "SteakedDegen DEGEN"
+        );
     }
 }
