@@ -92,7 +92,7 @@ contract BetRegistry is IBetRegistry {
         emit BetPlaced(marketId_, msg.sender, amount_, steaks, betShares, feeAmount, direction_);
     }
 
-    function resolveMarket(uint256 marketId_) public {
+    function resolveMarket(uint256 marketId_) public view {
         Market storage market = markets[marketId_];
         require(block.timestamp >= market.endTime, "BetRegistry::resolveMarket: market has not ended.");
     }
