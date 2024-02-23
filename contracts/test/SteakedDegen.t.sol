@@ -37,8 +37,14 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
         steakedDegen.deposit(100 * 1e18, ALICE);
 
         assertEq(faucetToken.balanceOf(ALICE), 0, "ALICE should have 0 DEGEN");
-        assertEq(faucetToken.balanceOf(address(steakedDegen)), 100 * 1e18, "SteakedDegen should have 100*1e18 DEGEN");
-        assertEq(steakedDegen.balanceOf(ALICE), 99.31 * 1e18, "ALICE should have 99.31*1e18 SDEGEN");
+        assertEq(
+            faucetToken.balanceOf(address(steakedDegen)),
+            INITIAL_STAKE + 100 * 1e18,
+            "SteakedDegen should have received 100*1e18 DEGEN"
+        );
+        assertEq(
+            steakedDegen.balanceOf(ALICE), 99.31 * 1e18 * INITIAL_STAKE / (INITIAL_STAKE + 0.69 * 1e18), "ALICE SDEGEN"
+        );
     }
 
     function test_deposit_multiple() public {
@@ -47,25 +53,40 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
 
         assertEq(faucetToken.balanceOf(ALICE), 0, "ALICE should have 0 DEGEN");
         assertEq(faucetToken.balanceOf(BOB), 0, "ALICE should have 0 DEGEN");
-        assertEq(faucetToken.balanceOf(address(steakedDegen)), 200 * 1e18, "SteakedDegen should have 200*1e18 DEGEN");
+        assertEq(faucetToken.balanceOf(address(steakedDegen)), 300 * 1e18, "SteakedDegen should have 300*1e18 DEGEN");
         assertEq(
-            steakedDegen.balanceOf(ALICE),
-            (1e6 - steakedDegen.steakFee()) * 100 * 1e18 / 1e6,
-            "ALICE should have 99.31*1e18 SDEGEN"
+            steakedDegen.balanceOf(ALICE), 99.31 * 1e18 * INITIAL_STAKE / (INITIAL_STAKE + 0.69 * 1e18), "ALICE SDEGEN"
         );
         assertEq(
             steakedDegen.balanceOf(BOB),
-            (1e6 - steakedDegen.steakFee()) ** 2 * 100 * 1e18 / 1e6 ** 2,
-            "BOB should have 98.624761*1e18 SDEGEN"
+            99.31 * 1e18 * (INITIAL_STAKE + 99.31 * 1e18 * INITIAL_STAKE / (INITIAL_STAKE + 0.69 * 1e18))
+                / (INITIAL_STAKE * 2 + 0.69 * 1e18),
+            "BOB SDEGEN"
         );
     }
 
     function test_withdraw_basic() public {
         _deposit(ALICE, 100 * 1e18);
-        _withdraw(ALICE, 100 * 1e18 - 1);
+        _withdraw(ALICE, steakedDegen.maxWithdraw(ALICE));
         assertEq(steakedDegen.balanceOf(ALICE), 0, "ALICE should have 0 steakedDegen");
-        assertEq(faucetToken.balanceOf(address(steakedDegen)), 1, "SteakedDegen should have 1 dust DEGEN");
-        assertEq(faucetToken.balanceOf(address(ALICE)), 100 * 1e18 - 1, "Alice should have received all DEGEN back");
+        assertEq(
+            faucetToken.balanceOf(address(steakedDegen)),
+            1 + INITIAL_STAKE + 0.69 * 1e18,
+            "SteakedDegen should have 1 dust DEGEN"
+        );
+        assertEq(faucetToken.balanceOf(address(ALICE)), 99.31 * 1e18 - 1, "Alice should have received 99.31 DEGEN back");
         assertEq(steakedDegen.balanceOf(ALICE), 0, "ALICE should have 0 SDEGEN");
+    }
+
+    function test_initialDeposit() public {
+        assertEq(faucetToken.balanceOf(address(this)), 0, "this should have 0 DEGEN");
+        assertEq(faucetToken.balanceOf(DEGEN_UTILITY_DAO), 0, "DAO should have 0 DEGEN");
+
+        assertEq(
+            faucetToken.balanceOf(address(steakedDegen)),
+            INITIAL_STAKE,
+            "SteakedDegen should have received 1000*1e18 DEGEN"
+        );
+        assertEq(steakedDegen.totalSupply(), INITIAL_STAKE, "SteakedDegen.totalSupply() should be 1000*1e18 SDEGEN");
     }
 }

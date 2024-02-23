@@ -21,6 +21,8 @@ contract WithUtility is Test {
         faucetToken = new FaucetToken("Degen Token", "DEGEN");
         steakedDegen = new SteakedDegen("Steaked Degen", "SDEGEN", faucetToken);
         betRegistry = new BetRegistry(faucetToken, steakedDegen, DEGEN_UTILITY_DAO);
+
+        _initialDeposit(INITIAL_STAKE, DEGEN_UTILITY_DAO);
     }
 
     function _createMarket(uint40 endTime, uint256 targetPrice) public {
@@ -57,6 +59,13 @@ contract WithUtility is Test {
         _dealAndApprove(account, address(steakedDegen), amount);
         vm.prank(account);
         steakedDegen.deposit(amount, account);
+    }
+
+    function _initialDeposit(uint256 amount, address receiver) public {
+        steakedDegen.setFan(address(this), true);
+        _dealAndApprove(address(this), address(steakedDegen), amount);
+        vm.prank(address(this));
+        steakedDegen.initialDeposit(amount, receiver);
     }
 
     function _withdraw(address account, uint256 amount) public {

@@ -13,10 +13,11 @@ contract SteakedDegen is ISteakedDegen, ERC4626, Ownable {
 
     uint256 public steakFee = 69 * 1e2; // 0.69%
     uint256 constant FEE_DIVISOR = 1e6; // 1% = 1e4: 1 BPS = 1e2
-
-    event SteakFeePaid(address indexed caller, uint256 amount);
+    bool isInitialized = false;
 
     mapping(address => bool) public isFan; // haha just kidding, it's a pun. onlyDepositer is a better name.
+
+    event SteakFeePaid(address indexed caller, uint256 amount);
 
     constructor(string memory name_, string memory symbol_, IERC20 degenToken_)
         ERC20(name_, symbol_)
@@ -33,6 +34,19 @@ contract SteakedDegen is ISteakedDegen, ERC4626, Ownable {
         isFan[fan_] = isFan_;
     }
 
+    function whenInitialized() public view {
+        require(isInitialized, "SteakedDegen::whenInitialized: not initialized.");
+    }
+
+    function initialDeposit(uint256 assets_, address receiver_) public onlyOwner {
+        require(!isInitialized, "SteakedDegen::initialDeposit: already initialized.");
+        isInitialized = true;
+
+        uint256 shares = previewDeposit(assets_);
+
+        _deposit(_msgSender(), receiver_, assets_, shares);
+    }
+
     /**
      * @dev See {IERC4626-deposit}.
      * This is a complete override of deposit and _deposit.
@@ -47,10 +61,15 @@ contract SteakedDegen is ISteakedDegen, ERC4626, Ownable {
 
         uint256 feeAmount = steakFee * assets / FEE_DIVISOR;
         uint256 assetsAfterFee = assets - feeAmount;
+
+        // slither-disable-next-line reentrancy-no-eth
+        SafeERC20.safeTransferFrom(IERC20(asset()), _msgSender(), address(this), feeAmount);
+
         uint256 shares = previewDeposit(assetsAfterFee);
 
         // slither-disable-next-line reentrancy-no-eth
-        SafeERC20.safeTransferFrom(IERC20(asset()), _msgSender(), address(this), assets);
+        SafeERC20.safeTransferFrom(IERC20(asset()), _msgSender(), address(this), assetsAfterFee);
+
         emit SteakFeePaid(_msgSender(), feeAmount);
         _mint(receiver, shares);
 
