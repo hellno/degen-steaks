@@ -36,8 +36,8 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
         vm.prank(ALICE);
         steakedDegen.deposit(100 * 1e18, ALICE);
 
-        assertEq(faucetToken.balanceOf(ALICE), 0, "ALICE should have 0 DEGEN");
-        assertEq(faucetToken.balanceOf(address(steakedDegen)), 2 * INITIAL_STAKE - DAO_FEE_AMOUNT, "SteakedDegen DEGEN");
+        assertEq(degenToken.balanceOf(ALICE), 0, "ALICE should have 0 DEGEN");
+        assertEq(degenToken.balanceOf(address(steakedDegen)), 2 * INITIAL_STAKE - DAO_FEE_AMOUNT, "SteakedDegen DEGEN");
         assertEq(
             steakedDegen.balanceOf(ALICE),
             STAKE_AFTER_FEES * INITIAL_STAKE / (INITIAL_STAKE + STEAK_FEE_AMOUNT),
@@ -49,10 +49,10 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
         _deposit(ALICE, 100 * 1e18);
         _deposit(BOB, 100 * 1e18);
 
-        assertEq(faucetToken.balanceOf(ALICE), 0, "ALICE should have 0 DEGEN");
-        assertEq(faucetToken.balanceOf(BOB), 0, "ALICE should have 0 DEGEN");
+        assertEq(degenToken.balanceOf(ALICE), 0, "ALICE should have 0 DEGEN");
+        assertEq(degenToken.balanceOf(BOB), 0, "ALICE should have 0 DEGEN");
         assertEq(
-            faucetToken.balanceOf(address(steakedDegen)), 3 * INITIAL_STAKE - 2 * DAO_FEE_AMOUNT, "SteakedDegen DEGEN"
+            degenToken.balanceOf(address(steakedDegen)), 3 * INITIAL_STAKE - 2 * DAO_FEE_AMOUNT, "SteakedDegen DEGEN"
         );
         assertEq(
             steakedDegen.balanceOf(ALICE),
@@ -72,22 +72,22 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
         _withdraw(ALICE, steakedDegen.maxWithdraw(ALICE));
         assertEq(steakedDegen.balanceOf(ALICE), 0, "ALICE should have 0 steakedDegen");
         assertEq(
-            faucetToken.balanceOf(address(steakedDegen)),
+            degenToken.balanceOf(address(steakedDegen)),
             1 + INITIAL_STAKE + 0.69 * 1e18,
             "SteakedDegen should have 1 dust DEGEN"
         );
         assertEq(
-            faucetToken.balanceOf(address(ALICE)), STAKE_AFTER_FEES - 1, "Alice should have received 99.31 DEGEN back"
+            degenToken.balanceOf(address(ALICE)), STAKE_AFTER_FEES - 1, "Alice should have received 99.31 DEGEN back"
         );
         assertEq(steakedDegen.balanceOf(ALICE), 0, "ALICE should have 0 SDEGEN");
     }
 
     function test_initialDeposit() public {
-        assertEq(faucetToken.balanceOf(address(this)), 0, "this should have 0 DEGEN");
-        assertEq(faucetToken.balanceOf(DEGEN_UTILITY_DAO), 0, "DAO should have 0 DEGEN");
+        assertEq(degenToken.balanceOf(address(this)), 0, "this should have 0 DEGEN");
+        assertEq(degenToken.balanceOf(DEGEN_UTILITY_DAO), 0, "DAO should have 0 DEGEN");
 
         assertEq(
-            faucetToken.balanceOf(address(steakedDegen)),
+            degenToken.balanceOf(address(steakedDegen)),
             INITIAL_STAKE,
             "SteakedDegen should have received 1000*1e18 DEGEN"
         );
@@ -104,19 +104,19 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
         assertEq(steakedDegen.balanceOf(ALICE), 0, "ALICE should have 0 steakedDegen");
         assertEq(steakedDegen.balanceOf(BOB), 0, "BOB should have 0 steakedDegen");
         assertEq(
-            faucetToken.balanceOf(address(ALICE)),
+            degenToken.balanceOf(address(ALICE)),
             STAKE_AFTER_FEES + STEAK_FEE_AMOUNT * SDEGENS_SECOND_DEPOSIT / (INITIAL_STAKE + SDEGENS_SECOND_DEPOSIT),
             "Alice SDEGEN"
         );
-        assertEq(faucetToken.balanceOf(address(BOB)), STAKE_AFTER_FEES, "BOB SDEGEN");
+        assertEq(degenToken.balanceOf(address(BOB)), STAKE_AFTER_FEES, "BOB SDEGEN");
         assertEq(
-            faucetToken.balanceOf(address(ALICE))
+            degenToken.balanceOf(address(ALICE))
                 - STEAK_FEE_AMOUNT * SDEGENS_SECOND_DEPOSIT / (INITIAL_STAKE + SDEGENS_SECOND_DEPOSIT),
-            faucetToken.balanceOf(address(BOB)),
+            degenToken.balanceOf(address(BOB)),
             "Alice should have more DEGEN than Bob"
         );
         assertEq(
-            faucetToken.balanceOf(address(steakedDegen)),
+            degenToken.balanceOf(address(steakedDegen)),
             INITIAL_STAKE + STEAK_FEE_AMOUNT
                 + STEAK_FEE_AMOUNT * INITIAL_STAKE / (INITIAL_STAKE + SDEGENS_SECOND_DEPOSIT) + 1,
             "SteakedDegen DEGEN"

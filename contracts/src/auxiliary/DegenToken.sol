@@ -3,7 +3,7 @@ pragma solidity ^0.8.18;
 
 import "openzeppelin/token/ERC20/ERC20.sol";
 
-contract FaucetToken is ERC20 {
+contract DegenToken is ERC20 {
     constructor(string memory _name, string memory _symbol) ERC20(_name, _symbol) {}
 
     function mint(uint256 _amount) external {
@@ -14,5 +14,5 @@ contract FaucetToken is ERC20 {
         _burn(msg.sender, _amount);
     }
 
-    function test_FaucetToken() public pure {}
+    function test_degenToken() public pure {}
 }
