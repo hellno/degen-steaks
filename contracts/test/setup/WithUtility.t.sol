@@ -7,12 +7,12 @@ import {IBetRegistry, BetRegistry} from "src/BetRegistry.sol";
 import {FaucetToken} from "src/auxiliary/FaucetToken.sol";
 import {SteakedDegen} from "src/SteakedDegen.sol";
 import "openzeppelin/token/ERC20/IERC20.sol";
-import "openzeppelin/interfaces/IERC4626.sol";
+import "src/interfaces/ISteakedDegen.sol";
 
 contract WithUtility is Test {
     IBetRegistry betRegistry;
     IERC20 faucetToken;
-    IERC4626 steakedDegen;
+    ISteakedDegen steakedDegen;
 
     /// @dev This function removes this contract from coverage reports
     function test_WithUtility() public {}

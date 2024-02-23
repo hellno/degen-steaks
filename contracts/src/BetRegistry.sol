@@ -50,6 +50,25 @@ contract BetRegistry is IBetRegistry {
 
         degenToken.safeTransferFrom(msg.sender, address(this), amountHigher_ + amountLower_);
 
+        
+        // send fee to vault
+        degenToken.safeTransfer()
+        // deposit to vault
+
+        
+        // send staeked degen to DUDE (degen utility dao external wallet)
+        
+        // pay fee to totalStDegen in Market
+        
+        // virtual deposit of stDegen to vault
+        
+        // increase totalStDegen and totalSharesHigh and totalSharesLow in Market
+        
+        // increase totalSharesHigh and totalSharesLow in Bet of user
+
+
+
+
         Bet storage bet = marketToUserToBet[marketId_][msg.sender];
         bet.amountHigher += amountHigher_;
         bet.amountLower += amountLower_;
