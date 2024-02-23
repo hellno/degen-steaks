@@ -59,4 +59,12 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
             "BOB should have 98.624761*1e18 SDEGEN"
         );
     }
+
+    function test_withdraw_basic() public {
+        _deposit(ALICE, 100 * 1e18);
+        _withdraw(ALICE, 100 * 1e18 - 1);
+        assertEq(steakedDegen.balanceOf(ALICE), 0, "ALICE should have 0 steakedDegen");
+        assertEq(faucetToken.balanceOf(address(steakedDegen)), 1, "SteakedDegen should have 1 dust DEGEN");
+        assertEq(steakedDegen.balanceOf(ALICE), 0, "ALICE should have 0 SDEGEN");
+    }
 }

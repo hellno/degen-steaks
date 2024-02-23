@@ -58,4 +58,9 @@ contract WithUtility is Test {
         vm.prank(account);
         steakedDegen.deposit(amount, account);
     }
+
+    function _withdraw(address account, uint256 amount) public {
+        vm.prank(account);
+        steakedDegen.withdraw(amount, account, account);
+    }
 }
