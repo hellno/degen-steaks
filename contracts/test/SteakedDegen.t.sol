@@ -111,7 +111,9 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
         );
     }
 
-    function test_initialDeposit() public {
+    function test_initialDeposit_success() public {
+        deploy();
+
         assertEq(degenToken.balanceOf(address(this)), 0, "this should have 0 DEGEN");
         assertEq(degenToken.balanceOf(DEGEN_UTILITY_DAO), 0, "DAO should have 0 DEGEN");
 
