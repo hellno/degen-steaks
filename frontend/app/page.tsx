@@ -116,21 +116,6 @@ export default async function Home({
     }
   };
 
-  const renderButtons = () => {
-    const buttons = stateToButtons[state.pageState];
-    if (!buttons) {
-      return <FrameButton>something went wrong</FrameButton>;
-    }
-
-    return (
-      <>
-        {buttons.map((label, index) => (
-          <FrameButton key={index}>{label}</FrameButton>
-        ))}
-      </>
-    );
-  };
-
   const renderProgressBar = ({ a, b }: { a: number; b: number }) => (
     <div tw="flex justify-center px-12">
       <div tw="flex h-24 rounded-lg">
@@ -225,6 +210,8 @@ export default async function Home({
     </FrameImage>
   );
 
+  const buttons = stateToButtons[state.pageState];
+
   return (
     <div>
       Multi-page example <Link href="/debug">Debug</Link>
@@ -235,7 +222,11 @@ export default async function Home({
         previousFrame={previousFrame}
       >
         {renderImage()}
-        {renderButtons()}
+        {/* ugly buttons, but found no better solution that passes the build */}
+        {buttons.length > 0 ? <FrameButton key={buttons[0]}>{buttons[0]!}</FrameButton> : null}
+        {buttons.length > 1 ? <FrameButton key={buttons[1]}>{buttons[1]!}</FrameButton> : null}
+        {buttons.length > 2 ? <FrameButton key={buttons[2]}>{buttons[2]!}</FrameButton> : null}
+        {buttons.length > 3 ? <FrameButton key={buttons[3]}>{buttons[3]!}</FrameButton> : null}
       </FrameContainer>
     </div>
   );
