@@ -9,8 +9,8 @@ import "openzeppelin/interfaces/IERC4626.sol";
 contract BetRegistry is IBetRegistry {
     using SafeERC20 for IERC20;
 
+    uint256 constant MARKET_FEE = 69 * 1e2; // 0.69%
     uint256 constant FEE_DIVISOR = 1e6; // 1% = 1e4: 1 BPS = 1e2
-    uint256 constant FEE = 69 * 1e2; // 0.69%
 
     Market[] public markets;
     mapping(uint256 marketId => mapping(address user => Bet)) public marketToUserToBet;
@@ -54,29 +54,36 @@ contract BetRegistry is IBetRegistry {
     function placeBet(uint256 marketId_, uint256 amount_, BetDirection direction_) public {
         require(marketId_ < markets.length, "BetRegistry::placeBet: marketId out of range.");
         require(amount_ > 0, "BetRegistry::placeBet: amount must be greater than 0.");
-        require(block.timestamp < markets[marketId_].endTime, "BetRegistry::placeBet: market has ended.");
+        Market storage market = markets[marketId_];
+        require(block.timestamp < market.endTime, "BetRegistry::placeBet: market has ended.");
 
         degenToken.safeTransferFrom(msg.sender, address(this), amount_);
 
         // deposit to steakedDegen
 
-        // send staeked degen to DUDE (degen utility dao external wallet)
+        degenToken.approve(address(steakedDegen), amount_);
+        uint256 steaks = steakedDegen.deposit(amount_, address(this));
 
         // pay fee to totalStDegen in Market
 
+        uint256 feeAmount = (steaks * MARKET_FEE) / FEE_DIVISOR;
+
+        Bet storage bet = marketToUserToBet[marketId_][msg.sender];
+
         // virtual deposit of stDegen to steakedDegen
+
+        market.totalSteakedDegen += steaks;
 
         // increase totalStDegen and totalSharesHigh and totalSharesLow in Market
 
         // increase totalSharesHigh and totalSharesLow in Bet of user
 
-        Bet storage bet = marketToUserToBet[marketId_][msg.sender];
         if (direction_ == BetDirection.HIGHER) {
             bet.amountHigher += amount_;
-            markets[marketId_].totalHigher += amount_;
+            market.totalHigher += amount_;
         } else {
             bet.amountLower += amount_;
-            markets[marketId_].totalLower += amount_;
+            market.totalLower += amount_;
         }
     }
 }

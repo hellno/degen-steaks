@@ -122,6 +122,35 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
         );
     }
 
+    function test_redeem_multiple() public {
+        _deposit(ALICE, INITIAL_STAKE);
+        _deposit(BOB, INITIAL_STAKE);
+
+        _redeem(ALICE, steakedDegen.maxRedeem(ALICE));
+        _redeem(BOB, steakedDegen.maxRedeem(BOB));
+
+        assertEq(steakedDegen.balanceOf(ALICE), 0, "ALICE should have 0 steakedDegen");
+        assertEq(steakedDegen.balanceOf(BOB), 0, "BOB should have 0 steakedDegen");
+        assertEq(
+            degenToken.balanceOf(address(ALICE)),
+            STAKE_AFTER_FEES + STEAK_FEE_AMOUNT * SDEGENS_SECOND_DEPOSIT / (INITIAL_STAKE + SDEGENS_SECOND_DEPOSIT),
+            "Alice SDEGEN"
+        );
+        assertEq(degenToken.balanceOf(address(BOB)), STAKE_AFTER_FEES, "BOB SDEGEN");
+        assertEq(
+            degenToken.balanceOf(address(ALICE))
+                - STEAK_FEE_AMOUNT * SDEGENS_SECOND_DEPOSIT / (INITIAL_STAKE + SDEGENS_SECOND_DEPOSIT),
+            degenToken.balanceOf(address(BOB)),
+            "Alice should have more DEGEN than Bob"
+        );
+        assertEq(
+            degenToken.balanceOf(address(steakedDegen)),
+            INITIAL_STAKE + STEAK_FEE_AMOUNT
+                + STEAK_FEE_AMOUNT * INITIAL_STAKE / (INITIAL_STAKE + SDEGENS_SECOND_DEPOSIT) + 1,
+            "SteakedDegen DEGEN"
+        );
+    }
+
     function test_initialDeposit_success() public {
         deploy();
 

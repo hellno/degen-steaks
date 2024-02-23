@@ -21,6 +21,7 @@ contract WithUtility is Test {
         degenToken = new DegenToken("Degen Token", "DEGEN");
         steakedDegen = new SteakedDegen("Steaked Degen", "SDEGEN", degenToken, DEGEN_UTILITY_DAO);
         betRegistry = new BetRegistry(degenToken, steakedDegen, DEGEN_UTILITY_DAO);
+        steakedDegen.setFan(address(betRegistry), true);
 
         _initialDeposit(INITIAL_STAKE, DEGEN_UTILITY_DAO);
     }
@@ -77,5 +78,10 @@ contract WithUtility is Test {
     function _withdraw(address account, uint256 amount) public {
         vm.prank(account);
         steakedDegen.withdraw(amount, account, account);
+    }
+
+    function _redeem(address account, uint256 amount) public {
+        vm.prank(account);
+        steakedDegen.redeem(amount, account, account);
     }
 }
