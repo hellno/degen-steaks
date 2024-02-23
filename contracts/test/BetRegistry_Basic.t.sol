@@ -99,13 +99,12 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
         betRegistry.placeBet(0, BET, IBetRegistry.BetDirection.HIGHER);
     }
 
-    function test_resolveBet_success() public {
+    function test_resolveBet_fail_notEnded() public {
         _createMarket(1 days, 1000);
         _placeBet(0, BET, IBetRegistry.BetDirection.LOWER);
         _placeBet(0, BET, IBetRegistry.BetDirection.LOWER);
 
-        vm.warp(2 days);
-
-        betRegistry.resolveBet(0, 1000);
+        vm.expectRevert("BetRegistry::resolveMarket: market has not ended.");
+        betRegistry.resolveMarket(0);
     }
 }
