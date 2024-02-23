@@ -65,6 +65,7 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
         _withdraw(ALICE, 100 * 1e18 - 1);
         assertEq(steakedDegen.balanceOf(ALICE), 0, "ALICE should have 0 steakedDegen");
         assertEq(faucetToken.balanceOf(address(steakedDegen)), 1, "SteakedDegen should have 1 dust DEGEN");
+        assertEq(faucetToken.balanceOf(address(ALICE)), 100 * 1e18 - 1, "Alice should have received all DEGEN back");
         assertEq(steakedDegen.balanceOf(ALICE), 0, "ALICE should have 0 SDEGEN");
     }
 }
