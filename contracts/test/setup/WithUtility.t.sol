@@ -31,6 +31,11 @@ contract WithUtility is Test {
         return betRegistry.getMarket(marketId);
     }
 
+    function _dealAndApprove(address account, address receiver, uint256 amount) public {
+        deal(address(faucetToken), account, amount);
+        faucetToken.approve(receiver, amount);
+    }
+
     function _dealAndApprove(address account, uint256 amount) public {
         deal(address(faucetToken), account, amount);
         faucetToken.approve(address(betRegistry), amount);
