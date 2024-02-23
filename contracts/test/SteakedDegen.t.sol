@@ -37,13 +37,11 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
         steakedDegen.deposit(100 * 1e18, ALICE);
 
         assertEq(faucetToken.balanceOf(ALICE), 0, "ALICE should have 0 DEGEN");
+        assertEq(faucetToken.balanceOf(address(steakedDegen)), 2 * INITIAL_STAKE - DAO_FEE_AMOUNT, "SteakedDegen DEGEN");
         assertEq(
-            faucetToken.balanceOf(address(steakedDegen)),
-            INITIAL_STAKE + 100 * 1e18,
-            "SteakedDegen should have received 100*1e18 DEGEN"
-        );
-        assertEq(
-            steakedDegen.balanceOf(ALICE), 99.31 * 1e18 * INITIAL_STAKE / (INITIAL_STAKE + 0.69 * 1e18), "ALICE SDEGEN"
+            steakedDegen.balanceOf(ALICE),
+            STAKE_AFTER_FEES * INITIAL_STAKE / (INITIAL_STAKE + STEAK_FEE_AMOUNT),
+            "ALICE SDEGEN"
         );
     }
 
@@ -53,14 +51,18 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
 
         assertEq(faucetToken.balanceOf(ALICE), 0, "ALICE should have 0 DEGEN");
         assertEq(faucetToken.balanceOf(BOB), 0, "ALICE should have 0 DEGEN");
-        assertEq(faucetToken.balanceOf(address(steakedDegen)), 300 * 1e18, "SteakedDegen should have 300*1e18 DEGEN");
         assertEq(
-            steakedDegen.balanceOf(ALICE), 99.31 * 1e18 * INITIAL_STAKE / (INITIAL_STAKE + 0.69 * 1e18), "ALICE SDEGEN"
+            faucetToken.balanceOf(address(steakedDegen)), 3 * INITIAL_STAKE - 2 * DAO_FEE_AMOUNT, "SteakedDegen DEGEN"
+        );
+        assertEq(
+            steakedDegen.balanceOf(ALICE),
+            STAKE_AFTER_FEES * INITIAL_STAKE / (INITIAL_STAKE + STEAK_FEE_AMOUNT),
+            "ALICE SDEGEN"
         );
         assertEq(
             steakedDegen.balanceOf(BOB),
-            99.31 * 1e18 * (INITIAL_STAKE + 99.31 * 1e18 * INITIAL_STAKE / (INITIAL_STAKE + 0.69 * 1e18))
-                / (INITIAL_STAKE * 2 + 0.69 * 1e18),
+            STAKE_AFTER_FEES * (INITIAL_STAKE + SECOND_DEPOSIT_DEGENS)
+                / (2 * INITIAL_STAKE - DAO_FEE_AMOUNT + STEAK_FEE_AMOUNT),
             "BOB SDEGEN"
         );
     }
@@ -74,7 +76,9 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
             1 + INITIAL_STAKE + 0.69 * 1e18,
             "SteakedDegen should have 1 dust DEGEN"
         );
-        assertEq(faucetToken.balanceOf(address(ALICE)), 99.31 * 1e18 - 1, "Alice should have received 99.31 DEGEN back");
+        assertEq(
+            faucetToken.balanceOf(address(ALICE)), STAKE_AFTER_FEES - 1, "Alice should have received 99.31 DEGEN back"
+        );
         assertEq(steakedDegen.balanceOf(ALICE), 0, "ALICE should have 0 SDEGEN");
     }
 

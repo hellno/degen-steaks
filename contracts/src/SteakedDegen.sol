@@ -12,18 +12,24 @@ contract SteakedDegen is ISteakedDegen, ERC4626, Ownable {
     using SafeERC20 for IERC20;
 
     uint256 public steakFee = 69 * 1e2; // 0.69%
+    uint256 public daoFee = 69 * 1e2; // 0.69%
     uint256 constant FEE_DIVISOR = 1e6; // 1% = 1e4: 1 BPS = 1e2
+
+    address daoFeeReceiver;
+
     bool isInitialized = false;
 
     mapping(address => bool) public isFan; // haha just kidding, it's a pun. onlyDepositer is a better name.
 
     event SteakFeePaid(address indexed caller, uint256 amount);
 
-    constructor(string memory name_, string memory symbol_, IERC20 degenToken_)
+    constructor(string memory name_, string memory symbol_, IERC20 degenToken_, address daoFeeReceiver_)
         ERC20(name_, symbol_)
         ERC4626(degenToken_)
         Ownable(_msgSender())
-    {}
+    {
+        daoFeeReceiver = daoFeeReceiver_;
+    }
 
     modifier onlyFans() {
         require(isFan[_msgSender()], "SteakedDegen::onlyFans: caller is not a fan.");
@@ -59,18 +65,22 @@ contract SteakedDegen is ISteakedDegen, ERC4626, Ownable {
             revert ERC4626ExceededMaxDeposit(receiver, assets, maxAssets);
         }
 
-        uint256 feeAmount = steakFee * assets / FEE_DIVISOR;
-        uint256 assetsAfterFee = assets - feeAmount;
+        uint256 steakFeeAmount = steakFee * assets / FEE_DIVISOR;
+        uint256 daoFeeAmount = steakFee * assets / FEE_DIVISOR;
+        uint256 assetsAfterFee = assets - steakFeeAmount - daoFeeAmount;
 
         // slither-disable-next-line reentrancy-no-eth
-        SafeERC20.safeTransferFrom(IERC20(asset()), _msgSender(), address(this), feeAmount);
+        SafeERC20.safeTransferFrom(IERC20(asset()), _msgSender(), daoFeeReceiver, daoFeeAmount);
+
+        // slither-disable-next-line reentrancy-no-eth
+        SafeERC20.safeTransferFrom(IERC20(asset()), _msgSender(), address(this), steakFeeAmount);
 
         uint256 shares = previewDeposit(assetsAfterFee);
 
         // slither-disable-next-line reentrancy-no-eth
         SafeERC20.safeTransferFrom(IERC20(asset()), _msgSender(), address(this), assetsAfterFee);
 
-        emit SteakFeePaid(_msgSender(), feeAmount);
+        emit SteakFeePaid(_msgSender(), steakFeeAmount);
         _mint(receiver, shares);
 
         emit Deposit(_msgSender(), receiver, assetsAfterFee, shares);

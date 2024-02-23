@@ -19,7 +19,7 @@ contract WithUtility is Test {
 
     function deploy() public {
         faucetToken = new FaucetToken("Degen Token", "DEGEN");
-        steakedDegen = new SteakedDegen("Steaked Degen", "SDEGEN", faucetToken);
+        steakedDegen = new SteakedDegen("Steaked Degen", "SDEGEN", faucetToken, DEGEN_UTILITY_DAO);
         betRegistry = new BetRegistry(faucetToken, steakedDegen, DEGEN_UTILITY_DAO);
 
         _initialDeposit(INITIAL_STAKE, DEGEN_UTILITY_DAO);
