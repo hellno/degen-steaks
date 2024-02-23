@@ -67,11 +67,6 @@ contract SteakedDegen is ISteakedDegen, ERC4626, Ownable {
         whenInitialized
         returns (uint256)
     {
-        uint256 maxAssets = maxDeposit(receiver);
-        if (assets > maxAssets) {
-            revert ERC4626ExceededMaxDeposit(receiver, assets, maxAssets);
-        }
-
         uint256 steakFeeAmount = steakFee * assets / FEE_DIVISOR;
         uint256 daoFeeAmount = steakFee * assets / FEE_DIVISOR;
         uint256 assetsAfterFee = assets - steakFeeAmount - daoFeeAmount;
