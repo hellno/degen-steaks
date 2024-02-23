@@ -82,18 +82,6 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
         assertEq(steakedDegen.balanceOf(ALICE), 0, "ALICE should have 0 SDEGEN");
     }
 
-    function test_initialDeposit() public {
-        assertEq(degenToken.balanceOf(address(this)), 0, "this should have 0 DEGEN");
-        assertEq(degenToken.balanceOf(DEGEN_UTILITY_DAO), 0, "DAO should have 0 DEGEN");
-
-        assertEq(
-            degenToken.balanceOf(address(steakedDegen)),
-            INITIAL_STAKE,
-            "SteakedDegen should have received 1000*1e18 DEGEN"
-        );
-        assertEq(steakedDegen.totalSupply(), INITIAL_STAKE, "SteakedDegen.totalSupply() should be 1000*1e18 SDEGEN");
-    }
-
     function test_withdraw_multiple() public {
         _deposit(ALICE, INITIAL_STAKE);
         _deposit(BOB, INITIAL_STAKE);
@@ -121,5 +109,17 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
                 + STEAK_FEE_AMOUNT * INITIAL_STAKE / (INITIAL_STAKE + SDEGENS_SECOND_DEPOSIT) + 1,
             "SteakedDegen DEGEN"
         );
+    }
+
+    function test_initialDeposit() public {
+        assertEq(degenToken.balanceOf(address(this)), 0, "this should have 0 DEGEN");
+        assertEq(degenToken.balanceOf(DEGEN_UTILITY_DAO), 0, "DAO should have 0 DEGEN");
+
+        assertEq(
+            degenToken.balanceOf(address(steakedDegen)),
+            INITIAL_STAKE,
+            "SteakedDegen should have received 1000*1e18 DEGEN"
+        );
+        assertEq(steakedDegen.totalSupply(), INITIAL_STAKE, "SteakedDegen.totalSupply() should be 1000*1e18 SDEGEN");
     }
 }
