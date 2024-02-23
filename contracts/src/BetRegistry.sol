@@ -5,12 +5,16 @@ import "./interfaces/IBetRegistry.sol";
 import "openzeppelin/token/ERC20/IERC20.sol";
 import "openzeppelin/token/ERC20/utils/SafeERC20.sol";
 import "openzeppelin/interfaces/IERC4626.sol";
+import "openzeppelin/utils/math/Math.sol";
 
 contract BetRegistry is IBetRegistry {
     using SafeERC20 for IERC20;
+    using Math for uint256;
 
     uint256 constant MARKET_FEE = 69 * 1e2; // 0.69%
     uint256 constant FEE_DIVISOR = 1e6; // 1% = 1e4: 1 BPS = 1e2
+
+    uint256 constant MIN_BID = 1e18; // 1 DEGEN
 
     Market[] public markets;
     mapping(uint256 marketId => mapping(address user => Bet)) public marketToUserToBet;
@@ -53,37 +57,36 @@ contract BetRegistry is IBetRegistry {
 
     function placeBet(uint256 marketId_, uint256 amount_, BetDirection direction_) public {
         require(marketId_ < markets.length, "BetRegistry::placeBet: marketId out of range.");
-        require(amount_ > 0, "BetRegistry::placeBet: amount must be greater than 0.");
+        require(amount_ > MIN_BID, "BetRegistry::placeBet: amount must be greater than MIN_BID.");
         Market storage market = markets[marketId_];
         require(block.timestamp < market.endTime, "BetRegistry::placeBet: market has ended.");
 
         degenToken.safeTransferFrom(msg.sender, address(this), amount_);
 
         // deposit to steakedDegen
-
         degenToken.approve(address(steakedDegen), amount_);
         uint256 steaks = steakedDegen.deposit(amount_, address(this));
 
         // pay fee to totalStDegen in Market
-
-        uint256 feeAmount = (steaks * MARKET_FEE) / FEE_DIVISOR;
+        uint256 feeAmount = market.totalSteakedDegen == 0 ? 0 : steaks.mulDiv(MARKET_FEE, FEE_DIVISOR);
+        market.totalSteakedDegen += feeAmount;
+        steaks -= feeAmount;
 
         Bet storage bet = marketToUserToBet[marketId_][msg.sender];
 
-        // virtual deposit of stDegen to steakedDegen
-
+        // virtual shares of the market
+        // market.totalHigher + market.totalLower == 0 means this is the first bet
+        uint256 virtualShares = market.totalHigher + market.totalLower == 0
+            ? steaks
+            : steaks.mulDiv(market.totalHigher + market.totalLower, market.totalSteakedDegen);
         market.totalSteakedDegen += steaks;
 
-        // increase totalStDegen and totalSharesHigh and totalSharesLow in Market
-
-        // increase totalSharesHigh and totalSharesLow in Bet of user
-
         if (direction_ == BetDirection.HIGHER) {
-            bet.amountHigher += amount_;
-            market.totalHigher += amount_;
+            bet.amountHigher += virtualShares;
+            market.totalHigher += virtualShares;
         } else {
-            bet.amountLower += amount_;
-            market.totalLower += amount_;
+            bet.amountLower += virtualShares;
+            market.totalLower += virtualShares;
         }
     }
 }
