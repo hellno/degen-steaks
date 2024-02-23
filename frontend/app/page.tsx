@@ -122,9 +122,13 @@ export default async function Home({
       return <FrameButton>something went wrong</FrameButton>;
     }
 
-    return buttons.map((label, index) => (
-      <FrameButton key={index}>{label}</FrameButton>
-    ));
+    return (
+      <>
+        {buttons.map((label, index) => (
+          <FrameButton key={index}>{label}</FrameButton>
+        ))}
+      </>
+    );
   };
 
   const renderProgressBar = ({ a, b }: { a: number; b: number }) => (
