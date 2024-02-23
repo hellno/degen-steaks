@@ -51,4 +51,11 @@ contract WithUtility is Test {
     function _getBet(uint256 marketId, address user) public view returns (IBetRegistry.Bet memory) {
         return betRegistry.getBet(marketId, user);
     }
+
+    function _deposit(address account, uint256 amount) public {
+        steakedDegen.setFan(account, true);
+        _dealAndApprove(account, address(steakedDegen), amount);
+        vm.prank(account);
+        steakedDegen.deposit(amount, account);
+    }
 }

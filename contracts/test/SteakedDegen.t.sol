@@ -40,4 +40,23 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
         assertEq(faucetToken.balanceOf(address(steakedDegen)), 100 * 1e18, "SteakedDegen should have 100*1e18 DEGEN");
         assertEq(steakedDegen.balanceOf(ALICE), 99.31 * 1e18, "ALICE should have 99.31*1e18 SDEGEN");
     }
+
+    function test_deposit_multiple() public {
+        _deposit(ALICE, 100 * 1e18);
+        _deposit(BOB, 100 * 1e18);
+
+        assertEq(faucetToken.balanceOf(ALICE), 0, "ALICE should have 0 DEGEN");
+        assertEq(faucetToken.balanceOf(BOB), 0, "ALICE should have 0 DEGEN");
+        assertEq(faucetToken.balanceOf(address(steakedDegen)), 200 * 1e18, "SteakedDegen should have 200*1e18 DEGEN");
+        assertEq(
+            steakedDegen.balanceOf(ALICE),
+            (1e6 - steakedDegen.steakFee()) * 100 * 1e18 / 1e6,
+            "ALICE should have 99.31*1e18 SDEGEN"
+        );
+        assertEq(
+            steakedDegen.balanceOf(BOB),
+            (1e6 - steakedDegen.steakFee()) ** 2 * 100 * 1e18 / 1e6 ** 2,
+            "BOB should have 98.624761*1e18 SDEGEN"
+        );
+    }
 }
