@@ -33,11 +33,13 @@ contract WithUtility is Test {
 
     function _dealAndApprove(address account, address receiver, uint256 amount) public {
         deal(address(faucetToken), account, amount);
+        vm.prank(account);
         faucetToken.approve(receiver, amount);
     }
 
     function _dealAndApprove(address account, uint256 amount) public {
         deal(address(faucetToken), account, amount);
+        vm.prank(account);
         faucetToken.approve(address(betRegistry), amount);
     }
 

@@ -22,4 +22,22 @@ contract BetRegistry_Basic_Test is Test, WithUtility {
         vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, ALICE));
         steakedDegen.setFan(ALICE, true);
     }
+
+    function test_deposit_onlyFans() public {
+        _dealAndApprove(ALICE, address(steakedDegen), 100);
+        vm.prank(ALICE);
+        vm.expectRevert("SteakedDegen::onlyFans: caller is not a fan.");
+        steakedDegen.deposit(100, ALICE);
+    }
+
+    function test_deposit_success() public {
+        steakedDegen.setFan(ALICE, true);
+        _dealAndApprove(ALICE, address(steakedDegen), 100 * 1e18);
+        vm.prank(ALICE);
+        steakedDegen.deposit(100 * 1e18, ALICE);
+
+        assertEq(faucetToken.balanceOf(ALICE), 0, "ALICE should have 0 DEGEN");
+        assertEq(faucetToken.balanceOf(address(steakedDegen)), 100 * 1e18, "SteakedDegen should have 100*1e18 DEGEN");
+        assertEq(steakedDegen.balanceOf(ALICE), 99.31 * 1e18, "ALICE should have 99.31*1e18 SDEGEN");
+    }
 }
