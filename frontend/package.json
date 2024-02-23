@@ -14,13 +14,15 @@
     "@farcaster/core": "^0.14.0",
     "@noble/ed25519": "^2.0.0",
     "@xmtp/frames-validator": "^0.5.0",
+    "clsx": "^2.1.0",
     "frames.js": "^0.5.2",
     "next": "14.1.0",
     "qrcode.react": "^3.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "satori": "^0.10.13",
-    "swr": "^2.2.4"
+    "swr": "^2.2.4",
+    "viem": "^2.7.13"
   },
   "engines": {
     "node": ">=18.17.0"
