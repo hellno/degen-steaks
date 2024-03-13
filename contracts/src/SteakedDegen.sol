@@ -45,6 +45,9 @@ contract SteakedDegen is ISteakedDegen, ERC4626, Ownable {
         isFan[fan_] = isFan_;
     }
 
+    /**
+     * @dev The initial deposit is needed to initialize the ratio. No fee applies here.
+     */
     function initialDeposit(uint256 assets_, address receiver_) public onlyOwner {
         require(!isInitialized, "SteakedDegen::initialDeposit: already initialized.");
         isInitialized = true;
