@@ -12,7 +12,7 @@ import "src/auxiliary/EthDegenPool.sol";
 import "src/auxiliary/EthUsdcPool.sol";
 import "src/PriceFeed.sol";
 
-contract WithUtility is Test {
+contract WithTestHelpers is Test {
     IBetRegistry betRegistry;
     IERC20 degenToken;
     ISteakedDegen steakedDegen;
@@ -21,7 +21,7 @@ contract WithUtility is Test {
     PriceFeed priceFeed;
 
     /// @dev This function removes this contract from coverage reports
-    function test_WithUtility() public {}
+    function test_WithTestHelpers() public {}
 
     function deploy() public {
         degenToken = new DegenToken("Degen Token", "DEGEN");
