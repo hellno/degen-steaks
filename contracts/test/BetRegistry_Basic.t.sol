@@ -99,7 +99,7 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         betRegistry.placeBet(0, BET, IBetRegistry.BetDirection.HIGHER);
     }
 
-    function test_resolveBet_fail_notEnded() public {
+    function test_resolveMarket_fail_notEnded() public {
         _createMarket(1 days, 1000);
         _placeBet(0, BET, IBetRegistry.BetDirection.LOWER);
         _placeBet(0, BET, IBetRegistry.BetDirection.LOWER);
