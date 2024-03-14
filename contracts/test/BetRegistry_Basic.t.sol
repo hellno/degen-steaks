@@ -285,4 +285,28 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         vm.expectRevert("BetRegistry::slash: Slash period not over.");
         betRegistry.slash(0);
     }
+
+    function test_slash_basic() public {
+        _createMarket(1 days, 1000);
+        _placeBet(0, BET, IBetRegistry.BetDirection.HIGHER);
+        _placeBet(0, BET, IBetRegistry.BetDirection.LOWER);
+        vm.warp(1 days + 60);
+        betRegistry.resolveMarket(0);
+        vm.warp(1 days + 60 + 4 weeks);
+
+        assertEq(degenToken.balanceOf(address(betRegistry)) / 1e18, 196, "betRegistry DEGEN before, two bets minus fee");
+        uint256 daoBalanceBefore = degenToken.balanceOf(DEGEN_UTILITY_DAO);
+
+        vm.prank(BOB);
+        betRegistry.slash(0);
+
+        assertEq(degenToken.balanceOf(address(betRegistry)), 0, "betRegistry DEGEN after");
+        assertEq(degenToken.balanceOf(BOB) / 1e18, 1, "BOB DEGEN after");
+        assertEq(degenToken.balanceOf(address(this)) / 1e18, 2, "Creator DEGEN after");
+        assertGt(degenToken.balanceOf(DEGEN_UTILITY_DAO), daoBalanceBefore, "DAO should have received some DEGEN");
+        assertEq(degenToken.balanceOf(address(steakedDegen)) / 1e18, 293, "Steak DEGEN after");
+        assertEq(_getMarket(0).totalDegen, 0, "market totalDegen after");
+        assertEq(_getMarket(0).totalHigher, 0, "market totalHigher after");
+        assertEq(_getMarket(0).totalLower, 0, "market totalLower after");
+    }
 }

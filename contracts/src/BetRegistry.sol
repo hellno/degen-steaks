@@ -152,5 +152,22 @@ contract BetRegistry is IBetRegistry {
             block.timestamp >= market.endTime + GRACE_PERIOD + SLASH_PERIOD,
             "BetRegistry::slash: Slash period not over."
         );
+
+        uint256 totalDegen = market.totalDegen;
+        require(totalDegen > 0, "BetRegistry::slash: Nothing to slash.");
+        market.totalDegen = 0;
+        market.totalHigher = 0;
+        market.totalLower = 0;
+
+        uint256 creatorFee = totalDegen.mulDiv(CREATOR_FEE, FEE_DIVISOR);
+        uint256 slashFee = totalDegen.mulDiv(CREATOR_FEE, FEE_DIVISOR);
+        uint256 daoFee = totalDegen.mulDiv(CREATOR_FEE, FEE_DIVISOR);
+
+        totalDegen -= creatorFee + slashFee + daoFee;
+
+        degenToken.safeTransfer(address(steakedDegen), totalDegen);
+        degenToken.safeTransfer(market.creator, creatorFee);
+        degenToken.safeTransfer(msg.sender, slashFee);
+        degenToken.safeTransfer(degenUtilityDao, daoFee);
     }
 }
