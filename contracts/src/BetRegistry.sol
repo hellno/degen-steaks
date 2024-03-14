@@ -91,9 +91,9 @@ contract BetRegistry is IBetRegistry, Ownable {
         uint256 steaks = steakedDegen.deposit(amount_, address(this));
 
         // pay fee to totalStDegen in Market
-        uint256 feeAmount = market.totalSteakedDegen == 0 ? 0 : steaks.mulDiv(MARKET_FEE, FEE_DIVISOR);
-        market.totalSteakedDegen += feeAmount;
-        steaks -= feeAmount;
+        uint256 feeSteaks = market.totalSteakedDegen == 0 ? 0 : steaks.mulDiv(MARKET_FEE, FEE_DIVISOR);
+        market.totalSteakedDegen += feeSteaks;
+        steaks -= feeSteaks;
 
         Bet storage bet = marketToUserToBet[marketId_][msg.sender];
 
@@ -112,7 +112,15 @@ contract BetRegistry is IBetRegistry, Ownable {
             market.totalLower += betShares;
         }
 
-        emit BetPlaced(marketId_, msg.sender, amount_, steaks, betShares, feeAmount, direction_);
+        emit BetPlaced({
+            marketId: marketId_,
+            user: msg.sender,
+            degen: amount_,
+            steaks: steaks,
+            feeSteaks: feeSteaks,
+            betShares: betShares,
+            direction: direction_
+        });
     }
 
     function resolveMarket(uint256 marketId_) public {

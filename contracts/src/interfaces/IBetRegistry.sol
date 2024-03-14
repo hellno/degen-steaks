@@ -23,14 +23,14 @@ interface IBetRegistry {
         uint256 amountLower;
     }
 
-    event MarketCreated(uint256 indexed betId, address indexed creator, uint40 endTime, uint256 targetPrice);
+    event MarketCreated(uint256 indexed id, address indexed creator, uint40 endTime, uint256 targetPrice);
     event BetPlaced(
-        uint256 indexed betId,
+        uint256 indexed marketId,
         address indexed user,
-        uint256 amount,
+        uint256 degen,
         uint256 steaks,
+        uint256 feeSteaks,
         uint256 betShares,
-        uint256 feeAmount,
         BetDirection direction
     );
 
