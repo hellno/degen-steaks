@@ -119,18 +119,28 @@ contract BetRegistry is IBetRegistry {
         Market storage market = markets[marketId_];
         require(market.endPrice != 0, "BetRegistry::cashOut: market not resolved.");
 
-        BetDirection winningDirection = market.endPrice > market.targetPrice ? BetDirection.HIGHER : BetDirection.LOWER;
-        uint256 totalMarketShares = winningDirection == BetDirection.HIGHER ? market.totalHigher : market.totalLower;
-        uint256 userMarketShares = winningDirection == BetDirection.HIGHER
-            ? marketToUserToBet[marketId_][msg.sender].amountHigher
-            : marketToUserToBet[marketId_][msg.sender].amountLower;
+        uint256 totalMarketShares;
+        uint256 userMarketShares;
+        uint256 userDegenPayout;
 
-        require(userMarketShares > 0, "BetRegistry::cashOut: Nothing to cash out.");
-
-        uint256 userDegenPayout = market.totalDegen.mulDiv(userMarketShares, totalMarketShares);
-
-        marketToUserToBet[marketId_][msg.sender].amountHigher = 0;
-        marketToUserToBet[marketId_][msg.sender].amountLower = 0;
+        // winning direction is HIGHER
+        if (market.endPrice > market.targetPrice) {
+            totalMarketShares = market.totalHigher;
+            userMarketShares = marketToUserToBet[marketId_][msg.sender].amountHigher;
+            require(userMarketShares > 0, "BetRegistry::cashOut: Nothing to cash out.");
+            userDegenPayout = market.totalDegen.mulDiv(userMarketShares, totalMarketShares);
+            marketToUserToBet[marketId_][msg.sender].amountHigher = 0;
+            market.totalHigher -= userMarketShares;
+            market.totalDegen -= userDegenPayout;
+        } else {
+            totalMarketShares = market.totalLower;
+            userMarketShares = marketToUserToBet[marketId_][msg.sender].amountLower;
+            require(userMarketShares > 0, "BetRegistry::cashOut: Nothing to cash out.");
+            userDegenPayout = market.totalDegen.mulDiv(userMarketShares, totalMarketShares);
+            marketToUserToBet[marketId_][msg.sender].amountLower = 0;
+            market.totalLower -= userMarketShares;
+            market.totalDegen -= userDegenPayout;
+        }
 
         degenToken.safeTransfer(msg.sender, userDegenPayout);
     }
