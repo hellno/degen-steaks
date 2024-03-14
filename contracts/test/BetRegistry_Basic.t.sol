@@ -173,7 +173,7 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         assertEq(degenToken.balanceOf(address(this)) / 1e16, 136, "owner degen after should be ~1.36");
     }
 
-    function test_cashout_fail_marketNotResolved() public {
+    function test_cashOut_fail_marketNotResolved() public {
         _createMarket(1 days, 1000);
         _placeBet(0, BET, IBetRegistry.BetDirection.HIGHER);
         _placeBet(0, BET, IBetRegistry.BetDirection.LOWER);
@@ -181,24 +181,24 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         _cashOut(0);
     }
 
-    function test_cashout_basic() public {
+    function test_cashOut_basic() public {
         _createMarket(1 days, 1000);
         _placeBet(0, BET, IBetRegistry.BetDirection.HIGHER);
         _placeBet(0, BET, IBetRegistry.BetDirection.LOWER);
         vm.warp(1 days + 60);
         betRegistry.resolveMarket(0);
 
-        // before cashout, all degen should be unsteaked and market should have no steaks but all degen
+        // before cashOut, all degen should be unsteaked and market should have no steaks but all degen
         assertEq(degenToken.balanceOf(address(betRegistry)) / 1e18, 196, "betRegistry DEGEN before, two bets minus fee");
 
         _cashOut(0);
 
-        // after cashout, all degen should be steaked and market should have all steaks and no degen
+        // after cashOut, all degen should be steaked and market should have all steaks and no degen
         assertEq(degenToken.balanceOf(address(betRegistry)), 0, "DEGEN after");
         assertEq(degenToken.balanceOf(ALICE) / 1e18, 196, "Alice DEGEN after");
     }
 
-    function test_cashout_fail_onlyOnce() public {
+    function test_cashOut_fail_onlyOnce() public {
         _createMarket(1 days, 1000);
         _placeBet(0, BET, IBetRegistry.BetDirection.HIGHER);
         _placeBet(0, BET, IBetRegistry.BetDirection.LOWER);
@@ -208,6 +208,14 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
 
         vm.expectRevert("BetRegistry::cashOut: Nothing to cash out.");
 
+        _cashOut(0);
+    }
+
+    function test_cashOut_fail_withoutBet() public {
+        _createMarket(1 days, 1000);
+        vm.warp(1 days + 60);
+        betRegistry.resolveMarket(0);
+        vm.expectRevert("BetRegistry::cashOut: Nothing to cash out.");
         _cashOut(0);
     }
 }
