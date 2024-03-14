@@ -35,3 +35,12 @@ networks:
               - name: Market
               - name: User
               - name: Dao
+      - name: SteakedDegen
+        address: "0x11CcD77B6f4Fd43ab51Ee97766f0481BCa51f711"
+        abi_file_path: ./abi/SteakedDegen.json
+        handler: ./src/event-handlers/SteakedDegen.ts
+        events:
+          - event: DaoFeePaid
+            requiredEntities:
+              - name: Dao
+          
