@@ -18,7 +18,7 @@ contract WithTestHelpers is Test {
     ISteakedDegen steakedDegen;
     EthDegenPool ethDegenPool;
     EthUsdcPool ethUsdcPool;
-    PriceFeed priceFeed;
+    IPriceFeed priceFeed;
 
     /// @dev This function removes this contract from coverage reports
     function test_WithTestHelpers() public {}

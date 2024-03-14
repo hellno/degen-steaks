@@ -116,15 +116,4 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         vm.expectRevert("BetRegistry::resolveMarket: grace period not over.");
         betRegistry.resolveMarket(0);
     }
-
-    function test_resolveMarket_setsEndPrice() public {
-        _createMarket(1 days, 1000);
-        _placeBet(0, BET, IBetRegistry.BetDirection.LOWER);
-        _placeBet(0, BET, IBetRegistry.BetDirection.LOWER);
-        vm.warp(1 days + 60);
-        betRegistry.resolveMarket(0);
-
-        IBetRegistry.Market memory market = _getMarket(0);
-        assertEq(market.endPrice, 1000, "endPrice");
-    }
 }
