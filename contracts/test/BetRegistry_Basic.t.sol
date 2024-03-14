@@ -180,4 +180,21 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         vm.expectRevert("BetRegistry::cashOut: market not resolved.");
         _cashOut(0);
     }
+
+    function test_cashout_basic() public {
+        _createMarket(1 days, 1000);
+        _placeBet(0, BET, IBetRegistry.BetDirection.HIGHER);
+        _placeBet(0, BET, IBetRegistry.BetDirection.LOWER);
+        vm.warp(1 days + 60);
+        betRegistry.resolveMarket(0);
+
+        // before cashout, all degen should be unsteaked and market should have no steaks but all degen
+        assertEq(degenToken.balanceOf(address(betRegistry)) / 1e18, 196, "betRegistry DEGEN before, two bets minus fee");
+
+        _cashOut(0);
+
+        // after cashout, all degen should be steaked and market should have all steaks and no degen
+        assertEq(degenToken.balanceOf(address(betRegistry)), 0, "DEGEN after");
+        assertEq(degenToken.balanceOf(ALICE) / 1e18, 196, "Alice DEGEN after");
+    }
 }

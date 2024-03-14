@@ -118,5 +118,18 @@ contract BetRegistry is IBetRegistry {
     function cashOut(uint256 marketId_) public {
         Market storage market = markets[marketId_];
         require(market.endPrice != 0, "BetRegistry::cashOut: market not resolved.");
+
+        BetDirection winningDirection = market.endPrice > market.targetPrice ? BetDirection.HIGHER : BetDirection.LOWER;
+        uint256 totalMarketShares = winningDirection == BetDirection.HIGHER ? market.totalHigher : market.totalLower;
+        uint256 userMarketShares = winningDirection == BetDirection.HIGHER
+            ? marketToUserToBet[marketId_][msg.sender].amountHigher
+            : marketToUserToBet[marketId_][msg.sender].amountLower;
+
+        uint256 userDegenPayout = market.totalDegen.mulDiv(userMarketShares, totalMarketShares);
+
+        marketToUserToBet[marketId_][msg.sender].amountHigher = 0;
+        marketToUserToBet[marketId_][msg.sender].amountLower = 0;
+
+        degenToken.safeTransfer(msg.sender, userDegenPayout);
     }
 }
