@@ -221,7 +221,8 @@ contract BetRegistry is IBetRegistry, Ownable {
             totalDegen: totalDegen,
             creatorFee: creatorFee,
             slashFee: slashFee,
-            daoFee: daoFee
+            daoFee: daoFee,
+            slasher: msg.sender
         });
     }
 }

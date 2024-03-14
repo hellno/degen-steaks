@@ -411,7 +411,7 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         uint256 daoFee = creatorFee;
 
         vm.expectEmit();
-        emit MarketSlashed(0, totalDegen, creatorFee, slashFee, daoFee);
+        emit MarketSlashed(0, totalDegen, creatorFee, slashFee, daoFee, BOB);
 
         vm.prank(BOB);
         betRegistry.slash(0);
