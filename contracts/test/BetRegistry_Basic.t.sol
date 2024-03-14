@@ -11,7 +11,7 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         deploy();
     }
 
-    function testCreateMarket() public {
+    function test_CreateMarket_basic() public {
         _createMarket(1 days, 1000);
         IBetRegistry.Market memory market = _getMarket(0);
         assertEq(market.creator, address(this));
@@ -22,6 +22,17 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         assertEq(market.totalLower, 0);
         assertEq(market.totalSteakedDegen, 0);
         assertEq(market.totalDegen, 0);
+    }
+
+    function test_createMarket_fail_onlyFan() public {
+        vm.prank(ALICE);
+        vm.expectRevert("BetRegistry::onlyFans: caller is not a fan.");
+        betRegistry.createMarket(1 days, 1000);
+    }
+
+    function test_createMarket_afterSetFan() public {
+        betRegistry.setFan(ALICE, true);
+        _createMarket(1 days, 1000);
     }
 
     function test_getMarket_fail_outOfRange() public {

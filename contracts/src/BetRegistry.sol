@@ -7,8 +7,9 @@ import "openzeppelin/token/ERC20/IERC20.sol";
 import "openzeppelin/token/ERC20/utils/SafeERC20.sol";
 import "openzeppelin/interfaces/IERC4626.sol";
 import "openzeppelin/utils/math/Math.sol";
+import "openzeppelin/access/Ownable.sol";
 
-contract BetRegistry is IBetRegistry {
+contract BetRegistry is IBetRegistry, Ownable {
     using SafeERC20 for IERC20;
     using Math for uint256;
 
@@ -28,11 +29,25 @@ contract BetRegistry is IBetRegistry {
     IPriceFeed priceFeed;
     address public degenUtilityDao;
 
-    constructor(IERC20 degenToken_, IERC4626 steakedDegen_, IPriceFeed priceFeed_, address degenUtilityDao_) {
+    mapping(address => bool) public isFan; // haha just kidding, it's a pun. onlyDepositer is a better name.
+
+    constructor(IERC20 degenToken_, IERC4626 steakedDegen_, IPriceFeed priceFeed_, address degenUtilityDao_)
+        Ownable(msg.sender)
+    {
         degenToken = IERC20(degenToken_);
         steakedDegen = steakedDegen_;
         priceFeed = priceFeed_;
         degenUtilityDao = degenUtilityDao_;
+        isFan[msg.sender] = true;
+    }
+
+    modifier onlyFans() {
+        require(isFan[_msgSender()], "BetRegistry::onlyFans: caller is not a fan.");
+        _;
+    }
+
+    function setFan(address fan_, bool isFan_) public onlyOwner {
+        isFan[fan_] = isFan_;
     }
 
     function getMarket(uint256 marketId_) public view returns (Market memory) {
@@ -46,7 +61,7 @@ contract BetRegistry is IBetRegistry {
         return marketToUserToBet[marketId_][user_];
     }
 
-    function createMarket(uint40 endTime_, uint256 targetPrice_) public {
+    function createMarket(uint40 endTime_, uint256 targetPrice_) public onlyFans {
         markets.push(
             Market({
                 creator: msg.sender,
