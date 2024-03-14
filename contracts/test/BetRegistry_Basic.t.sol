@@ -93,6 +93,12 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         betRegistry.placeBet(0, BET, IBetRegistry.BetDirection.HIGHER);
     }
 
+    function test_placeBet_fail_underMinBid() public {
+        _createMarket(1 days, 1000);
+        vm.expectRevert("BetRegistry::placeBet: amount must be greater than MIN_BID.");
+        betRegistry.placeBet(0, 1e18 - 1, IBetRegistry.BetDirection.HIGHER);
+    }
+
     function test_placeBet_fail_marketEnded() public {
         _createMarket(1 days, 1000);
         vm.warp(2 days);
