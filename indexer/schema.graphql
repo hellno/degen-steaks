@@ -9,8 +9,8 @@ type Market {
   startTime: Int!
   targetPrice: BigInt!
   endTime: BigInt!
-  totalHigher: BigInt!
-  totalLower: BigInt!
+  totalSharesHigher: BigInt!
+  totalSharesLower: BigInt!
   totalSteakedDegen: BigInt!
   betCount: Int!
   degenCollected: BigInt!

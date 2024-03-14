@@ -28,8 +28,8 @@ BetRegistryContract_MarketCreated_handler(({ event, context }) => {
     startTime: event.blockTimestamp,
     targetPrice: event.params.targetPrice,
     endTime: event.params.endTime,
-    totalHigher: 0n,
-    totalLower: 0n,
+    totalSharesHigher: 0n,
+    totalSharesLower: 0n,
     totalSteakedDegen: 0n,
     degenCollected: 0n,
     betCount: 0,
@@ -94,7 +94,7 @@ BetRegistryContract_BetPlaced_handler(({ event, context }) => {
     // BetDirection is HIGHER
     market = {
       ...market,
-      totalHigher: market.totalHigher + event.params.betShares,
+      totalSharesHigher: market.totalSharesHigher + event.params.betShares,
     };
 
     bet = {
@@ -105,7 +105,7 @@ BetRegistryContract_BetPlaced_handler(({ event, context }) => {
     // BetDirection is LOWER
     market = {
       ...market,
-      totalLower: market.totalLower + event.params.betShares,
+      totalSharesLower: market.totalSharesLower + event.params.betShares,
     };
 
     bet = {
