@@ -12,26 +12,26 @@ import "src/auxiliary/EthDegenPool.sol";
 import "src/auxiliary/EthUsdcPool.sol";
 import "src/PriceFeed.sol";
 
-contract WithUtility is Test {
+contract WithTestHelpers is Test {
     IBetRegistry betRegistry;
     IERC20 degenToken;
     ISteakedDegen steakedDegen;
     EthDegenPool ethDegenPool;
     EthUsdcPool ethUsdcPool;
-    PriceFeed priceFeed;
+    IPriceFeed priceFeed;
 
     /// @dev This function removes this contract from coverage reports
-    function test_WithUtility() public {}
+    function test_WithTestHelpers() public {}
 
     function deploy() public {
-        degenToken = new DegenToken("Degen Token", "DEGEN");
-        steakedDegen = new SteakedDegen("Steaked Degen", "SDEGEN", degenToken, DEGEN_UTILITY_DAO);
-        betRegistry = new BetRegistry(degenToken, steakedDegen, DEGEN_UTILITY_DAO);
-        steakedDegen.setFan(address(betRegistry), true);
-
         ethDegenPool = new EthDegenPool();
         ethUsdcPool = new EthUsdcPool();
         priceFeed = new PriceFeed(address(ethDegenPool), address(ethUsdcPool));
+
+        degenToken = new DegenToken("Degen Token", "DEGEN");
+        steakedDegen = new SteakedDegen("Steaked Degen", "SDEGEN", degenToken, DEGEN_UTILITY_DAO);
+        betRegistry = new BetRegistry(degenToken, steakedDegen, priceFeed, DEGEN_UTILITY_DAO);
+        steakedDegen.setFan(address(betRegistry), true);
 
         _initialDeposit(INITIAL_STAKE, DEGEN_UTILITY_DAO);
     }
@@ -39,7 +39,7 @@ contract WithUtility is Test {
     function deployWithoutInitialDeposit() public {
         degenToken = new DegenToken("Degen Token", "DEGEN");
         steakedDegen = new SteakedDegen("Steaked Degen", "SDEGEN", degenToken, DEGEN_UTILITY_DAO);
-        betRegistry = new BetRegistry(degenToken, steakedDegen, DEGEN_UTILITY_DAO);
+        betRegistry = new BetRegistry(degenToken, steakedDegen, priceFeed, DEGEN_UTILITY_DAO);
     }
 
     function _createMarket(uint40 endTime, uint256 targetPrice) public {
@@ -63,12 +63,18 @@ contract WithUtility is Test {
     }
 
     function _placeBet(uint256 marketId, uint256 amount, IBetRegistry.BetDirection direction) public {
-        _dealAndApprove(address(this), amount);
+        _dealAndApprove(ALICE, amount);
+        vm.prank(ALICE);
         betRegistry.placeBet(marketId, amount, direction);
     }
 
     function _getBet(uint256 marketId, address user) public view returns (IBetRegistry.Bet memory) {
         return betRegistry.getBet(marketId, user);
+    }
+
+    function _cashOut(uint256 marketId) public {
+        vm.prank(ALICE);
+        betRegistry.cashOut(marketId);
     }
 
     function _deposit(address account, uint256 amount) public {

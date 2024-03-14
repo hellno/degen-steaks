@@ -11,9 +11,11 @@ interface IBetRegistry {
         address creator;
         uint40 endTime;
         uint256 targetPrice;
+        uint256 endPrice;
         uint256 totalHigher; // virtual shares
         uint256 totalLower; // virtual shares
         uint256 totalSteakedDegen;
+        uint256 totalDegen;
     }
 
     struct Bet {
@@ -37,4 +39,6 @@ interface IBetRegistry {
     function placeBet(uint256 marketId, uint256 amount, BetDirection direction) external;
     function getBet(uint256 marketId, address user) external view returns (Bet memory);
     function resolveMarket(uint256 marketId) external;
+    function cashOut(uint256 marketId) external;
+    function slash(uint256 marketId) external;
 }

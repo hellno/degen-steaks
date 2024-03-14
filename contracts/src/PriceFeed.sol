@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
+import "src/interfaces/IPriceFeed.sol";
 import "src/auxiliary/EthDegenPool.sol";
 import "src/auxiliary/EthUsdcPool.sol";
 import "lib/uniswap-v3/OracleLibrary.sol";
@@ -9,7 +10,7 @@ address constant WETH_BASE = 0x4200000000000000000000000000000000000006;
 address constant DEGEN_BASE = 0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed;
 address constant USDC_BASE = 0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA;
 
-contract PriceFeed {
+contract PriceFeed is IPriceFeed {
     IUniswapV3Pool public ethDegenPool;
     IUniswapV3Pool public ethUsdcPool;
 

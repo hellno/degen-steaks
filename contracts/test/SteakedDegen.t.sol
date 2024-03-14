@@ -2,12 +2,12 @@
 pragma solidity ^0.8.13;
 
 import {Test, console2} from "forge-std/Test.sol";
-import {WithUtility} from "test/setup/WithUtility.t.sol";
+import {WithTestHelpers} from "test/setup/WithTestHelpers.t.sol";
 import {IBetRegistry, BetRegistry} from "src/BetRegistry.sol";
 import "test/setup/Constants.t.sol";
 import "openzeppelin/access/Ownable.sol";
 
-contract BetRegistry_Basic_Test is Test, WithUtility {
+contract BetRegistry_Basic_Test is Test, WithTestHelpers {
     function setUp() public {
         deploy();
     }
