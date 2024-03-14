@@ -56,6 +56,8 @@ contract SteakedDegen is ISteakedDegen, ERC4626, Ownable {
         uint256 shares = previewDeposit(assets_);
 
         _deposit(_msgSender(), receiver_, assets_, shares);
+
+        emit InitialDeposit(_msgSender(), receiver_, assets_, shares);
     }
 
     /**

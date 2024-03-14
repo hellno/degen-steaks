@@ -20,6 +20,7 @@ contract WithTestHelpers is Test {
     );
     event SteakFeePaid(address indexed caller, uint256 amount);
     event FanSet(address indexed user, bool isFan);
+    event InitialDeposit(address indexed sender, address indexed receiver, uint256 assets, uint256 shares);
 
     IBetRegistry betRegistry;
     IERC20 degenToken;
