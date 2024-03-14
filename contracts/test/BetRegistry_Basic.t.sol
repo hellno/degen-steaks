@@ -190,6 +190,24 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         assertEq(degenToken.balanceOf(address(this)) / 1e16, 136, "owner degen after should be ~1.36");
     }
 
+    function test_resolveMarket_event() public {
+        _createMarket(1 days, 1000);
+        _placeBet(0, BET, IBetRegistry.BetDirection.HIGHER);
+        _placeBet(0, BET, IBetRegistry.BetDirection.LOWER);
+        vm.warp(1 days + 60);
+
+        uint256 creatorBalanceBefore = degenToken.balanceOf(address(this));
+
+        uint256 creatorFee = 1_363_311_776_529_025_136;
+        uint256 totalDegen = 196_218_105_111_735_487_432;
+
+        vm.expectEmit();
+        emit MarketResolved(0, DEGEN_PRICE_1, totalDegen, creatorFee);
+        betRegistry.resolveMarket(0);
+
+        assertEq(degenToken.balanceOf(address(this)), creatorBalanceBefore + creatorFee, "creator balance after");
+    }
+
     function test_cashOut_fail_marketNotResolved() public {
         _createMarket(1 days, 1000);
         _placeBet(0, BET, IBetRegistry.BetDirection.HIGHER);

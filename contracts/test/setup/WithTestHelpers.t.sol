@@ -13,6 +13,7 @@ import "src/auxiliary/EthUsdcPool.sol";
 import "src/PriceFeed.sol";
 
 contract WithTestHelpers is Test {
+    event MarketResolved(uint256 indexed marketId, uint256 endPrice, uint256 totalDegen, uint256 creatorFee);
     event BetCashedOut(uint256 indexed marketId, address indexed user, uint256 degen, uint256 marketShares);
     event MarketSlashed(
         uint256 indexed marketId, uint256 totalDegen, uint256 creatorFee, uint256 slashFee, uint256 daoFee
