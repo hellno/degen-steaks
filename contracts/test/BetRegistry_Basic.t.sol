@@ -111,7 +111,7 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
 
     function test_resolveMarket_fail_gracePeriod() public {
         _createMarket(1 days, 1000);
-        _placeBet(0, BET, IBetRegistry.BetDirection.LOWER);
+        _placeBet(0, BET, IBetRegistry.BetDirection.HIGHER);
         _placeBet(0, BET, IBetRegistry.BetDirection.LOWER);
         vm.warp(1 days + 59);
         vm.expectRevert("BetRegistry::resolveMarket: grace period not over.");
@@ -120,12 +120,41 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
 
     function test_resolveMarket_setsEndPrice() public {
         _createMarket(1 days, 1000);
-        _placeBet(0, BET, IBetRegistry.BetDirection.LOWER);
+        _placeBet(0, BET, IBetRegistry.BetDirection.HIGHER);
         _placeBet(0, BET, IBetRegistry.BetDirection.LOWER);
         vm.warp(1 days + 60);
         betRegistry.resolveMarket(0);
 
         IBetRegistry.Market memory market = _getMarket(0);
         assertEq(market.endPrice, DEGEN_PRICE_1, "endPrice");
+    }
+
+    function test_resolveMarket_unsteaksDegen() public {
+        _createMarket(1 days, 1000);
+        _placeBet(0, BET, IBetRegistry.BetDirection.HIGHER);
+        _placeBet(0, BET, IBetRegistry.BetDirection.LOWER);
+        vm.warp(1 days + 60);
+
+        // before resolve all degen should be steaked and market should have all steaks and no degen
+        assertEq(degenToken.balanceOf(address(betRegistry)), 0, "DEGEN before");
+        assertEq(
+            _getMarket(0).totalSteakedDegen, SDEGENS_SECOND_DEPOSIT + SDEGENS_THIRD_DEPOSIT, "totalSteakedDegen before"
+        );
+        assertEq(
+            steakedDegen.balanceOf(address(betRegistry)),
+            SDEGENS_SECOND_DEPOSIT + SDEGENS_THIRD_DEPOSIT,
+            "SteakedDegen DEGEN before"
+        );
+
+        betRegistry.resolveMarket(0);
+
+        // after resolve, all degen should be unsteaked and market should have no steaks but all degen
+        assertEq(degenToken.balanceOf(address(betRegistry)) / 1e18, 197, "betRegistry DEGEN after, two bets minus fee");
+        assertEq(
+            degenToken.balanceOf(address(steakedDegen)) / 1e18,
+            101,
+            "total SteakedDegen DEGEN after, initial stake plus fee"
+        );
+        assertEq(steakedDegen.balanceOf(address(betRegistry)), 0, "betRegistry SteakedDegen DEGEN after");
     }
 }

@@ -103,5 +103,8 @@ contract BetRegistry is IBetRegistry {
         require(block.timestamp >= market.endTime + GRACE_PERIOD, "BetRegistry::resolveMarket: grace period not over.");
         uint256 price = priceFeed.getPrice();
         market.endPrice = price;
+
+        // unsteake degen
+        steakedDegen.redeem(market.totalSteakedDegen, address(this), address(this));
     }
 }
