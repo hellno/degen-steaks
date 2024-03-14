@@ -25,3 +25,8 @@ networks:
             requiredEntities:
               - name: Market
               - name: User
+          - event: BetCashedOut
+            requiredEntities:
+              - name: Bet
+              - name: User
+              - name: Market

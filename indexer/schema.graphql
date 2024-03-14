@@ -1,6 +1,8 @@
 type User {
   id: ID!
   creatorFeeReceived: BigInt!
+  totalDegenWon: BigInt!
+  totalDegenBet: BigInt!
 }
 
 type Market {
@@ -15,6 +17,7 @@ type Market {
   betCount: Int!
   degenCollected: BigInt!
   isResolved: Boolean!
+  highWon: Boolean
   endPrice: BigInt
   totalDegen: BigInt
   creatorFee: BigInt
@@ -26,6 +29,9 @@ type Bet {
   market: Market!
   sharesHigher: BigInt!
   sharesLower: BigInt!
+  cashedOut: Boolean
+  cashOutTransaction: String
+  cashedOutDegen: BigInt
 }
 
 type PlacedBet {
@@ -38,4 +44,5 @@ type PlacedBet {
   feeSteaks: BigInt!
   betShares: BigInt!
   direction: BigInt!
+  transaction: String!
 }
