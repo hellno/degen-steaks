@@ -50,6 +50,7 @@ contract BetRegistry is IBetRegistry {
                 creator: msg.sender,
                 endTime: endTime_,
                 targetPrice: targetPrice_,
+                endPrice: 0,
                 totalHigher: 0,
                 totalLower: 0,
                 totalSteakedDegen: 0

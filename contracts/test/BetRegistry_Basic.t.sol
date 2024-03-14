@@ -17,6 +17,7 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         assertEq(market.creator, address(this));
         assertEq(market.endTime, 1 days);
         assertEq(market.targetPrice, 1000);
+        assertEq(market.endPrice, 0);
         assertEq(market.totalHigher, 0);
         assertEq(market.totalLower, 0);
         assertEq(market.totalSteakedDegen, 0);

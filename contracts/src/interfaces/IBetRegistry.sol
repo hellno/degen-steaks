@@ -11,6 +11,7 @@ interface IBetRegistry {
         address creator;
         uint40 endTime;
         uint256 targetPrice;
+        uint256 endPrice;
         uint256 totalHigher; // virtual shares
         uint256 totalLower; // virtual shares
         uint256 totalSteakedDegen;
