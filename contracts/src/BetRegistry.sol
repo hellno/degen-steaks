@@ -207,5 +207,13 @@ contract BetRegistry is IBetRegistry, Ownable {
         degenToken.safeTransfer(market.creator, creatorFee);
         degenToken.safeTransfer(msg.sender, slashFee);
         degenToken.safeTransfer(degenUtilityDao, daoFee);
+
+        emit MarketSlashed({
+            marketId: marketId_,
+            totalDegen: totalDegen,
+            creatorFee: creatorFee,
+            slashFee: slashFee,
+            daoFee: daoFee
+        });
     }
 }

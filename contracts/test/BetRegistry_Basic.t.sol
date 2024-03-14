@@ -7,8 +7,6 @@ import {IBetRegistry, BetRegistry} from "src/BetRegistry.sol";
 import "test/setup/Constants.t.sol";
 
 contract BetRegistry_Basic_Test is Test, WithTestHelpers {
-    event BetCashedOut(uint256 indexed marketId, address indexed user, uint256 degen, uint256 marketShares);
-
     function setUp() public {
         deploy();
     }
@@ -342,15 +340,30 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
 
         assertEq(degenToken.balanceOf(address(betRegistry)) / 1e18, 196, "betRegistry DEGEN before, two bets minus fee");
         uint256 daoBalanceBefore = degenToken.balanceOf(DEGEN_UTILITY_DAO);
+        uint256 creatorBalanceBefore = degenToken.balanceOf(address(this));
+        uint256 steakedDegenBalanceBefore = degenToken.balanceOf(address(steakedDegen));
+        uint256 slashBalanceBefore = degenToken.balanceOf(BOB);
+
+        uint256 totalDegen = 192_156_390_335_922_562_843;
+        uint256 creatorFee = 1_353_904_925_270_974_863;
+        uint256 slashFee = creatorFee;
+        uint256 daoFee = creatorFee;
+
+        vm.expectEmit();
+        emit MarketSlashed(0, totalDegen, creatorFee, slashFee, daoFee);
 
         vm.prank(BOB);
         betRegistry.slash(0);
 
         assertEq(degenToken.balanceOf(address(betRegistry)), 0, "betRegistry DEGEN after");
-        assertEq(degenToken.balanceOf(BOB) / 1e18, 1, "BOB DEGEN after");
-        assertEq(degenToken.balanceOf(address(this)) / 1e18, 2, "Creator DEGEN after");
-        assertGt(degenToken.balanceOf(DEGEN_UTILITY_DAO), daoBalanceBefore, "DAO should have received some DEGEN");
-        assertEq(degenToken.balanceOf(address(steakedDegen)) / 1e18, 293, "Steak DEGEN after");
+        assertEq(degenToken.balanceOf(BOB), slashBalanceBefore + slashFee, "BOB DEGEN after");
+        assertEq(degenToken.balanceOf(address(this)), creatorBalanceBefore + creatorFee, "Creator DEGEN after");
+        assertEq(
+            degenToken.balanceOf(DEGEN_UTILITY_DAO), daoBalanceBefore + daoFee, "DAO should have received some DEGEN"
+        );
+        assertEq(
+            degenToken.balanceOf(address(steakedDegen)), steakedDegenBalanceBefore + totalDegen, "Steak DEGEN after"
+        );
         assertEq(_getMarket(0).totalDegen, 0, "market totalDegen after");
         assertEq(_getMarket(0).totalHigher, 0, "market totalHigher after");
         assertEq(_getMarket(0).totalLower, 0, "market totalLower after");
