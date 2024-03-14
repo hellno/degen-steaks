@@ -41,4 +41,5 @@ interface IBetRegistry {
     function resolveMarket(uint256 marketId) external;
     function cashOut(uint256 marketId) external;
     function slash(uint256 marketId) external;
+    function setFan(address user, bool isFan) external;
 }

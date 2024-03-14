@@ -29,6 +29,8 @@ contract BetRegistry is IBetRegistry, Ownable {
     IPriceFeed priceFeed;
     address public degenUtilityDao;
 
+    mapping(address => bool) public isFan; // haha just kidding, it's a pun. onlyDepositer is a better name.
+
     constructor(IERC20 degenToken_, IERC4626 steakedDegen_, IPriceFeed priceFeed_, address degenUtilityDao_)
         Ownable(msg.sender)
     {
@@ -36,6 +38,16 @@ contract BetRegistry is IBetRegistry, Ownable {
         steakedDegen = steakedDegen_;
         priceFeed = priceFeed_;
         degenUtilityDao = degenUtilityDao_;
+        isFan[msg.sender] = true;
+    }
+
+    modifier onlyFans() {
+        require(isFan[_msgSender()], "BetRegistry::onlyFans: caller is not a fan.");
+        _;
+    }
+
+    function setFan(address fan_, bool isFan_) public onlyOwner {
+        isFan[fan_] = isFan_;
     }
 
     function getMarket(uint256 marketId_) public view returns (Market memory) {
@@ -49,7 +61,7 @@ contract BetRegistry is IBetRegistry, Ownable {
         return marketToUserToBet[marketId_][user_];
     }
 
-    function createMarket(uint40 endTime_, uint256 targetPrice_) public {
+    function createMarket(uint40 endTime_, uint256 targetPrice_) public onlyFans {
         markets.push(
             Market({
                 creator: msg.sender,
