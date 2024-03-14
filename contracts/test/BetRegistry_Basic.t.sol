@@ -157,4 +157,12 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         );
         assertEq(steakedDegen.balanceOf(address(betRegistry)), 0, "betRegistry SteakedDegen DEGEN after");
     }
+
+    function test_cashout_fail_marketNotResolved() public {
+        _createMarket(1 days, 1000);
+        _placeBet(0, BET, IBetRegistry.BetDirection.HIGHER);
+        _placeBet(0, BET, IBetRegistry.BetDirection.LOWER);
+        vm.expectRevert("BetRegistry::cashOut: market not resolved.");
+        _cashOut(0);
+    }
 }

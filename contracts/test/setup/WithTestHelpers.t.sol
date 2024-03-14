@@ -71,6 +71,10 @@ contract WithTestHelpers is Test {
         return betRegistry.getBet(marketId, user);
     }
 
+    function _cashOut(uint256 marketId) public {
+        betRegistry.cashOut(marketId);
+    }
+
     function _deposit(address account, uint256 amount) public {
         steakedDegen.setFan(account, true);
         _dealAndApprove(account, address(steakedDegen), amount);

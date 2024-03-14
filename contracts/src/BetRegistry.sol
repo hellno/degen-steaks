@@ -107,4 +107,9 @@ contract BetRegistry is IBetRegistry {
         // unsteake degen
         steakedDegen.redeem(market.totalSteakedDegen, address(this), address(this));
     }
+
+    function cashOut(uint256 marketId_) public {
+        Market storage market = markets[marketId_];
+        require(market.endPrice != 0, "BetRegistry::cashOut: market not resolved.");
+    }
 }
