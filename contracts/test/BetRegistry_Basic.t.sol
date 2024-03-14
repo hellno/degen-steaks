@@ -7,6 +7,8 @@ import {IBetRegistry, BetRegistry} from "src/BetRegistry.sol";
 import "test/setup/Constants.t.sol";
 
 contract BetRegistry_Basic_Test is Test, WithTestHelpers {
+    event BetCashedOut(uint256 indexed marketId, address indexed user, uint256 degen, uint256 marketShares);
+
     function setUp() public {
         deploy();
     }
@@ -267,6 +269,9 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         // before cashOut, all degen should be unsteaked and market should have no steaks but all degen
         assertEq(degenToken.balanceOf(address(betRegistry)) / 1e18, 196, "betRegistry DEGEN before, two bets minus fee");
 
+        vm.expectEmit();
+
+        emit BetCashedOut(0, ALICE, 196218105111735487432, 96270817454335653081);
         _cashOut(0);
 
         // after cashOut, all degen should be steaked and market should have all steaks and no degen
