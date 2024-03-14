@@ -333,4 +333,17 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         assertEq(_getMarket(0).totalHigher, 0, "market totalHigher after");
         assertEq(_getMarket(0).totalLower, 0, "market totalLower after");
     }
+
+    function test_slash_onlyOnce() public {
+        _createMarket(1 days, 1000);
+        _placeBet(0, BET, IBetRegistry.BetDirection.HIGHER);
+        _placeBet(0, BET, IBetRegistry.BetDirection.LOWER);
+        vm.warp(1 days + 60);
+        betRegistry.resolveMarket(0);
+        vm.warp(1 days + 60 + 4 weeks);
+        betRegistry.slash(0);
+
+        vm.expectRevert("BetRegistry::slash: Nothing to slash.");
+        betRegistry.slash(0);
+    }
 }
