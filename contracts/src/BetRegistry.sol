@@ -125,6 +125,8 @@ contract BetRegistry is IBetRegistry {
             ? marketToUserToBet[marketId_][msg.sender].amountHigher
             : marketToUserToBet[marketId_][msg.sender].amountLower;
 
+        require(userMarketShares > 0, "BetRegistry::cashOut: Nothing to cash out.");
+
         uint256 userDegenPayout = market.totalDegen.mulDiv(userMarketShares, totalMarketShares);
 
         marketToUserToBet[marketId_][msg.sender].amountHigher = 0;
