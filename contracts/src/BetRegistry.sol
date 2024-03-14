@@ -7,8 +7,9 @@ import "openzeppelin/token/ERC20/IERC20.sol";
 import "openzeppelin/token/ERC20/utils/SafeERC20.sol";
 import "openzeppelin/interfaces/IERC4626.sol";
 import "openzeppelin/utils/math/Math.sol";
+import "openzeppelin/access/Ownable.sol";
 
-contract BetRegistry is IBetRegistry {
+contract BetRegistry is IBetRegistry, Ownable {
     using SafeERC20 for IERC20;
     using Math for uint256;
 
@@ -28,7 +29,9 @@ contract BetRegistry is IBetRegistry {
     IPriceFeed priceFeed;
     address public degenUtilityDao;
 
-    constructor(IERC20 degenToken_, IERC4626 steakedDegen_, IPriceFeed priceFeed_, address degenUtilityDao_) {
+    constructor(IERC20 degenToken_, IERC4626 steakedDegen_, IPriceFeed priceFeed_, address degenUtilityDao_)
+        Ownable(msg.sender)
+    {
         degenToken = IERC20(degenToken_);
         steakedDegen = steakedDegen_;
         priceFeed = priceFeed_;
