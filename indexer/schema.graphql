@@ -5,13 +5,13 @@ type User {
 type Market {
   id: ID!
   creator: User!
-  startTime: BigInt!
+  startTime: Int!
   targetPrice: BigInt!
-  endTime: BigInt
-  endPrice: BigInt
+  endTime: BigInt!
   totalHigher: BigInt!
   totalLower: BigInt!
   totalSteakedDegen: BigInt!
+  endPrice: BigInt
   totalDegen: BigInt
 }
 
