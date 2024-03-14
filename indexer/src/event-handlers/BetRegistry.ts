@@ -9,7 +9,7 @@ import {
   BetRegistryContract_MarketResolved_loader,
   BetRegistryContract_MarketSlashed_handler,
   BetRegistryContract_MarketSlashed_loader,
-} from "../src/Handlers.gen";
+} from "../../generated/src/Handlers.gen";
 
 BetRegistryContract_MarketCreated_loader(({ event, context }) => {
   context.Market.load(event.params.id.toString(), {});

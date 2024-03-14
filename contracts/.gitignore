@@ -17,4 +17,3 @@ lcov.info
 
 # Testrun files
 deployments/testrun_*
-deployments/local_*

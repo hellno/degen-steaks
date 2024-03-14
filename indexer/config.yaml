@@ -7,7 +7,7 @@ networks:
       url: "http://127.0.0.1:8545"
     contracts:
       - name: BetRegistry
-        address: "0x78B4784daD53C0640134e5DC7e4248c9a0c440CB"
+        address: "0xe5C09FAa2A2Aaa0e61c30B9f734ED0963147298e"
         abi_file_path: ./abi/BetRegistry.json
         handler: ./src/event-handlers/BetRegistry.ts
         events:
@@ -36,7 +36,7 @@ networks:
               - name: User
               - name: Dao
       - name: SteakedDegen
-        address: "0x11CcD77B6f4Fd43ab51Ee97766f0481BCa51f711"
+        address: "0x0f3a3907f58175eF673cB193645f287F5D964198"
         abi_file_path: ./abi/SteakedDegen.json
         handler: ./src/event-handlers/SteakedDegen.ts
         events:

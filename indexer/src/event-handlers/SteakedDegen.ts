@@ -1,7 +1,7 @@
 import {
   SteakedDegenContract_DaoFeePaid_handler,
   SteakedDegenContract_DaoFeePaid_loader,
-} from "../src/Handlers.gen";
+} from "../../generated/src/Handlers.gen";
 
 SteakedDegenContract_DaoFeePaid_loader(({ event, context }) => {
   context.Dao.load("1");
