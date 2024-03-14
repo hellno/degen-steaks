@@ -119,6 +119,7 @@ contract BetRegistry is IBetRegistry {
     function cashOut(uint256 marketId_) public {
         Market storage market = markets[marketId_];
         require(market.endPrice != 0, "BetRegistry::cashOut: market not resolved.");
+        require(market.totalDegen > 0, "BetRegistry::cashOut: market has no degen.");
 
         uint256 totalMarketShares;
         uint256 userMarketShares;

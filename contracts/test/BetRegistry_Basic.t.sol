@@ -206,7 +206,7 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         betRegistry.resolveMarket(0);
         _cashOut(0);
 
-        vm.expectRevert("BetRegistry::cashOut: Nothing to cash out.");
+        vm.expectRevert("BetRegistry::cashOut: market has no degen.");
 
         _cashOut(0);
     }
@@ -215,7 +215,7 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         _createMarket(1 days, 1000);
         vm.warp(1 days + 60);
         betRegistry.resolveMarket(0);
-        vm.expectRevert("BetRegistry::cashOut: Nothing to cash out.");
+        vm.expectRevert("BetRegistry::cashOut: market has no degen.");
         _cashOut(0);
     }
 
@@ -225,6 +225,18 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         vm.warp(1 days + 60);
         betRegistry.resolveMarket(0);
         vm.expectRevert("BetRegistry::cashOut: Nothing to cash out.");
+        _cashOut(0);
+    }
+
+    function test_cashOut_HIGHER_fail_afterSlash() public {
+        _createMarket(1 days, DEGEN_PRICE_1 - 1);
+        _placeBet(0, BET, IBetRegistry.BetDirection.HIGHER);
+        _placeBet(0, BET, IBetRegistry.BetDirection.LOWER);
+        vm.warp(1 days + 60);
+        betRegistry.resolveMarket(0);
+        vm.warp(1 days + 60 + 4 weeks);
+        betRegistry.slash(0);
+        vm.expectRevert("BetRegistry::cashOut: market has no degen.");
         _cashOut(0);
     }
 
@@ -253,7 +265,7 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         betRegistry.resolveMarket(0);
         _cashOut(0);
 
-        vm.expectRevert("BetRegistry::cashOut: Nothing to cash out.");
+        vm.expectRevert("BetRegistry::cashOut: market has no degen.");
 
         _cashOut(0);
     }
@@ -262,7 +274,19 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         _createMarket(1 days, DEGEN_PRICE_1 + 1);
         vm.warp(1 days + 60);
         betRegistry.resolveMarket(0);
-        vm.expectRevert("BetRegistry::cashOut: Nothing to cash out.");
+        vm.expectRevert("BetRegistry::cashOut: market has no degen.");
+        _cashOut(0);
+    }
+
+    function test_cashOut_LOWER_fail_afterSlash() public {
+        _createMarket(1 days, DEGEN_PRICE_1 + 1);
+        _placeBet(0, BET, IBetRegistry.BetDirection.HIGHER);
+        _placeBet(0, BET, IBetRegistry.BetDirection.LOWER);
+        vm.warp(1 days + 60);
+        betRegistry.resolveMarket(0);
+        vm.warp(1 days + 60 + 4 weeks);
+        betRegistry.slash(0);
+        vm.expectRevert("BetRegistry::cashOut: market has no degen.");
         _cashOut(0);
     }
 
