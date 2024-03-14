@@ -218,4 +218,13 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         vm.expectRevert("BetRegistry::cashOut: Nothing to cash out.");
         _cashOut(0);
     }
+
+    function test_cashOut_fail_wrongBet() public {
+        _createMarket(1 days, 1000);
+        _placeBet(0, BET, IBetRegistry.BetDirection.LOWER);
+        vm.warp(1 days + 60);
+        betRegistry.resolveMarket(0);
+        vm.expectRevert("BetRegistry::cashOut: Nothing to cash out.");
+        _cashOut(0);
+    }
 }
