@@ -25,8 +25,8 @@ contract BetRegistry is IBetRegistry, Ownable {
     mapping(uint256 marketId => mapping(address user => Bet)) public marketToUserToBet;
     IERC20 public degenToken;
 
-    IERC4626 steakedDegen;
-    IPriceFeed priceFeed;
+    IERC4626 public steakedDegen;
+    IPriceFeed public priceFeed;
     address public degenUtilityDao;
 
     mapping(address => bool) public isFan; // haha just kidding, it's a pun. onlyDepositer is a better name.

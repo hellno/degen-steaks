@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
+import "openzeppelin/token/ERC20/IERC20.sol";
 import "openzeppelin/interfaces/IERC4626.sol";
 
 interface ISteakedDegen is IERC4626 {

@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
+import "openzeppelin/token/ERC20/IERC20.sol";
+import "openzeppelin/interfaces/IERC4626.sol";
+import "src/interfaces/IPriceFeed.sol";
+
 interface IBetRegistry {
     enum BetDirection {
         HIGHER,
@@ -48,4 +52,8 @@ interface IBetRegistry {
     function cashOut(uint256 marketId) external;
     function slash(uint256 marketId) external;
     function setFan(address user, bool isFan) external;
+    function isFan(address user) external view returns (bool);
+    function degenToken() external view returns (IERC20);
+    function steakedDegen() external view returns (IERC4626);
+    function priceFeed() external view returns (IPriceFeed);
 }
