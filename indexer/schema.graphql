@@ -1,19 +1,36 @@
-type Account {
-  # id is the address of the account
+type User {
   id: ID!
-  # approvals are a list of approvals that this account has given
-  approvals: [Approval!]! @derivedFrom(field: "owner")
-  # account balance of tokens
-  balance: BigInt!
 }
 
-type Approval {
-  # id is the owner address and spender address [owner-spender]
+type Market {
   id: ID!
-  # amount is the amount of tokens approved
-  amount: BigInt!
-  # owner is the account that approved the tokens
-  owner: Account!
-  # spender is the account that is approved to spend the tokens
-  spender: Account!
+  creator: User!
+  startTime: BigInt!
+  targetPrice: BigInt!
+  endTime: BigInt
+  endPrice: BigInt
+  totalHigher: BigInt!
+  totalLower: BigInt!
+  totalSteakedDegen: BigInt!
+  totalDegen: BigInt
+}
+
+type Bet {
+  id: ID!
+  user: User!
+  market: Market!
+  amountHigher: BigInt!
+  amountLower: BigInt!
+}
+
+type PlacedBet {
+  id: ID!
+  user: User!
+  bet: Bet!
+  market: Market!
+  degen: BigInt!
+  steaks: BigInt!
+  feeSteaks: BigInt!
+  betShares: BigInt!
+  isHigher: Boolean!
 }
