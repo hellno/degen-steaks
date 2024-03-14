@@ -1,8 +1,14 @@
+type Dao {
+  id: ID!
+  totalDegenFee: BigInt!
+}
+
 type User {
   id: ID!
   creatorFeeReceived: BigInt!
   totalDegenWon: BigInt!
   totalDegenBet: BigInt!
+  totalSlashFee: BigInt!
 }
 
 type Market {
@@ -21,6 +27,7 @@ type Market {
   endPrice: BigInt
   totalDegen: BigInt
   creatorFee: BigInt
+  slashTransaction: String
 }
 
 type Bet {

@@ -7,6 +7,8 @@ import {
   BetRegistryContract_MarketCreated_loader,
   BetRegistryContract_MarketResolved_handler,
   BetRegistryContract_MarketResolved_loader,
+  BetRegistryContract_MarketSlashed_handler,
+  BetRegistryContract_MarketSlashed_loader,
 } from "../src/Handlers.gen";
 
 BetRegistryContract_MarketCreated_loader(({ event, context }) => {
@@ -22,6 +24,7 @@ BetRegistryContract_MarketCreated_handler(({ event, context }) => {
       creatorFeeReceived: 0n,
       totalDegenWon: 0n,
       totalDegenBet: 0n,
+      totalSlashFee: 0n,
     };
     context.User.set(user);
   }
@@ -42,6 +45,7 @@ BetRegistryContract_MarketCreated_handler(({ event, context }) => {
     endPrice: undefined,
     creatorFee: undefined,
     highWon: undefined,
+    slashTransaction: undefined,
   };
   context.Market.set(market);
 });
@@ -63,6 +67,7 @@ BetRegistryContract_BetPlaced_handler(({ event, context }) => {
       creatorFeeReceived: 0n,
       totalDegenWon: 0n,
       totalDegenBet: 0n,
+      totalSlashFee: 0n,
     };
   }
   user = {
@@ -262,4 +267,73 @@ BetRegistryContract_BetCashedOut_handler(({ event, context }) => {
     ...user,
     totalDegenWon: user.totalDegenWon + event.params.degen,
   };
+});
+
+BetRegistryContract_MarketSlashed_loader(({ event, context }) => {
+  context.Market.load(event.params.marketId.toString(), {
+    loaders: { loadCreator: true },
+  });
+  context.User.load(event.params.slasher);
+  context.Dao.load("1");
+});
+
+BetRegistryContract_MarketSlashed_handler(({ event, context }) => {
+  let market = context.Market.get(event.params.marketId.toString());
+  if (market === undefined) {
+    context.log.error(
+      "BetRegistry::MarketSlashed: Market not found: " +
+        event.params.marketId.toString()
+    );
+    return;
+  }
+
+  market = {
+    ...market,
+    totalDegen: 0n,
+    slashTransaction: event.transactionHash,
+  };
+  context.Market.set(market);
+
+  let user = context.Market.getCreator(market);
+  if (user === undefined) {
+    context.log.error(
+      "BetRegistry::MarketSlashed: User not found: " + market.creator_id
+    );
+    return;
+  }
+
+  user = {
+    ...user,
+    creatorFeeReceived: user.creatorFeeReceived + event.params.creatorFee,
+  };
+  context.User.set(user);
+
+  let slasher = context.User.get(event.params.slasher);
+  if (slasher === undefined) {
+    slasher = {
+      id: event.params.slasher,
+      creatorFeeReceived: 0n,
+      totalDegenWon: 0n,
+      totalDegenBet: 0n,
+      totalSlashFee: 0n,
+    };
+  }
+  slasher = {
+    ...slasher,
+    totalSlashFee: slasher.totalSlashFee + event.params.slashFee,
+  };
+  context.User.set(slasher);
+
+  let dao = context.Dao.get("1");
+  if (dao === undefined) {
+    dao = {
+      id: "1",
+      totalDegenFee: 0n,
+    };
+  }
+  dao = {
+    ...dao,
+    totalDegenFee: dao.totalDegenFee + event.params.daoFee,
+  };
+  context.Dao.set(dao);
 });
