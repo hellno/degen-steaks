@@ -33,6 +33,7 @@ interface IBetRegistry {
         uint256 betShares,
         BetDirection direction
     );
+    event MarketResolved(uint256 indexed marketId, uint256 endPrice, uint256 totalDegen, uint256 creatorFee);
 
     function createMarket(uint40 endTime, uint256 targetPrice) external;
     function getMarket(uint256 marketId) external view returns (Market memory);

@@ -137,6 +137,13 @@ contract BetRegistry is IBetRegistry, Ownable {
         uint256 creatorFee = degen.mulDiv(CREATOR_FEE, FEE_DIVISOR);
         market.totalDegen = degen - creatorFee;
         degenToken.safeTransfer(market.creator, creatorFee);
+
+        emit MarketResolved({
+            marketId: marketId_,
+            endPrice: price,
+            totalDegen: degen - creatorFee,
+            creatorFee: creatorFee
+        });
     }
 
     function cashOut(uint256 marketId_) public {
