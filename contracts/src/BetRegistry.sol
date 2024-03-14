@@ -12,7 +12,8 @@ contract BetRegistry is IBetRegistry {
     using SafeERC20 for IERC20;
     using Math for uint256;
 
-    uint256 constant MARKET_FEE = 69 * 1e2; // 0.69%
+    uint256 constant MARKET_FEE = 69 * 1e2; // 0.69%: 69 BPS
+    uint256 constant CREATOR_FEE = 69 * 1e2; // 0.69%; 69 BPS
     uint256 constant FEE_DIVISOR = 1e6; // 1% = 1e4: 1 BPS = 1e2
 
     uint256 constant MIN_BID = 1e18; // 1 DEGEN
@@ -53,7 +54,8 @@ contract BetRegistry is IBetRegistry {
                 endPrice: 0,
                 totalHigher: 0,
                 totalLower: 0,
-                totalSteakedDegen: 0
+                totalSteakedDegen: 0,
+                totalDegen: 0
             })
         );
 
@@ -105,7 +107,12 @@ contract BetRegistry is IBetRegistry {
         market.endPrice = price;
 
         // unsteake degen
-        steakedDegen.redeem(market.totalSteakedDegen, address(this), address(this));
+        uint256 degen = steakedDegen.redeem(market.totalSteakedDegen, address(this), address(this));
+
+        // deduct owner fee
+        uint256 creatorFee = degen.mulDiv(CREATOR_FEE, FEE_DIVISOR);
+        market.totalDegen = degen - creatorFee;
+        degenToken.safeTransfer(market.creator, creatorFee);
     }
 
     function cashOut(uint256 marketId_) public {

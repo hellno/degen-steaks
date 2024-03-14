@@ -15,6 +15,7 @@ interface IBetRegistry {
         uint256 totalHigher; // virtual shares
         uint256 totalLower; // virtual shares
         uint256 totalSteakedDegen;
+        uint256 totalDegen;
     }
 
     struct Bet {

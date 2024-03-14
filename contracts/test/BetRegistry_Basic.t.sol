@@ -21,6 +21,7 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         assertEq(market.totalHigher, 0);
         assertEq(market.totalLower, 0);
         assertEq(market.totalSteakedDegen, 0);
+        assertEq(market.totalDegen, 0);
     }
 
     function test_getMarket_fail_outOfRange() public {
@@ -118,7 +119,7 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         betRegistry.resolveMarket(0);
     }
 
-    function test_resolveMarket_setsEndPrice() public {
+    function test_resolveMarket_setsEndPriceAndTotalDegen() public {
         _createMarket(1 days, 1000);
         _placeBet(0, BET, IBetRegistry.BetDirection.HIGHER);
         _placeBet(0, BET, IBetRegistry.BetDirection.LOWER);
@@ -127,6 +128,7 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
 
         IBetRegistry.Market memory market = _getMarket(0);
         assertEq(market.endPrice, DEGEN_PRICE_1, "endPrice");
+        assertEq(market.totalDegen / 1e18, 196, "totalDegen");
     }
 
     function test_resolveMarket_unsteaksDegen() public {
@@ -149,13 +151,26 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         betRegistry.resolveMarket(0);
 
         // after resolve, all degen should be unsteaked and market should have no steaks but all degen
-        assertEq(degenToken.balanceOf(address(betRegistry)) / 1e18, 197, "betRegistry DEGEN after, two bets minus fee");
+        assertEq(degenToken.balanceOf(address(betRegistry)) / 1e18, 196, "betRegistry DEGEN after, two bets minus fee");
         assertEq(
             degenToken.balanceOf(address(steakedDegen)) / 1e18,
             101,
             "total SteakedDegen DEGEN after, initial stake plus fee"
         );
         assertEq(steakedDegen.balanceOf(address(betRegistry)), 0, "betRegistry SteakedDegen DEGEN after");
+    }
+
+    function test_resolveMarket_sendsFeeToCreator() public {
+        _createMarket(1 days, 1000);
+        _placeBet(0, BET, IBetRegistry.BetDirection.HIGHER);
+        _placeBet(0, BET, IBetRegistry.BetDirection.LOWER);
+        vm.warp(1 days + 60);
+
+        assertEq(degenToken.balanceOf(address(this)) / 1e18, 0, "owner degen before should be 0");
+
+        betRegistry.resolveMarket(0);
+
+        assertEq(degenToken.balanceOf(address(this)) / 1e16, 136, "owner degen after should be ~1.36");
     }
 
     function test_cashout_fail_marketNotResolved() public {
