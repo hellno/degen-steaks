@@ -4,6 +4,7 @@ pragma solidity ^0.8.13;
 import {Test, console2} from "forge-std/Test.sol";
 import {WithTestHelpers} from "test/setup/WithTestHelpers.t.sol";
 import {IBetRegistry, BetRegistry} from "src/BetRegistry.sol";
+import {MockPriceFeed} from "src/auxiliary/MockPriceFeed.sol";
 import "test/setup/Constants.t.sol";
 
 contract PriceFeed_Basic_Test is Test, WithTestHelpers {
@@ -23,5 +24,13 @@ contract PriceFeed_Basic_Test is Test, WithTestHelpers {
         ethDegenPool.togglePrice();
         ethUsdcPool.togglePrice();
         assertEq(priceFeed.getPrice(), DEGEN_PRICE_2, "getPrice should be 1_000_000_000");
+    }
+
+    function test_mockPriceFeed() public {
+        MockPriceFeed mockPriceFeed = new MockPriceFeed();
+        assertEq(mockPriceFeed.getPrice(), 0, "getPrice should be 0");
+
+        mockPriceFeed.setPrice(1_000_000_000);
+        assertEq(mockPriceFeed.getPrice(), 1_000_000_000, "getPrice should be 1_000_000_000");
     }
 }
