@@ -21,3 +21,7 @@ networks:
               - name: Bet
               - name: User
               - name: Market
+          - event: MarketResolved
+            requiredEntities:
+              - name: Market
+              - name: User

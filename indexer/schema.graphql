@@ -1,5 +1,6 @@
 type User {
   id: ID!
+  creatorFeeReceived: BigInt!
 }
 
 type Market {
@@ -13,8 +14,10 @@ type Market {
   totalSteakedDegen: BigInt!
   betCount: Int!
   degenCollected: BigInt!
+  isResolved: Boolean!
   endPrice: BigInt
   totalDegen: BigInt
+  creatorFee: BigInt
 }
 
 type Bet {

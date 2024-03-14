@@ -3,6 +3,8 @@ import {
   BetRegistryContract_BetPlaced_loader,
   BetRegistryContract_MarketCreated_handler,
   BetRegistryContract_MarketCreated_loader,
+  BetRegistryContract_MarketResolved_handler,
+  BetRegistryContract_MarketResolved_loader,
 } from "../src/Handlers.gen";
 
 BetRegistryContract_MarketCreated_loader(({ event, context }) => {
@@ -15,6 +17,7 @@ BetRegistryContract_MarketCreated_handler(({ event, context }) => {
   if (user === undefined) {
     user = {
       id: event.params.creator,
+      creatorFeeReceived: 0n,
     };
     context.User.set(user);
   }
@@ -30,8 +33,10 @@ BetRegistryContract_MarketCreated_handler(({ event, context }) => {
     totalSteakedDegen: 0n,
     degenCollected: 0n,
     betCount: 0,
+    isResolved: false,
     totalDegen: undefined,
     endPrice: undefined,
+    creatorFee: undefined,
   };
   context.Market.set(market);
 });
@@ -50,6 +55,7 @@ BetRegistryContract_BetPlaced_handler(({ event, context }) => {
   if (user === undefined) {
     user = {
       id: event.params.user,
+      creatorFeeReceived: 0n,
     };
     context.User.set(user);
   }
@@ -129,4 +135,44 @@ BetRegistryContract_BetPlaced_handler(({ event, context }) => {
   };
 
   context.PlacedBet.set(PlacedBet);
+});
+
+BetRegistryContract_MarketResolved_loader(({ event, context }) => {
+  context.Market.load(event.params.marketId.toString(), {
+    loaders: { loadCreator: true },
+  });
+});
+
+BetRegistryContract_MarketResolved_handler(({ event, context }) => {
+  let market = context.Market.get(event.params.marketId.toString());
+  if (market === undefined) {
+    context.log.error(
+      "BetRegistry::MarketResolved: Market not found: " +
+        event.params.marketId.toString()
+    );
+    return;
+  }
+
+  let user = context.Market.getCreator(market);
+  if (user === undefined) {
+    context.log.error(
+      "BetRegistry::MarketResolved: User not found: " + market.creator_id
+    );
+    return;
+  }
+
+  user = {
+    ...user,
+    creatorFeeReceived: user.creatorFeeReceived + event.params.creatorFee,
+  };
+  context.User.set(user);
+
+  market = {
+    ...market,
+    endPrice: event.params.endPrice,
+    totalDegen: event.params.totalDegen,
+    creatorFee: event.params.creatorFee,
+    isResolved: true,
+  };
+  context.Market.set(market);
 });
