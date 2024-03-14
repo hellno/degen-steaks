@@ -43,6 +43,7 @@ interface IBetRegistry {
         uint256 indexed marketId, uint256 totalDegen, uint256 creatorFee, uint256 slashFee, uint256 daoFee
     );
     event FanSet(address indexed user, bool isFan);
+    event GracePeriodSet(uint256 gracePeriod);
 
     function createMarket(uint40 endTime, uint256 targetPrice) external;
     function getMarket(uint256 marketId) external view returns (Market memory);
@@ -56,4 +57,6 @@ interface IBetRegistry {
     function degenToken() external view returns (IERC20);
     function steakedDegen() external view returns (IERC4626);
     function priceFeed() external view returns (IPriceFeed);
+    function setGracePeriod(uint256 gracePeriod) external;
+    function gracePeriod() external view returns (uint256);
 }
