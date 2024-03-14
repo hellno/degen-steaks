@@ -175,6 +175,13 @@ contract BetRegistry is IBetRegistry, Ownable {
         }
 
         degenToken.safeTransfer(msg.sender, userDegenPayout);
+
+        emit BetCashedOut({
+            marketId: marketId_,
+            user: msg.sender,
+            degen: userDegenPayout,
+            marketShares: userMarketShares
+        });
     }
 
     function slash(uint256 marketId_) public {
