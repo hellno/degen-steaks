@@ -37,7 +37,7 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         assertEq(market.totalHigher, SDEGENS_SECOND_DEPOSIT, "totalHigher");
         assertEq(market.totalLower, 0, "totalLower");
 
-        IBetRegistry.Bet memory bet = _getBet(0, address(this));
+        IBetRegistry.Bet memory bet = _getBet(0, ALICE);
         assertEq(bet.amountHigher, SDEGENS_SECOND_DEPOSIT, "amountHigher");
         assertEq(bet.amountLower, 0, "amountLower");
     }
@@ -51,7 +51,7 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         assertEq(market.totalLower, SDEGENS_SECOND_DEPOSIT);
         assertEq(market.totalSteakedDegen, SDEGENS_SECOND_DEPOSIT, "totalSteakedDegen");
 
-        IBetRegistry.Bet memory bet = _getBet(0, address(this));
+        IBetRegistry.Bet memory bet = _getBet(0, ALICE);
         assertEq(bet.amountHigher, 0);
         assertEq(bet.amountLower, SDEGENS_SECOND_DEPOSIT);
     }
@@ -82,7 +82,7 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
             "totalSteakedDegen"
         );
 
-        IBetRegistry.Bet memory bet = _getBet(0, address(this));
+        IBetRegistry.Bet memory bet = _getBet(0, ALICE);
         assertEq(bet.amountHigher / 1e18, 193, "amountHigher");
         assertEq(bet.amountLower / 1e18, 191, "amountLower");
     }

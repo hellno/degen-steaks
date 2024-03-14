@@ -63,7 +63,8 @@ contract WithTestHelpers is Test {
     }
 
     function _placeBet(uint256 marketId, uint256 amount, IBetRegistry.BetDirection direction) public {
-        _dealAndApprove(address(this), amount);
+        _dealAndApprove(ALICE, amount);
+        vm.prank(ALICE);
         betRegistry.placeBet(marketId, amount, direction);
     }
 
@@ -72,6 +73,7 @@ contract WithTestHelpers is Test {
     }
 
     function _cashOut(uint256 marketId) public {
+        vm.prank(ALICE);
         betRegistry.cashOut(marketId);
     }
 
