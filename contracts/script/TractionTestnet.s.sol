@@ -10,8 +10,6 @@ contract TractionTestnet is Script, WithFileHelpers {
     function traction() public {
         IBetRegistry betRegistry = IBetRegistry(_getAddress("betRegistry"));
         DegenToken degenToken = DegenToken(_getAddress("degenToken"));
-        ISteakedDegen steakedDegen = ISteakedDegen(_getAddress("steakedDegen"));
-        MockPriceFeed priceFeed = MockPriceFeed(_getAddress("priceFeed"));
 
         vm.startBroadcast(vm.envUint("DEPLOYER_PK"));
         betRegistry.createMarket(uint40(block.timestamp + 120), 3_468_565_538);
@@ -30,4 +28,6 @@ contract TractionTestnet is Script, WithFileHelpers {
         betRegistry.placeBet(0, amount, IBetRegistry.BetDirection.LOWER);
         vm.stopBroadcast();
     }
+
+    function test_script() public {}
 }

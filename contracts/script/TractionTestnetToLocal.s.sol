@@ -14,4 +14,6 @@ contract TractionTestnetToLocal is Script, WithFileHelpers {
         tractionTestnet.setNetwork(_network);
         tractionTestnet.traction();
     }
+
+    function test_script() public {}
 }

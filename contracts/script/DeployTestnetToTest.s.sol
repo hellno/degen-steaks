@@ -15,4 +15,6 @@ contract DeployTestnetToTest is Script, WithFileHelpers {
         deployTestnet.setNetwork(_network);
         deployTestnet.deploy();
     }
+
+    function test_script() public {}
 }

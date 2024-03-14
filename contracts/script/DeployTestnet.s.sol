@@ -15,8 +15,6 @@ contract DeployTestnet is Script, WithFileHelpers {
     MockPriceFeed priceFeed;
 
     function deploy() public {
-        require(keccak256(abi.encodePacked(_network)) != keccak256(abi.encodePacked("")), "network not set");
-
         uint256 deployerPrivateKey = vm.envUint("DEPLOYER_PK");
         vm.startBroadcast(deployerPrivateKey);
 
