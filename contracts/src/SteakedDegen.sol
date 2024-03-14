@@ -21,8 +21,6 @@ contract SteakedDegen is ISteakedDegen, ERC4626, Ownable {
 
     mapping(address => bool) public isFan; // haha just kidding, it's a pun. onlyDepositer is a better name.
 
-    event SteakFeePaid(address indexed caller, uint256 amount);
-
     constructor(string memory name_, string memory symbol_, IERC20 degenToken_, address daoFeeReceiver_)
         ERC20(name_, symbol_)
         ERC4626(degenToken_)
@@ -79,6 +77,8 @@ contract SteakedDegen is ISteakedDegen, ERC4626, Ownable {
 
         // slither-disable-next-line reentrancy-no-eth
         SafeERC20.safeTransferFrom(IERC20(asset()), _msgSender(), daoFeeReceiver, daoFeeAmount);
+
+        emit DaoFeePaid(_msgSender(), daoFeeAmount);
 
         // slither-disable-next-line reentrancy-no-eth
         SafeERC20.safeTransferFrom(IERC20(asset()), _msgSender(), address(this), steakFeeAmount);

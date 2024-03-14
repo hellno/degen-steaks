@@ -38,6 +38,7 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
 
         vm.expectEmit();
         emit SteakFeePaid(ALICE, 0.0069 * 1e18 * 100);
+        emit DaoFeePaid(ALICE, 0.0069 * 1e18 * 100);
 
         vm.prank(ALICE);
         steakedDegen.deposit(100 * 1e18, ALICE);

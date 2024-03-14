@@ -24,6 +24,7 @@ contract WithTestHelpers is Test {
         address slasher
     );
     event SteakFeePaid(address indexed caller, uint256 amount);
+    event DaoFeePaid(address indexed caller, uint256 amount);
     event FanSet(address indexed user, bool isFan);
     event InitialDeposit(address indexed sender, address indexed receiver, uint256 assets, uint256 shares);
     event GracePeriodSet(uint256 gracePeriod);
