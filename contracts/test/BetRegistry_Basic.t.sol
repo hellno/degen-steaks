@@ -5,6 +5,7 @@ import {Test, console2} from "forge-std/Test.sol";
 import {WithTestHelpers} from "test/setup/WithTestHelpers.t.sol";
 import {IBetRegistry, BetRegistry} from "src/BetRegistry.sol";
 import "test/setup/Constants.t.sol";
+import "openzeppelin/access/Ownable.sol";
 
 contract BetRegistry_Basic_Test is Test, WithTestHelpers {
     function setUp() public {
@@ -22,6 +23,12 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         assertEq(market.totalLower, 0);
         assertEq(market.totalSteakedDegen, 0);
         assertEq(market.totalDegen, 0);
+    }
+
+    function test_setFan_onlyOwner() public {
+        vm.prank(ALICE);
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, ALICE));
+        betRegistry.setFan(ALICE, true);
     }
 
     function test_createMarket_fail_onlyFan() public {
