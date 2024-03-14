@@ -18,6 +18,7 @@ contract BetRegistry is IBetRegistry {
 
     uint256 constant MIN_BID = 1e18; // 1 DEGEN
     uint256 constant GRACE_PERIOD = 60; // 60 seconds between end of a market and resolution.
+    uint256 constant SLASH_PERIOD = 4 weeks; // 4 weeks after grace period to slash unclaimed funds.
 
     Market[] public markets;
     mapping(uint256 marketId => mapping(address user => Bet)) public marketToUserToBet;
@@ -143,5 +144,13 @@ contract BetRegistry is IBetRegistry {
         }
 
         degenToken.safeTransfer(msg.sender, userDegenPayout);
+    }
+
+    function slash(uint256 marketId_) public {
+        Market storage market = markets[marketId_];
+        require(
+            block.timestamp >= market.endTime + GRACE_PERIOD + SLASH_PERIOD,
+            "BetRegistry::slash: Slash period not over."
+        );
     }
 }

@@ -40,4 +40,5 @@ interface IBetRegistry {
     function getBet(uint256 marketId, address user) external view returns (Bet memory);
     function resolveMarket(uint256 marketId) external;
     function cashOut(uint256 marketId) external;
+    function slash(uint256 marketId) external;
 }
