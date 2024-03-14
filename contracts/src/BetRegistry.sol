@@ -2,6 +2,7 @@
 pragma solidity ^0.8.18;
 
 import "./interfaces/IBetRegistry.sol";
+import "src/interfaces/IPriceFeed.sol";
 import "openzeppelin/token/ERC20/IERC20.sol";
 import "openzeppelin/token/ERC20/utils/SafeERC20.sol";
 import "openzeppelin/interfaces/IERC4626.sol";
@@ -22,11 +23,13 @@ contract BetRegistry is IBetRegistry {
     IERC20 public degenToken;
 
     IERC4626 steakedDegen;
+    IPriceFeed priceFeed;
     address public degenUtilityDao;
 
-    constructor(IERC20 degenToken_, IERC4626 steakedDegen_, address degenUtilityDao_) {
+    constructor(IERC20 degenToken_, IERC4626 steakedDegen_, IPriceFeed priceFeed_, address degenUtilityDao_) {
         degenToken = IERC20(degenToken_);
         steakedDegen = steakedDegen_;
+        priceFeed = priceFeed_;
         degenUtilityDao = degenUtilityDao_;
     }
 

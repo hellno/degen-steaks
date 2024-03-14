@@ -24,14 +24,14 @@ contract WithTestHelpers is Test {
     function test_WithTestHelpers() public {}
 
     function deploy() public {
-        degenToken = new DegenToken("Degen Token", "DEGEN");
-        steakedDegen = new SteakedDegen("Steaked Degen", "SDEGEN", degenToken, DEGEN_UTILITY_DAO);
-        betRegistry = new BetRegistry(degenToken, steakedDegen, DEGEN_UTILITY_DAO);
-        steakedDegen.setFan(address(betRegistry), true);
-
         ethDegenPool = new EthDegenPool();
         ethUsdcPool = new EthUsdcPool();
         priceFeed = new PriceFeed(address(ethDegenPool), address(ethUsdcPool));
+
+        degenToken = new DegenToken("Degen Token", "DEGEN");
+        steakedDegen = new SteakedDegen("Steaked Degen", "SDEGEN", degenToken, DEGEN_UTILITY_DAO);
+        betRegistry = new BetRegistry(degenToken, steakedDegen, priceFeed, DEGEN_UTILITY_DAO);
+        steakedDegen.setFan(address(betRegistry), true);
 
         _initialDeposit(INITIAL_STAKE, DEGEN_UTILITY_DAO);
     }
@@ -39,7 +39,7 @@ contract WithTestHelpers is Test {
     function deployWithoutInitialDeposit() public {
         degenToken = new DegenToken("Degen Token", "DEGEN");
         steakedDegen = new SteakedDegen("Steaked Degen", "SDEGEN", degenToken, DEGEN_UTILITY_DAO);
-        betRegistry = new BetRegistry(degenToken, steakedDegen, DEGEN_UTILITY_DAO);
+        betRegistry = new BetRegistry(degenToken, steakedDegen, priceFeed, DEGEN_UTILITY_DAO);
     }
 
     function _createMarket(uint40 endTime, uint256 targetPrice) public {
