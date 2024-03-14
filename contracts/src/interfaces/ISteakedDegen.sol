@@ -4,6 +4,8 @@ pragma solidity ^0.8.18;
 import "openzeppelin/interfaces/IERC4626.sol";
 
 interface ISteakedDegen is IERC4626 {
+    event FanSet(address indexed user, bool isFan);
+
     function setFan(address user, bool isFan) external;
     function isFan(address user) external view returns (bool);
     function steakFee() external view returns (uint256);

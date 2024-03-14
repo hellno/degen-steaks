@@ -43,6 +43,7 @@ contract SteakedDegen is ISteakedDegen, ERC4626, Ownable {
 
     function setFan(address fan_, bool isFan_) public onlyOwner {
         isFan[fan_] = isFan_;
+        emit FanSet(fan_, isFan_);
     }
 
     /**

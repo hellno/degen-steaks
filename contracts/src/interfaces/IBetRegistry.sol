@@ -38,6 +38,7 @@ interface IBetRegistry {
     event MarketSlashed(
         uint256 indexed marketId, uint256 totalDegen, uint256 creatorFee, uint256 slashFee, uint256 daoFee
     );
+    event FanSet(address indexed user, bool isFan);
 
     function createMarket(uint40 endTime, uint256 targetPrice) external;
     function getMarket(uint256 marketId) external view returns (Market memory);

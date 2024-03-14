@@ -48,6 +48,7 @@ contract BetRegistry is IBetRegistry, Ownable {
 
     function setFan(address fan_, bool isFan_) public onlyOwner {
         isFan[fan_] = isFan_;
+        emit FanSet(fan_, isFan_);
     }
 
     function getMarket(uint256 marketId_) public view returns (Market memory) {

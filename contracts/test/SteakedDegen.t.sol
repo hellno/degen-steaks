@@ -13,6 +13,8 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
     }
 
     function test_setFan_success() public {
+        vm.expectEmit();
+        emit FanSet(ALICE, true);
         steakedDegen.setFan(ALICE, true);
         assertTrue(steakedDegen.isFan(ALICE));
     }

@@ -31,6 +31,8 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
     }
 
     function test_createMarket_afterSetFan() public {
+        vm.expectEmit();
+        emit FanSet(ALICE, true);
         betRegistry.setFan(ALICE, true);
         _createMarket(1 days, 1000);
     }
