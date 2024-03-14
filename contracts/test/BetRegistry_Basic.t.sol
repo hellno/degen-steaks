@@ -61,7 +61,12 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
     function test_createMarket_fail_endTime() public {
         vm.warp(1 days);
         vm.expectRevert("BetRegistry::createMarket: endTime must be in the future.");
-        betRegistry.createMarket(0, 1 days);
+        betRegistry.createMarket(1 days, 1000);
+    }
+
+    function test_createMarket_fail_priceIsZero() public {
+        vm.expectRevert("BetRegistry::createMarket: targetPrice must be greater than zero.");
+        betRegistry.createMarket(1 days, 0);
     }
 
     function test_getMarket_fail_outOfRange() public {

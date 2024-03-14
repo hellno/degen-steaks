@@ -69,7 +69,7 @@ contract BetRegistry is IBetRegistry, Ownable {
 
     function createMarket(uint40 endTime_, uint256 targetPrice_) public onlyFans {
         require(endTime_ > block.timestamp, "BetRegistry::createMarket: endTime must be in the future.");
-
+        require(targetPrice_ > 0, "BetRegistry::createMarket: targetPrice must be greater than zero.");
         markets.push(
             Market({
                 creator: msg.sender,
