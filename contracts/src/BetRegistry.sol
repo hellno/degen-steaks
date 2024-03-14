@@ -15,6 +15,7 @@ contract BetRegistry is IBetRegistry {
     uint256 constant FEE_DIVISOR = 1e6; // 1% = 1e4: 1 BPS = 1e2
 
     uint256 constant MIN_BID = 1e18; // 1 DEGEN
+    uint256 constant GRACE_PERIOD = 60; // 60 seconds between end of a market and resolution.
 
     Market[] public markets;
     mapping(uint256 marketId => mapping(address user => Bet)) public marketToUserToBet;
@@ -95,5 +96,6 @@ contract BetRegistry is IBetRegistry {
     function resolveMarket(uint256 marketId_) public view {
         Market storage market = markets[marketId_];
         require(block.timestamp >= market.endTime, "BetRegistry::resolveMarket: market has not ended.");
+        require(block.timestamp >= market.endTime + GRACE_PERIOD, "BetRegistry::resolveMarket: grace period not over.");
     }
 }

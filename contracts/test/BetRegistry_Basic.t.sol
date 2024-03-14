@@ -107,4 +107,13 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         vm.expectRevert("BetRegistry::resolveMarket: market has not ended.");
         betRegistry.resolveMarket(0);
     }
+
+    function test_resolveMarket_fail_gracePeriod() public {
+        _createMarket(1 days, 1000);
+        _placeBet(0, BET, IBetRegistry.BetDirection.LOWER);
+        _placeBet(0, BET, IBetRegistry.BetDirection.LOWER);
+        vm.warp(1 days + 59);
+        vm.expectRevert("BetRegistry::resolveMarket: grace period not over.");
+        betRegistry.resolveMarket(0);
+    }
 }
