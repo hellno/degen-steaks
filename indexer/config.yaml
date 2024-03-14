@@ -16,3 +16,8 @@ networks:
               - name: Market
               - name: Bet
               - name: User
+          - event: BetPlaced
+            requiredEntities:
+              - name: Bet
+              - name: User
+              - name: Market

@@ -11,6 +11,8 @@ type Market {
   totalHigher: BigInt!
   totalLower: BigInt!
   totalSteakedDegen: BigInt!
+  betCount: Int!
+  degenCollected: BigInt!
   endPrice: BigInt
   totalDegen: BigInt
 }
@@ -19,8 +21,8 @@ type Bet {
   id: ID!
   user: User!
   market: Market!
-  amountHigher: BigInt!
-  amountLower: BigInt!
+  sharesHigher: BigInt!
+  sharesLower: BigInt!
 }
 
 type PlacedBet {
@@ -32,5 +34,5 @@ type PlacedBet {
   steaks: BigInt!
   feeSteaks: BigInt!
   betShares: BigInt!
-  isHigher: Boolean!
+  direction: BigInt!
 }
