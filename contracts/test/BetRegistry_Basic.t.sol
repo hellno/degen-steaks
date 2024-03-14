@@ -12,19 +12,6 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         deploy();
     }
 
-    function test_CreateMarket_basic() public {
-        _createMarket(1 days, 1000);
-        IBetRegistry.Market memory market = _getMarket(0);
-        assertEq(market.creator, address(this));
-        assertEq(market.endTime, 1 days);
-        assertEq(market.targetPrice, 1000);
-        assertEq(market.endPrice, 0);
-        assertEq(market.totalHigher, 0);
-        assertEq(market.totalLower, 0);
-        assertEq(market.totalSteakedDegen, 0);
-        assertEq(market.totalDegen, 0);
-    }
-
     function test_setFan_onlyOwner() public {
         vm.prank(ALICE);
         vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, ALICE));
@@ -51,11 +38,30 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         betRegistry.createMarket(1 days, 1000);
     }
 
+    function test_CreateMarket_basic() public {
+        _createMarket(1 days, 1000);
+        IBetRegistry.Market memory market = _getMarket(0);
+        assertEq(market.creator, address(this));
+        assertEq(market.endTime, 1 days);
+        assertEq(market.targetPrice, 1000);
+        assertEq(market.endPrice, 0);
+        assertEq(market.totalHigher, 0);
+        assertEq(market.totalLower, 0);
+        assertEq(market.totalSteakedDegen, 0);
+        assertEq(market.totalDegen, 0);
+    }
+
     function test_createMarket_afterSetFan() public {
         vm.expectEmit();
         emit FanSet(ALICE, true);
         betRegistry.setFan(ALICE, true);
         _createMarket(1 days, 1000);
+    }
+
+    function test_createMarket_fail_endTime() public {
+        vm.warp(1 days);
+        vm.expectRevert("BetRegistry::createMarket: endTime must be in the future.");
+        betRegistry.createMarket(0, 1 days);
     }
 
     function test_getMarket_fail_outOfRange() public {
