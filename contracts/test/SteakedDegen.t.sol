@@ -33,6 +33,10 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
     function test_deposit_success() public {
         steakedDegen.setFan(ALICE, true);
         _dealAndApprove(ALICE, address(steakedDegen), 100 * 1e18);
+
+        vm.expectEmit();
+        emit SteakFeePaid(ALICE, 0.0069 * 1e18 * 100);
+
         vm.prank(ALICE);
         steakedDegen.deposit(100 * 1e18, ALICE);
 
