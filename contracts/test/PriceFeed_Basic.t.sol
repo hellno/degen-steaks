@@ -17,4 +17,11 @@ contract PriceFeed_Basic_Test is Test, WithTestHelpers {
         assertEq(priceFeed.degenToUsdc(1e6 * 1e18), 804_217_277, "1mio degenToUsdc should be ~$804");
         assertEq(priceFeed.getPrice(), DEGEN_PRICE_1, "getPrice should be 804_217_277");
     }
+
+    function test_togglePrice() public {
+        assertEq(priceFeed.getPrice(), DEGEN_PRICE_1, "getPrice should be 804_217_277");
+        ethDegenPool.togglePrice();
+        ethUsdcPool.togglePrice();
+        assertEq(priceFeed.getPrice(), DEGEN_PRICE_2, "getPrice should be 1_000_000_000");
+    }
 }
