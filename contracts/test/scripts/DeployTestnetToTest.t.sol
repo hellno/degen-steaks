@@ -5,16 +5,14 @@ import {Test, console2} from "forge-std/Test.sol";
 import "script/DeployTestnetToTest.s.sol";
 import "script/helpers/WithFileHelpers.s.sol";
 
-contract DeployTestnetToTest_Test is WithFileHelpers, Test {
+contract Test_DeploymentScripts is WithFileHelpers, Test {
     DeployTestnetToTest deployTestnetToTest;
 
-    function setUp() public {
+    function test_deployTestnetToTestnet() public {
         setNetwork("testrun");
         deployTestnetToTest = new DeployTestnetToTest();
         deployTestnetToTest.run();
-    }
 
-    function test_deploymentAddresses() public {
         IBetRegistry betRegistry = IBetRegistry(_getAddress("betRegistry"));
         DegenToken degenToken = DegenToken(_getAddress("degenToken"));
         ISteakedDegen steakedDegen = ISteakedDegen(_getAddress("steakedDegen"));
