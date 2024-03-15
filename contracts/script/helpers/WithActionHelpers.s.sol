@@ -75,18 +75,9 @@ contract WithActionHelpers is Script, WithFileHelpers {
 
         traction_2();
 
-        // Resolve 2, Alice and Carol win (HIGHER)
-        vm.warp(block.timestamp + 180);
-        betRegistry.resolveMarket(2);
+        vm.warp(block.timestamp + 10);
 
-        // Cash out
-        vm.startBroadcast(vm.envUint("ALICE_PK"));
-        betRegistry.cashOut(2);
-        vm.stopBroadcast();
-
-        vm.startBroadcast(vm.envUint("CAROL_PK"));
-        betRegistry.cashOut(2);
-        vm.stopBroadcast();
+        traction_3();
     }
 
     function traction_setup() public {
@@ -146,7 +137,7 @@ contract WithActionHelpers is Script, WithFileHelpers {
         // 1 will stay open, 2 will close earlier
         vm.startBroadcast(vm.envUint("DEPLOYER_PK"));
         betRegistry.createMarket(uint40(block.timestamp + 1 days), DEGEN_PRICE_1 - 1);
-        betRegistry.createMarket(uint40(block.timestamp + 120), DEGEN_PRICE_1 + 1);
+        betRegistry.createMarket(uint40(block.timestamp + 10), DEGEN_PRICE_1 + 1);
         vm.stopBroadcast();
 
         // Place bets
@@ -169,6 +160,19 @@ contract WithActionHelpers is Script, WithFileHelpers {
         degenToken.approve(address(betRegistry), betAmount * 2);
         betRegistry.placeBet(1, betAmount, IBetRegistry.BetDirection.HIGHER);
         betRegistry.placeBet(2, betAmount, IBetRegistry.BetDirection.LOWER);
+        vm.stopBroadcast();
+    }
+
+    function traction_3() public {
+        betRegistry.resolveMarket(2);
+
+        // Cash out
+        vm.startBroadcast(vm.envUint("ALICE_PK"));
+        betRegistry.cashOut(2);
+        vm.stopBroadcast();
+
+        vm.startBroadcast(vm.envUint("CAROL_PK"));
+        betRegistry.cashOut(2);
         vm.stopBroadcast();
     }
 }
