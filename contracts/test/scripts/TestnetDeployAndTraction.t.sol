@@ -2,19 +2,16 @@
 pragma solidity ^0.8.18;
 
 import {Test, console2} from "forge-std/Test.sol";
-import "script/DeployTestnetToTest.s.sol";
 import "script/helpers/WithFileHelpers.s.sol";
+import "script/TestnetDeploymentAndTraction.s.sol";
 
-contract DeployTestnetToTest_Test is WithFileHelpers, Test {
-    DeployTestnetToTest deployTestnetToTest;
-
-    function setUp() public {
+contract TestnetDeploymentAndTractionTest is WithFileHelpers, Test {
+    function test_TestnetDeploymentAndTraction_success() public {
         setNetwork("testrun");
-        deployTestnetToTest = new DeployTestnetToTest();
-        deployTestnetToTest.run();
-    }
+        TestnetDeploymentAndTraction testnetDeploymentAndTraction = new TestnetDeploymentAndTraction();
+        testnetDeploymentAndTraction.setNetwork("testrun");
+        testnetDeploymentAndTraction.run();
 
-    function test_deploymentAddresses() public {
         IBetRegistry betRegistry = IBetRegistry(_getAddress("betRegistry"));
         DegenToken degenToken = DegenToken(_getAddress("degenToken"));
         ISteakedDegen steakedDegen = ISteakedDegen(_getAddress("steakedDegen"));

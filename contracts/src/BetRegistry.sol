@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: BUSL 1.1
 pragma solidity ^0.8.18;
 
 import "./interfaces/IBetRegistry.sol";
@@ -17,8 +17,8 @@ contract BetRegistry is IBetRegistry, Ownable {
     uint256 constant CREATOR_FEE = 69 * 1e2; // 0.69%; 69 BPS
     uint256 constant FEE_DIVISOR = 1e6; // 1% = 1e4: 1 BPS = 1e2
 
+    uint256 public slashPeriod = 4 weeks; // 4 weeks after grace period to slash unclaimed funds.
     uint256 constant MIN_BID = 1e18; // 1 DEGEN
-    uint256 constant SLASH_PERIOD = 4 weeks; // 4 weeks after grace period to slash unclaimed funds.
     uint256 public gracePeriod = 60; // 60 seconds between end of a market and resolution.
 
     Market[] public markets;
@@ -54,6 +54,11 @@ contract BetRegistry is IBetRegistry, Ownable {
     function setGracePeriod(uint256 gracePeriod_) public onlyOwner {
         gracePeriod = gracePeriod_;
         emit GracePeriodSet(gracePeriod_);
+    }
+
+    function setSlashPeriod(uint256 slashPeriod_) public onlyOwner {
+        slashPeriod = slashPeriod_;
+        emit SlashPeriodSet(slashPeriod_);
     }
 
     function getMarket(uint256 marketId_) public view returns (Market memory) {
@@ -196,7 +201,7 @@ contract BetRegistry is IBetRegistry, Ownable {
     function slash(uint256 marketId_) public {
         Market storage market = markets[marketId_];
         require(
-            block.timestamp >= market.endTime + gracePeriod + SLASH_PERIOD, "BetRegistry::slash: Slash period not over."
+            block.timestamp >= market.endTime + gracePeriod + slashPeriod, "BetRegistry::slash: Slash period not over."
         );
 
         uint256 totalDegen = market.totalDegen;
