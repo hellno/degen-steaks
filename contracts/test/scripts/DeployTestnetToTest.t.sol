@@ -4,6 +4,7 @@ pragma solidity ^0.8.18;
 import {Test, console2} from "forge-std/Test.sol";
 import "script/DeployTestnetToTest.s.sol";
 import "script/helpers/WithFileHelpers.s.sol";
+import "script/TractionTestnet.s.sol";
 
 contract Test_DeploymentScripts is WithFileHelpers, Test {
     DeployTestnetToTest deployTestnetToTest;
@@ -24,5 +25,15 @@ contract Test_DeploymentScripts is WithFileHelpers, Test {
         assertEq(address(steakedDegen.asset()), address(degenToken), "steakedDegen.degenToken");
         assertTrue(steakedDegen.isFan(address(betRegistry)), "steakedDegen.isFan");
         assertTrue(betRegistry.isFan(vm.envAddress("DEPLOYER")), "betRegistry.isFan");
+    }
+
+    function test_TractionToTestnetOnLocal() public {
+        setNetwork("testrun");
+        deployTestnetToTest = new DeployTestnetToTest();
+        deployTestnetToTest.run();
+
+        TractionTestnet tractionTestnet = new TractionTestnet();
+        tractionTestnet.setNetwork("testrun");
+        tractionTestnet.traction();
     }
 }

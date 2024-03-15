@@ -29,6 +29,8 @@ contract DeployTestnet is Script, WithFileHelpers {
         degenToken.approve(address(steakedDegen), initialDeposit);
         steakedDegen.initialDeposit(initialDeposit, address(this));
 
+        vm.stopBroadcast();
+
         // Write Files
 
         _writeJson("priceFeed", address(priceFeed));
