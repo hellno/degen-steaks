@@ -5,6 +5,7 @@ import {Test, console2} from "forge-std/Test.sol";
 import "script/DeployTestnetToTest.s.sol";
 import "script/helpers/WithFileHelpers.s.sol";
 import "script/TractionTestnet.s.sol";
+import "script/TestnetDeploymentAndTraction.s.sol";
 
 contract Test_DeploymentScripts is WithFileHelpers, Test {
     DeployTestnetToTest deployTestnetToTest;
@@ -35,5 +36,11 @@ contract Test_DeploymentScripts is WithFileHelpers, Test {
         TractionTestnet tractionTestnet = new TractionTestnet();
         tractionTestnet.setNetwork("testrun");
         tractionTestnet.traction();
+    }
+
+    function test_TestnetDeploymentAndTraction() public {
+        TestnetDeploymentAndTraction testnetDeploymentAndTraction = new TestnetDeploymentAndTraction();
+        testnetDeploymentAndTraction.setNetwork("testrun");
+        testnetDeploymentAndTraction.run();
     }
 }
