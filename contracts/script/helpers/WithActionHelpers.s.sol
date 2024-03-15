@@ -73,50 +73,7 @@ contract WithActionHelpers is Script, WithFileHelpers {
 
         vm.warp(block.timestamp + 10);
 
-        // Resolve the market
-        // HIGHER wins
-        priceFeed.setPrice(DEGEN_PRICE_1);
-        betRegistry.resolveMarket(0);
-
-        // Cash out Alice
-        // (Bob lost his bet)
-        vm.startBroadcast(vm.envUint("ALICE_PK"));
-        betRegistry.cashOut(0);
-        vm.stopBroadcast();
-
-        // Simulate slash
-        vm.startBroadcast(vm.envUint("ALICE_PK"));
-        betRegistry.slash(0);
-        vm.stopBroadcast();
-
-        // Create two new markets with different end times
-        // 1 will stay open, 2 will close earlier
-        vm.startBroadcast(vm.envUint("DEPLOYER_PK"));
-        betRegistry.createMarket(uint40(block.timestamp + 1 days), DEGEN_PRICE_1 - 1);
-        betRegistry.createMarket(uint40(block.timestamp + 120), DEGEN_PRICE_1 + 1);
-        vm.stopBroadcast();
-
-        // Place bets
-        vm.startBroadcast(vm.envUint("ALICE_PK"));
-        degenToken.mint(betAmount * 2);
-        degenToken.approve(address(betRegistry), betAmount * 2);
-        betRegistry.placeBet(1, betAmount, IBetRegistry.BetDirection.HIGHER);
-        betRegistry.placeBet(2, betAmount, IBetRegistry.BetDirection.LOWER);
-        vm.stopBroadcast();
-
-        vm.startBroadcast(vm.envUint("BOB_PK"));
-        degenToken.mint(betAmount * 2);
-        degenToken.approve(address(betRegistry), betAmount * 2);
-        betRegistry.placeBet(1, betAmount, IBetRegistry.BetDirection.LOWER);
-        betRegistry.placeBet(2, betAmount, IBetRegistry.BetDirection.HIGHER);
-        vm.stopBroadcast();
-
-        vm.startBroadcast(vm.envUint("CAROL_PK"));
-        degenToken.mint(betAmount * 2);
-        degenToken.approve(address(betRegistry), betAmount * 2);
-        betRegistry.placeBet(1, betAmount, IBetRegistry.BetDirection.HIGHER);
-        betRegistry.placeBet(2, betAmount, IBetRegistry.BetDirection.LOWER);
-        vm.stopBroadcast();
+        traction_2();
 
         // Resolve 2, Alice and Carol win (HIGHER)
         vm.warp(block.timestamp + 180);
@@ -168,5 +125,50 @@ contract WithActionHelpers is Script, WithFileHelpers {
         vm.stopBroadcast();
     }
 
-    function traction_2() public {}
+    function traction_2() public {
+        // Resolve the market
+        // HIGHER wins
+        priceFeed.setPrice(DEGEN_PRICE_1);
+        betRegistry.resolveMarket(0);
+
+        // Cash out Alice
+        // (Bob lost his bet)
+        vm.startBroadcast(vm.envUint("ALICE_PK"));
+        betRegistry.cashOut(0);
+        vm.stopBroadcast();
+
+        // Simulate slash
+        vm.startBroadcast(vm.envUint("ALICE_PK"));
+        betRegistry.slash(0);
+        vm.stopBroadcast();
+
+        // Create two new markets with different end times
+        // 1 will stay open, 2 will close earlier
+        vm.startBroadcast(vm.envUint("DEPLOYER_PK"));
+        betRegistry.createMarket(uint40(block.timestamp + 1 days), DEGEN_PRICE_1 - 1);
+        betRegistry.createMarket(uint40(block.timestamp + 120), DEGEN_PRICE_1 + 1);
+        vm.stopBroadcast();
+
+        // Place bets
+        vm.startBroadcast(vm.envUint("ALICE_PK"));
+        degenToken.mint(betAmount * 2);
+        degenToken.approve(address(betRegistry), betAmount * 2);
+        betRegistry.placeBet(1, betAmount, IBetRegistry.BetDirection.HIGHER);
+        betRegistry.placeBet(2, betAmount, IBetRegistry.BetDirection.LOWER);
+        vm.stopBroadcast();
+
+        vm.startBroadcast(vm.envUint("BOB_PK"));
+        degenToken.mint(betAmount * 2);
+        degenToken.approve(address(betRegistry), betAmount * 2);
+        betRegistry.placeBet(1, betAmount, IBetRegistry.BetDirection.LOWER);
+        betRegistry.placeBet(2, betAmount, IBetRegistry.BetDirection.HIGHER);
+        vm.stopBroadcast();
+
+        vm.startBroadcast(vm.envUint("CAROL_PK"));
+        degenToken.mint(betAmount * 2);
+        degenToken.approve(address(betRegistry), betAmount * 2);
+        betRegistry.placeBet(1, betAmount, IBetRegistry.BetDirection.HIGHER);
+        betRegistry.placeBet(2, betAmount, IBetRegistry.BetDirection.LOWER);
+        vm.stopBroadcast();
+    }
 }
