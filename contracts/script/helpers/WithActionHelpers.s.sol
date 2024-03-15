@@ -102,6 +102,8 @@ contract WithActionHelpers is Script, WithFileHelpers {
         degenToken = DegenToken(_getAddress("degenToken"));
         priceFeed = MockPriceFeed(_getAddress("priceFeed"));
         betAmount = 1e6 * 1e18;
+
+        marketDuration = vm.envOr("MARKET_DURATION", uint256(35));
     }
 
     function traction_1() public {
