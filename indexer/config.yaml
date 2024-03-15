@@ -1,13 +1,11 @@
 name: SteakedDegenIndexer
 description: Indexes Degen Steaks
 networks:
-  - id: 31337 # Local
+  - id: 84532 # Base Sepolia
     start_block: 0
-    rpc_config:
-      url: "http://127.0.0.1:8545"
     contracts:
       - name: BetRegistry
-        address: "0xe5C09FAa2A2Aaa0e61c30B9f734ED0963147298e"
+        address: "0x68D8E45939926154BD4356105F9bA120169EF606"
         abi_file_path: ./abi/BetRegistry.json
         handler: ./src/event-handlers/BetRegistry.ts
         events:
@@ -36,7 +34,7 @@ networks:
               - name: User
               - name: Dao
       - name: SteakedDegen
-        address: "0x0f3a3907f58175eF673cB193645f287F5D964198"
+        address: "0xb99e496f3e741b9D1a1E3413ace21c56ea3e5361"
         abi_file_path: ./abi/SteakedDegen.json
         handler: ./src/event-handlers/SteakedDegen.ts
         events:
