@@ -13,14 +13,14 @@ cast rpc anvil_setBalance 0x3E8C992a2e94280be9f2b942Bfcc3e2a7cc30e71 10000000000
 NETWORK=local forge script script/testnet/Deployment.s.sol --rpc-url http://localhost:8545 --broadcast -vvvv --legacy 
 NETWORK=local STEP=1 MARKET_DURATION=90 forge script script/testnet/Traction.s.sol --rpc-url http://localhost:8545 --broadcast -vvvv --legacy 
 echo "start sleep"
-cast rpc evm_increaseTime 90
+cast rpc evm_increaseTime 95
 echo "end sleep"
 NETWORK=local STEP=2 MARKET_DURATION=90 forge script script/testnet/Traction.s.sol --rpc-url http://localhost:8545 --broadcast -vvvv --legacy 
 NETWORK=local STEP=3 MARKET_DURATION=90 forge script script/testnet/Traction.s.sol --rpc-url http://localhost:8545 --broadcast -vvvv --legacy 
 NETWORK=local STEP=4 MARKET_DURATION=90 forge script script/testnet/Traction.s.sol --rpc-url http://localhost:8545 --broadcast -vvvv --legacy 
 NETWORK=local STEP=5 MARKET_DURATION=90 forge script script/testnet/Traction.s.sol --rpc-url http://localhost:8545 --broadcast -vvvv --legacy 
 echo "start sleep"
-cast rpc evm_increaseTime 90
+cast rpc evm_increaseTime 95
 echo "end sleep"
 NETWORK=local STEP=6 MARKET_DURATION=90 forge script script/testnet/Traction.s.sol --rpc-url http://localhost:8545 --broadcast -vvvv --legacy 
 NETWORK=local STEP=7 MARKET_DURATION=90 forge script script/testnet/Traction.s.sol --rpc-url http://localhost:8545 --broadcast -vvvv --legacy 
