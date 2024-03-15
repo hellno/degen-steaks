@@ -17,7 +17,7 @@ contract WithActionHelpers is Script, WithFileHelpers {
     ISteakedDegen steakedDegen;
     MockPriceFeed priceFeed;
     uint256 betAmount;
-    uint256 marketDuration = 20; // the script will sleep for this duration
+    uint256 marketDuration = 35; // the script will sleep for this duration
 
     /// @dev testnet deployment with MockDEGEN and MockPriceFeed
     function deployTestnet() public {
