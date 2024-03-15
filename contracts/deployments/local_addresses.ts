@@ -1,4 +1,4 @@
-export const priceFeedAddress = "0x2E3e740504A78D3390a3B98Df3b5605FE3443812";
-export const degenTokenAddress = "0xF6D6E89C16414a3A1f40AB088710E4cC3bB23608";
-export const steakedDegenAddress = "0x0f3a3907f58175eF673cB193645f287F5D964198";
-export const betRegistryAddress = "0xe5C09FAa2A2Aaa0e61c30B9f734ED0963147298e";
+export const priceFeedAddress = "0x8081f627fE411bfbA05837527D22C3b5435C05be";
+export const degenTokenAddress = "0x7003F5eD0e4015D6c8dd31DB565A036fBE028d9E";
+export const steakedDegenAddress = "0xF0717f71434576f4d60807a90BC63DF1F6dEae9f";
+export const betRegistryAddress = "0xe9Fc0bd340B13E08ffDB86B82c8018aD079566A4";

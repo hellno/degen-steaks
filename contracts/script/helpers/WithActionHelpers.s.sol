@@ -17,6 +17,7 @@ contract WithActionHelpers is Script, WithFileHelpers {
     ISteakedDegen steakedDegen;
     MockPriceFeed priceFeed;
     uint256 betAmount;
+    uint256 marketDuration = 20; // the script will sleep for this duration
 
     /// @dev testnet deployment with MockDEGEN and MockPriceFeed
     function deployTestnet() public {
@@ -71,13 +72,17 @@ contract WithActionHelpers is Script, WithFileHelpers {
         traction_setup();
         traction_1();
 
-        sleep(10);
+        sleep(marketDuration);
 
         traction_2();
-
-        sleep(10);
-
         traction_3();
+        traction_4();
+        traction_5();
+
+        sleep(marketDuration);
+
+        traction_6();
+        traction_7();
     }
 
     function sleep(uint256 seconds_) public {
@@ -105,7 +110,7 @@ contract WithActionHelpers is Script, WithFileHelpers {
         vm.startBroadcast(vm.envUint("DEPLOYER_PK"));
         betRegistry.setGracePeriod(0);
         betRegistry.setSlashPeriod(0);
-        betRegistry.createMarket(uint40(block.timestamp + 10), DEGEN_PRICE_1 - 1);
+        betRegistry.createMarket(uint40(block.timestamp + marketDuration), DEGEN_PRICE_1 - 1);
         vm.stopBroadcast();
 
         // Place bets
@@ -131,15 +136,21 @@ contract WithActionHelpers is Script, WithFileHelpers {
     function traction_2() public {
         // Resolve the market
         // HIGHER wins
+        vm.startBroadcast(vm.envUint("DEPLOYER_PK"));
         priceFeed.setPrice(DEGEN_PRICE_1);
         betRegistry.resolveMarket(0);
+        vm.stopBroadcast();
+    }
 
+    function traction_3() public {
         // Cash out Alice
         // (Bob lost his bet)
         vm.startBroadcast(vm.envUint("ALICE_PK"));
         betRegistry.cashOut(0);
         vm.stopBroadcast();
+    }
 
+    function traction_4() public {
         // Simulate slash
         vm.startBroadcast(vm.envUint("ALICE_PK"));
         betRegistry.slash(0);
@@ -149,9 +160,11 @@ contract WithActionHelpers is Script, WithFileHelpers {
         // 1 will stay open, 2 will close earlier
         vm.startBroadcast(vm.envUint("DEPLOYER_PK"));
         betRegistry.createMarket(uint40(block.timestamp + 1 days), DEGEN_PRICE_1 - 1);
-        betRegistry.createMarket(uint40(block.timestamp + 10), DEGEN_PRICE_1 + 1);
+        betRegistry.createMarket(uint40(block.timestamp + marketDuration), DEGEN_PRICE_1 + 1);
         vm.stopBroadcast();
+    }
 
+    function traction_5() public {
         // Place bets
         vm.startBroadcast(vm.envUint("ALICE_PK"));
         degenToken.mint(betAmount * 2);
@@ -175,9 +188,13 @@ contract WithActionHelpers is Script, WithFileHelpers {
         vm.stopBroadcast();
     }
 
-    function traction_3() public {
+    function traction_6() public {
+        vm.startBroadcast(vm.envUint("DEPLOYER_PK"));
         betRegistry.resolveMarket(2);
+        vm.stopBroadcast();
+    }
 
+    function traction_7() public {
         // Cash out
         vm.startBroadcast(vm.envUint("ALICE_PK"));
         betRegistry.cashOut(2);
