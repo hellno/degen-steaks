@@ -85,7 +85,6 @@ contract WithActionHelpers is Script, WithFileHelpers {
         vm.stopBroadcast();
 
         // Simulate slash
-        vm.warp(block.timestamp + 5 weeks);
         vm.startBroadcast(vm.envUint("ALICE_PK"));
         betRegistry.slash(0);
         vm.stopBroadcast();
@@ -141,9 +140,11 @@ contract WithActionHelpers is Script, WithFileHelpers {
     }
 
     function traction_1() public {
-        // Create a market and set gracePeriod to 0
+        // Set grace and slash period to 0
+        // create a market
         vm.startBroadcast(vm.envUint("DEPLOYER_PK"));
         betRegistry.setGracePeriod(0);
+        betRegistry.setSlashPeriod(0);
         betRegistry.createMarket(uint40(block.timestamp + 10), DEGEN_PRICE_1 - 1);
         vm.stopBroadcast();
 
