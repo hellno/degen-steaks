@@ -5,7 +5,7 @@ import {Test, console2} from "forge-std/Test.sol";
 import "script/helpers/WithFileHelpers.s.sol";
 import "script/TestnetDeploymentAndTraction.s.sol";
 
-contract Test_DeploymentScripts is WithFileHelpers, Test {
+contract TestnetDeploymentAndTractionTest is WithFileHelpers, Test {
     function test_TestnetDeploymentAndTraction_success() public {
         setNetwork("testrun");
         TestnetDeploymentAndTraction testnetDeploymentAndTraction = new TestnetDeploymentAndTraction();
