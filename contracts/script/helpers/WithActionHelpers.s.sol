@@ -16,6 +16,7 @@ contract WithActionHelpers is Script, WithFileHelpers {
     DegenToken degenToken;
     ISteakedDegen steakedDegen;
     MockPriceFeed priceFeed;
+    uint256 betAmount;
 
     /// @dev testnet deployment with MockDEGEN and MockPriceFeed
     function deployTestnet() public {
@@ -64,38 +65,15 @@ contract WithActionHelpers is Script, WithFileHelpers {
     }
 
     /// @dev open and close several markets and bets
+    /// the actions are separated into different functions that need 10 seconds of time in between them on testnet
+    /// locally the time difference can be simulated
     function traction() public {
-        betRegistry = IBetRegistry(_getAddress("betRegistry"));
-        degenToken = DegenToken(_getAddress("degenToken"));
-        priceFeed = MockPriceFeed(_getAddress("priceFeed"));
+        traction_setup();
+        traction_1();
 
-        // Create a market
-        vm.startBroadcast(vm.envUint("DEPLOYER_PK"));
-        betRegistry.createMarket(uint40(block.timestamp + 120), DEGEN_PRICE_1 - 1);
-        vm.stopBroadcast();
-
-        // Place bets
-        vm.startBroadcast(vm.envUint("ALICE_PK"));
-        uint256 amount = 1e6 * 1e18;
-        degenToken.mint(amount);
-        degenToken.approve(address(betRegistry), amount);
-        betRegistry.placeBet(0, amount, IBetRegistry.BetDirection.HIGHER);
-        vm.stopBroadcast();
-
-        vm.startBroadcast(vm.envUint("BOB_PK"));
-        degenToken.mint(amount);
-        degenToken.approve(address(betRegistry), amount);
-        betRegistry.placeBet(0, amount, IBetRegistry.BetDirection.LOWER);
-        vm.stopBroadcast();
-
-        vm.startBroadcast(vm.envUint("CAROL_PK"));
-        degenToken.mint(amount);
-        degenToken.approve(address(betRegistry), amount);
-        betRegistry.placeBet(0, amount, IBetRegistry.BetDirection.HIGHER);
-        vm.stopBroadcast();
+        vm.warp(block.timestamp + 10);
 
         // Resolve the market
-        vm.warp(block.timestamp + 180);
         // HIGHER wins
         priceFeed.setPrice(DEGEN_PRICE_1);
         betRegistry.resolveMarket(0);
@@ -121,24 +99,24 @@ contract WithActionHelpers is Script, WithFileHelpers {
 
         // Place bets
         vm.startBroadcast(vm.envUint("ALICE_PK"));
-        degenToken.mint(amount * 2);
-        degenToken.approve(address(betRegistry), amount * 2);
-        betRegistry.placeBet(1, amount, IBetRegistry.BetDirection.HIGHER);
-        betRegistry.placeBet(2, amount, IBetRegistry.BetDirection.LOWER);
+        degenToken.mint(betAmount * 2);
+        degenToken.approve(address(betRegistry), betAmount * 2);
+        betRegistry.placeBet(1, betAmount, IBetRegistry.BetDirection.HIGHER);
+        betRegistry.placeBet(2, betAmount, IBetRegistry.BetDirection.LOWER);
         vm.stopBroadcast();
 
         vm.startBroadcast(vm.envUint("BOB_PK"));
-        degenToken.mint(amount * 2);
-        degenToken.approve(address(betRegistry), amount * 2);
-        betRegistry.placeBet(1, amount, IBetRegistry.BetDirection.LOWER);
-        betRegistry.placeBet(2, amount, IBetRegistry.BetDirection.HIGHER);
+        degenToken.mint(betAmount * 2);
+        degenToken.approve(address(betRegistry), betAmount * 2);
+        betRegistry.placeBet(1, betAmount, IBetRegistry.BetDirection.LOWER);
+        betRegistry.placeBet(2, betAmount, IBetRegistry.BetDirection.HIGHER);
         vm.stopBroadcast();
 
         vm.startBroadcast(vm.envUint("CAROL_PK"));
-        degenToken.mint(amount * 2);
-        degenToken.approve(address(betRegistry), amount * 2);
-        betRegistry.placeBet(1, amount, IBetRegistry.BetDirection.HIGHER);
-        betRegistry.placeBet(2, amount, IBetRegistry.BetDirection.LOWER);
+        degenToken.mint(betAmount * 2);
+        degenToken.approve(address(betRegistry), betAmount * 2);
+        betRegistry.placeBet(1, betAmount, IBetRegistry.BetDirection.HIGHER);
+        betRegistry.placeBet(2, betAmount, IBetRegistry.BetDirection.LOWER);
         vm.stopBroadcast();
 
         // Resolve 2, Alice and Carol win (HIGHER)
@@ -152,6 +130,40 @@ contract WithActionHelpers is Script, WithFileHelpers {
 
         vm.startBroadcast(vm.envUint("CAROL_PK"));
         betRegistry.cashOut(2);
+        vm.stopBroadcast();
+    }
+
+    function traction_setup() public {
+        betRegistry = IBetRegistry(_getAddress("betRegistry"));
+        degenToken = DegenToken(_getAddress("degenToken"));
+        priceFeed = MockPriceFeed(_getAddress("priceFeed"));
+        betAmount = 1e6 * 1e18;
+    }
+
+    function traction_1() public {
+        // Create a market and set gracePeriod to 0
+        vm.startBroadcast(vm.envUint("DEPLOYER_PK"));
+        betRegistry.setGracePeriod(0);
+        betRegistry.createMarket(uint40(block.timestamp + 10), DEGEN_PRICE_1 - 1);
+        vm.stopBroadcast();
+
+        // Place bets
+        vm.startBroadcast(vm.envUint("ALICE_PK"));
+        degenToken.mint(betAmount);
+        degenToken.approve(address(betRegistry), betAmount);
+        betRegistry.placeBet(0, betAmount, IBetRegistry.BetDirection.HIGHER);
+        vm.stopBroadcast();
+
+        vm.startBroadcast(vm.envUint("BOB_PK"));
+        degenToken.mint(betAmount);
+        degenToken.approve(address(betRegistry), betAmount);
+        betRegistry.placeBet(0, betAmount, IBetRegistry.BetDirection.LOWER);
+        vm.stopBroadcast();
+
+        vm.startBroadcast(vm.envUint("CAROL_PK"));
+        degenToken.mint(betAmount);
+        degenToken.approve(address(betRegistry), betAmount);
+        betRegistry.placeBet(0, betAmount, IBetRegistry.BetDirection.HIGHER);
         vm.stopBroadcast();
     }
 }
