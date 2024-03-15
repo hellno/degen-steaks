@@ -9,6 +9,8 @@ type User {
   totalDegenWon: BigInt!
   totalDegenBet: BigInt!
   totalSlashFee: BigInt!
+  bets: [Bet!]! @derivedFrom(field: "user")
+  placedBets: [PlacedBet!]! @derivedFrom(field: "user")
 }
 
 type Market {
@@ -28,6 +30,8 @@ type Market {
   totalDegen: BigInt
   creatorFee: BigInt
   slashTransaction: String
+  bets: [Bet!]! @derivedFrom(field: "market")
+  placedBets: [PlacedBet!]! @derivedFrom(field: "market")
 }
 
 type Bet {
@@ -39,6 +43,7 @@ type Bet {
   cashedOut: Boolean
   cashOutTransaction: String
   cashedOutDegen: BigInt
+  placedBets: [PlacedBet!]! @derivedFrom(field: "bet")
 }
 
 type PlacedBet {
