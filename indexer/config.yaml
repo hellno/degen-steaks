@@ -1,0 +1,46 @@
+name: SteakedDegenIndexer
+description: Indexes Degen Steaks
+networks:
+  - id: 31337 # Local
+    start_block: 0
+    rpc_config:
+      url: "http://127.0.0.1:8545"
+    contracts:
+      - name: BetRegistry
+        address: "0xe5C09FAa2A2Aaa0e61c30B9f734ED0963147298e"
+        abi_file_path: ./abi/BetRegistry.json
+        handler: ./src/event-handlers/BetRegistry.ts
+        events:
+          - event: MarketCreated
+            requiredEntities:
+              - name: Market
+              - name: Bet
+              - name: User
+          - event: BetPlaced
+            requiredEntities:
+              - name: Bet
+              - name: User
+              - name: Market
+          - event: MarketResolved
+            requiredEntities:
+              - name: Market
+              - name: User
+          - event: BetCashedOut
+            requiredEntities:
+              - name: Bet
+              - name: User
+              - name: Market
+          - event: MarketSlashed
+            requiredEntities:
+              - name: Market
+              - name: User
+              - name: Dao
+      - name: SteakedDegen
+        address: "0x0f3a3907f58175eF673cB193645f287F5D964198"
+        abi_file_path: ./abi/SteakedDegen.json
+        handler: ./src/event-handlers/SteakedDegen.ts
+        events:
+          - event: DaoFeePaid
+            requiredEntities:
+              - name: Dao
+          

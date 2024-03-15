@@ -1,0 +1,55 @@
+type Dao {
+  id: ID!
+  totalDegenFee: BigInt!
+}
+
+type User {
+  id: ID!
+  creatorFeeReceived: BigInt!
+  totalDegenWon: BigInt!
+  totalDegenBet: BigInt!
+  totalSlashFee: BigInt!
+}
+
+type Market {
+  id: ID!
+  creator: User!
+  startTime: Int!
+  targetPrice: BigInt!
+  endTime: BigInt!
+  totalSharesHigher: BigInt!
+  totalSharesLower: BigInt!
+  totalSteakedDegen: BigInt!
+  betCount: Int!
+  degenCollected: BigInt!
+  isResolved: Boolean!
+  highWon: Boolean
+  endPrice: BigInt
+  totalDegen: BigInt
+  creatorFee: BigInt
+  slashTransaction: String
+}
+
+type Bet {
+  id: ID!
+  user: User!
+  market: Market!
+  sharesHigher: BigInt!
+  sharesLower: BigInt!
+  cashedOut: Boolean
+  cashOutTransaction: String
+  cashedOutDegen: BigInt
+}
+
+type PlacedBet {
+  id: ID!
+  user: User!
+  bet: Bet!
+  market: Market!
+  degen: BigInt!
+  steaks: BigInt!
+  feeSteaks: BigInt!
+  betShares: BigInt!
+  direction: BigInt!
+  transaction: String!
+}

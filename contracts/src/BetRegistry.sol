@@ -18,15 +18,15 @@ contract BetRegistry is IBetRegistry, Ownable {
     uint256 constant FEE_DIVISOR = 1e6; // 1% = 1e4: 1 BPS = 1e2
 
     uint256 constant MIN_BID = 1e18; // 1 DEGEN
-    uint256 constant GRACE_PERIOD = 60; // 60 seconds between end of a market and resolution.
     uint256 constant SLASH_PERIOD = 4 weeks; // 4 weeks after grace period to slash unclaimed funds.
+    uint256 public gracePeriod = 60; // 60 seconds between end of a market and resolution.
 
     Market[] public markets;
     mapping(uint256 marketId => mapping(address user => Bet)) public marketToUserToBet;
     IERC20 public degenToken;
 
-    IERC4626 steakedDegen;
-    IPriceFeed priceFeed;
+    IERC4626 public steakedDegen;
+    IPriceFeed public priceFeed;
     address public degenUtilityDao;
 
     mapping(address => bool) public isFan; // haha just kidding, it's a pun. onlyDepositer is a better name.
@@ -48,6 +48,12 @@ contract BetRegistry is IBetRegistry, Ownable {
 
     function setFan(address fan_, bool isFan_) public onlyOwner {
         isFan[fan_] = isFan_;
+        emit FanSet(fan_, isFan_);
+    }
+
+    function setGracePeriod(uint256 gracePeriod_) public onlyOwner {
+        gracePeriod = gracePeriod_;
+        emit GracePeriodSet(gracePeriod_);
     }
 
     function getMarket(uint256 marketId_) public view returns (Market memory) {
@@ -62,6 +68,8 @@ contract BetRegistry is IBetRegistry, Ownable {
     }
 
     function createMarket(uint40 endTime_, uint256 targetPrice_) public onlyFans {
+        require(endTime_ > block.timestamp, "BetRegistry::createMarket: endTime must be in the future.");
+        require(targetPrice_ > 0, "BetRegistry::createMarket: targetPrice must be greater than zero.");
         markets.push(
             Market({
                 creator: msg.sender,
@@ -91,9 +99,9 @@ contract BetRegistry is IBetRegistry, Ownable {
         uint256 steaks = steakedDegen.deposit(amount_, address(this));
 
         // pay fee to totalStDegen in Market
-        uint256 feeAmount = market.totalSteakedDegen == 0 ? 0 : steaks.mulDiv(MARKET_FEE, FEE_DIVISOR);
-        market.totalSteakedDegen += feeAmount;
-        steaks -= feeAmount;
+        uint256 feeSteaks = market.totalSteakedDegen == 0 ? 0 : steaks.mulDiv(MARKET_FEE, FEE_DIVISOR);
+        market.totalSteakedDegen += feeSteaks;
+        steaks -= feeSteaks;
 
         Bet storage bet = marketToUserToBet[marketId_][msg.sender];
 
@@ -112,14 +120,23 @@ contract BetRegistry is IBetRegistry, Ownable {
             market.totalLower += betShares;
         }
 
-        emit BetPlaced(marketId_, msg.sender, amount_, steaks, betShares, feeAmount, direction_);
+        emit BetPlaced({
+            marketId: marketId_,
+            user: msg.sender,
+            degen: amount_,
+            steaks: steaks,
+            feeSteaks: feeSteaks,
+            betShares: betShares,
+            direction: direction_
+        });
     }
 
     function resolveMarket(uint256 marketId_) public {
         Market storage market = markets[marketId_];
         require(block.timestamp >= market.endTime, "BetRegistry::resolveMarket: market has not ended.");
-        require(block.timestamp >= market.endTime + GRACE_PERIOD, "BetRegistry::resolveMarket: grace period not over.");
+        require(block.timestamp >= market.endTime + gracePeriod, "BetRegistry::resolveMarket: grace period not over.");
         uint256 price = priceFeed.getPrice();
+        require(price != market.targetPrice, "BetRegistry::resolveMarket: endPrice and targetPrice must differ.");
         market.endPrice = price;
 
         // unsteake degen
@@ -129,6 +146,13 @@ contract BetRegistry is IBetRegistry, Ownable {
         uint256 creatorFee = degen.mulDiv(CREATOR_FEE, FEE_DIVISOR);
         market.totalDegen = degen - creatorFee;
         degenToken.safeTransfer(market.creator, creatorFee);
+
+        emit MarketResolved({
+            marketId: marketId_,
+            endPrice: price,
+            totalDegen: degen - creatorFee,
+            creatorFee: creatorFee
+        });
     }
 
     function cashOut(uint256 marketId_) public {
@@ -160,13 +184,19 @@ contract BetRegistry is IBetRegistry, Ownable {
         }
 
         degenToken.safeTransfer(msg.sender, userDegenPayout);
+
+        emit BetCashedOut({
+            marketId: marketId_,
+            user: msg.sender,
+            degen: userDegenPayout,
+            marketShares: userMarketShares
+        });
     }
 
     function slash(uint256 marketId_) public {
         Market storage market = markets[marketId_];
         require(
-            block.timestamp >= market.endTime + GRACE_PERIOD + SLASH_PERIOD,
-            "BetRegistry::slash: Slash period not over."
+            block.timestamp >= market.endTime + gracePeriod + SLASH_PERIOD, "BetRegistry::slash: Slash period not over."
         );
 
         uint256 totalDegen = market.totalDegen;
@@ -185,5 +215,14 @@ contract BetRegistry is IBetRegistry, Ownable {
         degenToken.safeTransfer(market.creator, creatorFee);
         degenToken.safeTransfer(msg.sender, slashFee);
         degenToken.safeTransfer(degenUtilityDao, daoFee);
+
+        emit MarketSlashed({
+            marketId: marketId_,
+            totalDegen: totalDegen,
+            creatorFee: creatorFee,
+            slashFee: slashFee,
+            daoFee: daoFee,
+            slasher: msg.sender
+        });
     }
 }

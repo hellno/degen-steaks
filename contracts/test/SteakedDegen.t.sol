@@ -13,6 +13,8 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
     }
 
     function test_setFan_success() public {
+        vm.expectEmit();
+        emit FanSet(ALICE, true);
         steakedDegen.setFan(ALICE, true);
         assertTrue(steakedDegen.isFan(ALICE));
     }
@@ -33,6 +35,11 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
     function test_deposit_success() public {
         steakedDegen.setFan(ALICE, true);
         _dealAndApprove(ALICE, address(steakedDegen), 100 * 1e18);
+
+        vm.expectEmit();
+        emit SteakFeePaid(ALICE, 0.0069 * 1e18 * 100);
+        emit DaoFeePaid(ALICE, 0.0069 * 1e18 * 100);
+
         vm.prank(ALICE);
         steakedDegen.deposit(100 * 1e18, ALICE);
 
@@ -76,6 +83,22 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
 
         vm.expectRevert("SteakedDegen::whenInitialized: not initialized.");
         steakedDegen.deposit(INITIAL_STAKE, ALICE);
+    }
+
+    function test_initialDeposit_event() public {
+        deployWithoutInitialDeposit();
+
+        uint256 amount = 123 * 1e18;
+        uint256 shares = amount; // ratio should be 1:1 on initial deposit
+
+        steakedDegen.setFan(address(this), true);
+        _dealAndApprove(address(this), address(steakedDegen), amount);
+
+        vm.expectEmit();
+        emit InitialDeposit(address(this), DEGEN_UTILITY_DAO, amount, shares);
+
+        vm.prank(address(this));
+        steakedDegen.initialDeposit(amount, DEGEN_UTILITY_DAO);
     }
 
     function test_withdraw_basic() public {

@@ -13,6 +13,22 @@ import "src/auxiliary/EthUsdcPool.sol";
 import "src/PriceFeed.sol";
 
 contract WithTestHelpers is Test {
+    event MarketResolved(uint256 indexed marketId, uint256 endPrice, uint256 totalDegen, uint256 creatorFee);
+    event BetCashedOut(uint256 indexed marketId, address indexed user, uint256 degen, uint256 marketShares);
+    event MarketSlashed(
+        uint256 indexed marketId,
+        uint256 totalDegen,
+        uint256 creatorFee,
+        uint256 slashFee,
+        uint256 daoFee,
+        address slasher
+    );
+    event SteakFeePaid(address indexed caller, uint256 amount);
+    event DaoFeePaid(address indexed caller, uint256 amount);
+    event FanSet(address indexed user, bool isFan);
+    event InitialDeposit(address indexed sender, address indexed receiver, uint256 assets, uint256 shares);
+    event GracePeriodSet(uint256 gracePeriod);
+
     IBetRegistry betRegistry;
     IERC20 degenToken;
     ISteakedDegen steakedDegen;
