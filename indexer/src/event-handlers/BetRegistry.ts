@@ -254,7 +254,6 @@ BetRegistryContract_BetCashedOut_handler(({ event, context }) => {
     ...market,
     totalDegen: market.totalDegen! - event.params.degen,
   };
-  context.Market.set(market);
 
   bet = {
     ...bet,
@@ -267,6 +266,10 @@ BetRegistryContract_BetCashedOut_handler(({ event, context }) => {
     ...user,
     totalDegenWon: user.totalDegenWon + event.params.degen,
   };
+
+  context.Market.set(market);
+  context.Bet.set(bet);
+  context.User.set(user);
 });
 
 BetRegistryContract_MarketSlashed_loader(({ event, context }) => {
