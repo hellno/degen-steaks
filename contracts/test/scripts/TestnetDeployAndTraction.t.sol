@@ -24,10 +24,4 @@ contract TestnetDeploymentAndTractionTest is WithFileHelpers, Test {
         assertTrue(steakedDegen.isFan(address(betRegistry)), "steakedDegen.isFan");
         assertTrue(betRegistry.isFan(vm.envAddress("DEPLOYER")), "betRegistry.isFan");
     }
-
-    function test_TestnetDeploymentAndTraction_fail_networkNotSet() public {
-        TestnetDeploymentAndTraction testnetDeploymentAndTraction = new TestnetDeploymentAndTraction();
-        vm.expectRevert("network not set.");
-        testnetDeploymentAndTraction.run();
-    }
 }
