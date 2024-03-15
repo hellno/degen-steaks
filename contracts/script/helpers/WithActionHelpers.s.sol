@@ -4,9 +4,13 @@ pragma solidity ^0.8.18;
 
 import "forge-std/Script.sol";
 import "script/helpers/WithFileHelpers.s.sol";
-import "script/DeployTestnetToTest.s.sol";
 import "test/setup/Constants.t.sol";
+import "src/BetRegistry.sol";
+import "src/SteakedDegen.sol";
+import "src/auxiliary/DegenToken.sol";
+import "src/auxiliary/MockPriceFeed.sol";
 
+/// @dev holds action like deploying the system and creating some traction for testnet
 contract WithActionHelpers is Script, WithFileHelpers {
     IBetRegistry betRegistry;
     DegenToken degenToken;
