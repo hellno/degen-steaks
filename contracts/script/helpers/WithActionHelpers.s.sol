@@ -71,13 +71,25 @@ contract WithActionHelpers is Script, WithFileHelpers {
         traction_setup();
         traction_1();
 
-        vm.warp(block.timestamp + 10);
+        sleep(10);
 
         traction_2();
 
-        vm.warp(block.timestamp + 10);
+        sleep(10);
 
         traction_3();
+    }
+
+    function sleep(uint256 seconds_) public {
+        if (keccak256(abi.encodePacked(_network)) == keccak256(abi.encodePacked("local"))) {
+            vm.warp(block.timestamp + seconds_);
+        } else if (keccak256(abi.encodePacked(_network)) == keccak256(abi.encodePacked("testnet"))) {
+            vm.sleep(seconds_ * 1_000);
+        } else if (keccak256(abi.encodePacked(_network)) == keccak256(abi.encodePacked("testrun"))) {
+            vm.warp(block.timestamp + seconds_);
+        } else {
+            revert("unsupported network");
+        }
     }
 
     function traction_setup() public {
