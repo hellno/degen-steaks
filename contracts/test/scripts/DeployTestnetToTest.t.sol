@@ -6,7 +6,7 @@ import "script/helpers/WithFileHelpers.s.sol";
 import "script/TestnetDeploymentAndTraction.s.sol";
 
 contract Test_DeploymentScripts is WithFileHelpers, Test {
-    function test_TestnetDeploymentAndTraction() public {
+    function test_TestnetDeploymentAndTraction_success() public {
         setNetwork("testrun");
         TestnetDeploymentAndTraction testnetDeploymentAndTraction = new TestnetDeploymentAndTraction();
         testnetDeploymentAndTraction.setNetwork("testrun");
@@ -23,5 +23,11 @@ contract Test_DeploymentScripts is WithFileHelpers, Test {
         assertEq(address(steakedDegen.asset()), address(degenToken), "steakedDegen.degenToken");
         assertTrue(steakedDegen.isFan(address(betRegistry)), "steakedDegen.isFan");
         assertTrue(betRegistry.isFan(vm.envAddress("DEPLOYER")), "betRegistry.isFan");
+    }
+
+    function test_TestnetDeploymentAndTraction_fail_networkNotSet() public {
+        TestnetDeploymentAndTraction testnetDeploymentAndTraction = new TestnetDeploymentAndTraction();
+        vm.expectRevert("network not set.");
+        testnetDeploymentAndTraction.run();
     }
 }
