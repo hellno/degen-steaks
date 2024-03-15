@@ -166,4 +166,6 @@ contract WithActionHelpers is Script, WithFileHelpers {
         betRegistry.placeBet(0, betAmount, IBetRegistry.BetDirection.HIGHER);
         vm.stopBroadcast();
     }
+
+    function traction_2() public {}
 }

@@ -32,6 +32,20 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         assertEq(betRegistry.gracePeriod(), 1 days, "gracePeriod");
     }
 
+    function test_setSlashPeriod_onlyOwner() public {
+        vm.prank(ALICE);
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, ALICE));
+        betRegistry.setSlashPeriod(1 days);
+        assertEq(betRegistry.slashPeriod(), 4 weeks, "slashPeriod");
+    }
+
+    function test_setSlashPeriod_success() public {
+        vm.expectEmit();
+        emit SlashPeriodSet(1 days);
+        betRegistry.setSlashPeriod(1 days);
+        assertEq(betRegistry.slashPeriod(), 1 days, "slashPeriod");
+    }
+
     function test_createMarket_fail_onlyFan() public {
         vm.prank(ALICE);
         vm.expectRevert("BetRegistry::onlyFans: caller is not a fan.");

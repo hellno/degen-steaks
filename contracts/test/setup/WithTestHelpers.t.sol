@@ -28,6 +28,7 @@ contract WithTestHelpers is Test {
     event FanSet(address indexed user, bool isFan);
     event InitialDeposit(address indexed sender, address indexed receiver, uint256 assets, uint256 shares);
     event GracePeriodSet(uint256 gracePeriod);
+    event SlashPeriodSet(uint256 slashPeriod);
 
     IBetRegistry betRegistry;
     IERC20 degenToken;

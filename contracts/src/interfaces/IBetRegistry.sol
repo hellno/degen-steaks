@@ -49,6 +49,7 @@ interface IBetRegistry {
     );
     event FanSet(address indexed user, bool isFan);
     event GracePeriodSet(uint256 gracePeriod);
+    event SlashPeriodSet(uint256 slashPeriod);
 
     function createMarket(uint40 endTime, uint256 targetPrice) external;
     function getMarket(uint256 marketId) external view returns (Market memory);
@@ -64,4 +65,6 @@ interface IBetRegistry {
     function priceFeed() external view returns (IPriceFeed);
     function setGracePeriod(uint256 gracePeriod) external;
     function gracePeriod() external view returns (uint256);
+    function setSlashPeriod(uint256 slashPeriod) external;
+    function slashPeriod() external view returns (uint256);
 }
