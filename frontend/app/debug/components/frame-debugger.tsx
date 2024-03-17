@@ -1,4 +1,4 @@
-import { Frame, frameErrorKeys, getFrame, getFrameHtmlHead } from "frames.js";
+import { Frame, getFrame, getFrameHtmlHead } from "frames.js";
 import { useEffect, useState } from "react";
 import { FrameRender } from "./frame-render";
 import React from "react";
@@ -57,7 +57,7 @@ export function FrameDebugger({
                 </div>
               </div>
             ) : null}
-            {frameErrorKeys.map((key) => (
+            {/* {frameErrorKeys && frameErrorKeys.map((key) => (
               <div
                 style={{ display: "flex", flexDirection: "row", gap: "8px" }}
                 key={key}
@@ -71,7 +71,7 @@ export function FrameDebugger({
                   {frameData?.errors?.[key]?.join(",")}
                 </div>
               </div>
-            ))}
+            ))} */}
             <a
               target="_blank"
               className="underline text-slate-400 mt-2 block"
