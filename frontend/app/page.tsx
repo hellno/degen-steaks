@@ -172,7 +172,7 @@ export default async function Home({
         <div
           tw={clsx(
             b ? "rounded-l-full" : "rounded-full",
-            "flex border-r-5 border-gray-500 w-full bg-green-400"
+            "flex border-gray-500 w-full bg-green-400"
           )}
           style={{ width: `${a + b > 0 ? (a / (a + b)) * 100 : 0}%` }}
         >
@@ -308,8 +308,8 @@ export default async function Home({
   console.log("generate buttons", await generateButtons());
   const renderButtons = async () =>
     (await generateButtons()).map((button, idx) =>
-      renderButton(idx + 1, button)
-    );
+      renderButton(idx + 1, button) 
+    ) as any;
 
   return (
     <div>
