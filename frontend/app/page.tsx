@@ -310,7 +310,7 @@ export default async function Home({
     (await generateButtons()).map((button, idx) =>
       renderButton(idx + 1, button) 
     ) as any;
-
+  
   return (
     <div>
       yo
@@ -321,7 +321,7 @@ export default async function Home({
         previousFrame={previousFrame}
       >
         {renderImage()}
-        {await renderButtons()}
+        {/* {await renderButtons()} */}
       </FrameContainer>
     </div>
   );
