@@ -1,7 +1,9 @@
-import { createPublicClient, http } from 'viem'
+import { Chain, PublicClient, Transport, createPublicClient, http } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
- 
-export const publicClient = createPublicClient({
-  chain: baseSepolia,
-  transport: http()
+
+const chain = (process.env.NODE_ENV === 'production') ? base : baseSepolia;
+
+export const publicClient: PublicClient<Transport, Chain> = createPublicClient<Transport, Chain>({
+    chain,
+    transport: http()
 })
