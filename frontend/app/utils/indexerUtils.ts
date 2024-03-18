@@ -33,7 +33,9 @@ const BET_FRAGMENT = gql`
 `
 
 const runGraphqlRequest = async (query: string, variables: Variables, key: string) => {
+    console.log('graphql request', query, variables);
     const response = await request(GRAPHQL_ENDPOINT!, query, variables);
+    console.log('graphql response', response);
     return get(response, key);
 }
 

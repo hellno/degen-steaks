@@ -304,7 +304,7 @@ export default async function Home({
       {button.label}
     </FrameButton>
   );
-
+  console.log('marketData', marketData);
   console.log("generate buttons", await generateButtons());
   const renderButtons = async () =>
     (await generateButtons()).map((button, idx) =>
