@@ -1,6 +1,10 @@
 import { formatEther } from "viem";
 
 export function convertMillisecondsToDelta(milliseconds: number): string {
+    if (milliseconds < 0) {
+        milliseconds = Math.abs(milliseconds);
+    }
+
     var days, hours, minutes, seconds, total_hours, total_minutes, total_seconds;
 
     total_seconds = Math.floor(milliseconds / 1000);
@@ -20,4 +24,4 @@ export function convertMillisecondsToDelta(milliseconds: number): string {
     return timeString.replace(/, $/, '');
 };
 
-export const renderPrice = (price: bigint): string => `$${formatEther(price)}`;
+export const renderPrice = (price: bigint): string => price ? `$${formatEther(price)}` : "TBD";

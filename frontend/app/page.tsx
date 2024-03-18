@@ -4,18 +4,23 @@ import {
   FrameImage,
   FrameReducer,
   NextServerPageProps,
+  getFrameMessage,
   getPreviousFrame,
   useFramesReducer,
 } from "frames.js/next/server";
-import Link from "next/link";
-import {
-  getLatestMarketId,
-  getMarketData,
-  getUserDataForMarket,
-} from "./onchainUtils";
 import { formatEther } from "viem";
 import clsx from "clsx";
-import { convertMillisecondsToDelta, renderPrice } from "./utils";
+import { convertMillisecondsToDelta, renderPrice } from "./utils/utils";
+import { getMarket, getDefaultOpenMarket } from "./utils/indexerUtils";
+import { MarketType } from "./types";
+import isFunction from "lodash.isfunction";
+import { publicClient } from "./viemClient";
+import { degenAbi, degenContractAddress } from "./const/degenAbi";
+import { steakContractAddress } from "./const/steakAbi";
+import { getDegenAllowance } from "./utils/onchainUtils";
+
+const DEFAULT_MARKET_ID = -1;
+const baseUrl = process.env.NEXT_PUBLIC_HOST || "http://localhost:3000";
 
 enum PageState {
   start = "start",
@@ -24,11 +29,37 @@ enum PageState {
   view_market = "view_market",
 }
 
-const stateToButtons: { [key in PageState]: string[] } = {
-  [PageState.start]: ["Start 🔥"],
-  [PageState.decide]: ["Below 🔽", "Above 🔼"],
-  [PageState.pending_payment]: ["Pay ↗️", "Refresh", "Back to start"],
-  [PageState.view_market]: ["Refresh", "Back to start"],
+const renderPaymentButton = async (data: any): Promise<any> => {
+  const addresses = [data.requesterCustodyAddress].concat(
+    ...data.requesterVerifiedAddresses
+  );
+  const allowance = await getDegenAllowance(addresses);
+  const hasAllowance = allowance > 0n;
+
+  if (hasAllowance) {
+    return {
+      label: "Approve $DEGEN",
+      action: "tx",
+      target: `${baseUrl}/txdata/approvedegen`,
+    };
+  } else {
+    return {
+      label: "Start betting",
+      action: "tx",
+      target: `${baseUrl}/txdata/placebet`,
+    };
+  }
+};
+
+const stateToButtons: { [key in PageState]: any[] } = {
+  [PageState.start]: [{ label: "Start 🔥" }],
+  [PageState.decide]: [{ label: "Below 🔽" }, { label: "Above 🔼" }],
+  [PageState.pending_payment]: [
+    renderPaymentButton,
+    { label: "Refresh 🔄" },
+    { label: "Back 🏠" },
+  ],
+  [PageState.view_market]: [{ label: "Refresh 🔄" }, { label: "Back 🏠" }],
 };
 
 type State = {
@@ -36,13 +67,18 @@ type State = {
   marketId: number;
 };
 
-const initialState: State = { pageState: PageState.start, marketId: 0 };
+const initialState: State = {
+  pageState: PageState.start,
+  marketId: DEFAULT_MARKET_ID,
+};
 
 const reducer: FrameReducer<State> = (state, action) => {
+  console.log("reducer state", state);
   const buttonIndex = action.postBody?.untrustedData.buttonIndex;
   console.log("buttonIndex", buttonIndex);
   if (!state.marketId) {
-    state = { ...state, marketId: getLatestMarketId() };
+    console.log("has no market id");
+    state = { ...state, marketId: 1 };
   }
 
   if (state.pageState === PageState.start) {
@@ -55,13 +91,12 @@ const reducer: FrameReducer<State> = (state, action) => {
 
   if (state.pageState === PageState.pending_payment) {
     if (buttonIndex === 1) {
-      // stay on page, because we are pending payment
-      // action should link out to payment page and not trigger this
+      console.log("bet onchain");
       return { ...state, pageState: PageState.pending_payment };
     }
     if (buttonIndex === 2) {
       // refresh
-      return { ...state, pageState: PageState.view_market };
+      return { ...state, pageState: PageState.pending_payment };
     }
     if (buttonIndex === 3) {
       return { ...state, pageState: PageState.start };
@@ -85,25 +120,40 @@ export default async function Home({
 }: NextServerPageProps) {
   const previousFrame = getPreviousFrame<State>(searchParams);
   const [state] = useFramesReducer<State>(reducer, initialState, previousFrame);
-  console.log("state", state);
-  const marketData = await getMarketData(state.marketId);
-  // fake the data for now
-  if (state.pageState !== PageState.view_market) {
-    marketData.resolveTimestamp = new Date().getTime() + 300000;
+  const frameMessage = await getFrameMessage(previousFrame.postBody, {
+    // hubHttpUrl: '',
+    fetchHubContext: true,
+  });
+
+  console.log("page state", state);
+  // console.log("frameMessage", frameMessage);
+  const { marketId, pageState } = state;
+
+  let marketData: MarketType;
+
+  const userAddresses = !frameMessage
+    ? []
+    : [frameMessage.requesterCustodyAddress].concat(
+        ...frameMessage.requesterVerifiedAddresses
+      );
+  if (marketId === DEFAULT_MARKET_ID) {
+    marketData = await getDefaultOpenMarket(userAddresses);
+    state.marketId = marketData.id;
+  } else {
+    marketData = await getMarket(marketId, userAddresses);
   }
 
-  console.log("marketData", marketData);
-  const userData = await getUserDataForMarket(state.marketId);
-  if (state.pageState === PageState.pending_payment) {
+  if (pageState === PageState.pending_payment) {
     // check if user made a payment
+    console.log("pending payment");
   }
 
-  if (state.pageState === PageState.view_market) {
-    // check if user has won or lost
+  if (pageState === PageState.view_market) {
+    console.log("pending view market");
   }
 
   const renderImage = () => {
-    switch (state.pageState) {
+    switch (pageState) {
       case PageState.start:
         return renderDefaultFrame();
       case PageState.decide:
@@ -122,7 +172,7 @@ export default async function Home({
         <div
           tw={clsx(
             b ? "rounded-l-full" : "rounded-full",
-            "flex border-r-5 border-gray-500 w-full bg-green-400"
+            "flex border-gray-500 w-full bg-green-400"
           )}
           style={{ width: `${a + b > 0 ? (a / (a + b)) * 100 : 0}%` }}
         >
@@ -154,44 +204,68 @@ export default async function Home({
       <div tw="flex flex-col">
         <div tw="flex flex-col self-center text-center justify-center items-center">
           <p tw="text-7xl">Want more $DEGEN?</p>
-          <p tw="text-5xl">Start staking and betting today! 🥩</p>
+          <p tw="text-5xl">Start staking and betting today!</p>
         </div>
         <div tw="flex">{renderProgressBar({ a: 69, b: 21 })}</div>
       </div>
     </FrameImage>
   );
 
-  // use Market data to render progress bar and threshold
   const renderFrameForMarket = () => {
-    const timeDelta = marketData.resolveTimestamp - new Date().getTime();
-    if (timeDelta < 0) {
-      const userWasCorrect = userData.voted === marketData.result;
+    const { isResolved, endPrice, targetPrice, highWon, bets } = marketData;
+    console.log("renderFrameForMarket", marketData);
+    if (isResolved && endPrice) {
+      const userPlacedBet = bets && bets.length > 0;
+      const userWasCorrect = false;
+
       return (
         <FrameImage>
           <div tw="flex flex-col">
             <div tw="flex flex-col self-center text-center justify-center items-center">
-              <p tw="text-7xl">$DEGEN is cooked 🧑🏽‍🍳</p>
+              <p tw="text-7xl">DEGEN steak is done 🔥🧑🏽‍🍳</p>
               <p tw="text-5xl">
-                Price was {marketData.result}{" "}
-                {renderPrice(marketData.threshold)}
+                Price was {renderPrice(endPrice)} {renderPrice(targetPrice)}-
+                {">"} {highWon || "TBD"}
               </p>
-              <p tw="text-6xl">You {userWasCorrect ? "won" : "lost"} </p>
+              <p tw="text-6xl">You {userWasCorrect ? "won 🤩" : "lost 🫡"} </p>
             </div>
           </div>
         </FrameImage>
       );
     }
 
+    const timeDelta = marketData.endTime * 1000 - new Date().getTime();
+    const sharesLower =
+      marketData.totalSharesLower /
+      (marketData.totalSharesLower + marketData.totalSharesHigher);
+    const sharesHigher =
+      marketData.totalSharesHigher /
+      (marketData.totalSharesLower + marketData.totalSharesHigher);
+    console.log(
+      "timeDelta",
+      timeDelta,
+      marketData.endTime,
+      new Date().getTime()
+    );
+
+    const marketEndDescription =
+      timeDelta > 0
+        ? `Ends in ${convertMillisecondsToDelta(timeDelta)}`
+        : `Ended ${convertMillisecondsToDelta(timeDelta)} ago`;
+
     return (
       <FrameImage>
         <div tw="flex flex-col">
-          <div tw="flex flex-col space-y-2 self-center text-center justify-center items-center">
-            <p tw="text-4xl">Will the $DEGEN price be</p>
-            above or below
-            <p tw="text-4xl">{formatEther(marketData.threshold)}</p>
-            in {convertMillisecondsToDelta(timeDelta)}?
-            <div tw="flex">
-              {renderProgressBar({ a: marketData.above, b: marketData.below })}
+          <div tw="flex flex-col self-center text-center justify-center items-center">
+            <p tw="text-5xl">Will the $DEGEN price be</p>
+            above 🔼 or below 🔽
+            <p tw="text-7xl">{formatEther(marketData.targetPrice)}</p>
+            {marketEndDescription}
+            <div tw="flex mt-24">
+              {renderProgressBar({
+                a: 100 * Number(sharesLower),
+                b: 100 * Number(sharesHigher),
+              })}
             </div>
           </div>
         </div>
@@ -210,11 +284,36 @@ export default async function Home({
     </FrameImage>
   );
 
-  const buttons = stateToButtons[state.pageState];
+  const generateButtons = async () => {
+    const buttons = stateToButtons[state.pageState];
+    return await Promise.resolve(
+      Promise.all(
+        buttons.map(async (button) =>
+          isFunction(button) ? button(frameMessage) : button
+        ) as any
+      )
+    );
+  };
 
+  const renderButton = (idx: number, button: any) => (
+    <FrameButton
+      action={button.action ? button.action : "post"}
+      target={button.target}
+      key={idx}
+    >
+      {button.label}
+    </FrameButton>
+  );
+  console.log('marketData', marketData);
+  console.log("generate buttons", await generateButtons());
+  const renderButtons = async () =>
+    (await generateButtons()).map((button, idx) =>
+      renderButton(idx + 1, button) 
+    ) as any;
+  
   return (
     <div>
-      Multi-page example <Link href="/debug">Debug</Link>
+      <h1 className="text-4xl">degen steaks 🥩</h1>
       <FrameContainer
         postUrl="/frames"
         pathname="/"
@@ -222,11 +321,7 @@ export default async function Home({
         previousFrame={previousFrame}
       >
         {renderImage()}
-        {/* ugly buttons, but found no better solution that passes the build */}
-        {buttons.length > 0 ? <FrameButton key={buttons[0]}>{buttons[0]!}</FrameButton> : null}
-        {buttons.length > 1 ? <FrameButton key={buttons[1]}>{buttons[1]!}</FrameButton> : null}
-        {buttons.length > 2 ? <FrameButton key={buttons[2]}>{buttons[2]!}</FrameButton> : null}
-        {buttons.length > 3 ? <FrameButton key={buttons[3]}>{buttons[3]!}</FrameButton> : null}
+        {await renderButtons()}
       </FrameContainer>
     </div>
   );
