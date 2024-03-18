@@ -313,7 +313,7 @@ export default async function Home({
   
   return (
     <div>
-      yo
+      <h1 className="text-4xl">degen steaks 🥩</h1>
       <FrameContainer
         postUrl="/frames"
         pathname="/"
@@ -321,7 +321,7 @@ export default async function Home({
         previousFrame={previousFrame}
       >
         {renderImage()}
-        {/* {await renderButtons()} */}
+        {await renderButtons()}
       </FrameContainer>
     </div>
   );
