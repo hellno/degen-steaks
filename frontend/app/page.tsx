@@ -20,7 +20,7 @@ import { steakContractAddress } from "./const/steakAbi";
 import { getDegenAllowance } from "./utils/onchainUtils";
 
 const DEFAULT_MARKET_ID = -1;
-const baseUrl = process.env.NEXT_PUBLIC_HOST || "http://localhost:3000";
+const baseUrl = process.env.NEXT_PUBLIC_HOST;
 
 enum PageState {
   start = "start",
@@ -33,7 +33,7 @@ const renderPaymentButton = async (data: any): Promise<any> => {
   const addresses = [data.requesterCustodyAddress].concat(
     ...data.requesterVerifiedAddresses
   );
-  const allowance = await getDegenAllowance(addresses);
+  const allowance = 0n; // await getDegenAllowance(addresses);
   const hasAllowance = allowance > 0n;
 
   if (hasAllowance) {
