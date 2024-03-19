@@ -74,16 +74,21 @@ contract WithActionHelpers is Script, WithFileHelpers {
         address ethUsdcPool = 0x4C36388bE6F416A29C8d8Eee81C771cE6bE14B18;
         address degenTokenAddress = 0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed;
 
+        address dude = 0x2887e0d5a6D4869BE9589a5ea5693008FC168631;
+        address hellno = 0x36E31d250686E9B700c8A2a08E98458004E4D988;
+
         vm.startBroadcast(deployerPrivateKey);
 
         priceFeed = new PriceFeed({ethDegenPool_: ethDegenPool, ethUsdcPool_: ethUsdcPool});
         degenToken = DegenToken(degenTokenAddress);
         steakedDegen = new SteakedDegen("Steaked Degen", "SDEGEN", degenToken, address(this));
-        betRegistry = new BetRegistry(degenToken, steakedDegen, IPriceFeed(address(priceFeed)), address(this));
+        betRegistry = new BetRegistry(degenToken, steakedDegen, IPriceFeed(address(priceFeed)), dude);
         steakedDegen.setFan(address(betRegistry), true);
+        betRegistry.setFan(hellno, true);
 
-        // uint256 initialDeposit = 10 * 1e6 * 1e18;
-        // steakedDegen.initialDeposit(initialDeposit, address(this));
+        uint256 initialDeposit = 1_000_000 * 1e18;
+        degenToken.approve(address(steakedDegen), initialDeposit);
+        steakedDegen.initialDeposit(initialDeposit, address(this));
 
         vm.stopBroadcast();
 
