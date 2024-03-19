@@ -10,6 +10,7 @@ import "openzeppelin/access/Ownable.sol";
 
 contract SteakedDegen is ISteakedDegen, ERC4626, Ownable {
     using SafeERC20 for IERC20;
+    using Math for uint256;
 
     uint256 public steakFee = 69 * 1e2; // 0.69%
     uint256 public daoFee = 69 * 1e2; // 0.69%
@@ -93,7 +94,7 @@ contract SteakedDegen is ISteakedDegen, ERC4626, Ownable {
      * This is an override of previewDeposit to match the shares the user should expect from calling deposit.
      * This is to maintain compliancy with EIP-4626
      */
-    function previewDeposit(uint256 assets) public view override returns (uint256) {
+    function previewDeposit(uint256 assets) public view override(ERC4626, IERC4626) returns (uint256) {
         uint256 steakFeeAmount = assets * steakFee / FEE_DIVISOR;
         uint256 daoFeeAmount = assets * daoFee / FEE_DIVISOR;
         uint256 assetsAfterFee = assets - steakFeeAmount - daoFeeAmount;
