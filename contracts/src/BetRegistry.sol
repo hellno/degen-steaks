@@ -22,7 +22,8 @@ contract BetRegistry is IBetRegistry, Ownable {
     uint256 public gracePeriod = 60; // 60 seconds between end of a market and resolution.
 
     Market[] public markets;
-    mapping(uint256 marketId => mapping(address user => Bet)) public marketToUserToBet;
+    mapping(uint256 marketId => mapping(address user => Bet))
+        public marketToUserToBet;
     IERC20 public degenToken;
 
     IERC4626 public steakedDegen;
@@ -31,9 +32,12 @@ contract BetRegistry is IBetRegistry, Ownable {
 
     mapping(address => bool) public isFan; // haha just kidding, it's a pun. onlyDepositer is a better name.
 
-    constructor(IERC20 degenToken_, IERC4626 steakedDegen_, IPriceFeed priceFeed_, address degenUtilityDao_)
-        Ownable(msg.sender)
-    {
+    constructor(
+        IERC20 degenToken_,
+        IERC4626 steakedDegen_,
+        IPriceFeed priceFeed_,
+        address degenUtilityDao_
+    ) Ownable(msg.sender) {
         degenToken = IERC20(degenToken_);
         steakedDegen = steakedDegen_;
         priceFeed = priceFeed_;
@@ -42,7 +46,10 @@ contract BetRegistry is IBetRegistry, Ownable {
     }
 
     modifier onlyFans() {
-        require(isFan[_msgSender()], "BetRegistry::onlyFans: caller is not a fan.");
+        require(
+            isFan[_msgSender()],
+            "BetRegistry::onlyFans: caller is not a fan."
+        );
         _;
     }
 
@@ -68,13 +75,25 @@ contract BetRegistry is IBetRegistry, Ownable {
         return markets[marketId_];
     }
 
-    function getBet(uint256 marketId_, address user_) public view returns (Bet memory) {
+    function getBet(
+        uint256 marketId_,
+        address user_
+    ) public view returns (Bet memory) {
         return marketToUserToBet[marketId_][user_];
     }
 
-    function createMarket(uint40 endTime_, uint256 targetPrice_) public onlyFans {
-        require(endTime_ > block.timestamp, "BetRegistry::createMarket: endTime must be in the future.");
-        require(targetPrice_ > 0, "BetRegistry::createMarket: targetPrice must be greater than zero.");
+    function createMarket(
+        uint40 endTime_,
+        uint256 targetPrice_
+    ) public onlyFans {
+        require(
+            endTime_ > block.timestamp,
+            "BetRegistry::createMarket: endTime must be in the future."
+        );
+        require(
+            targetPrice_ > 0,
+            "BetRegistry::createMarket: targetPrice must be greater than zero."
+        );
         markets.push(
             Market({
                 creator: msg.sender,
@@ -88,14 +107,32 @@ contract BetRegistry is IBetRegistry, Ownable {
             })
         );
 
-        emit MarketCreated(markets.length - 1, msg.sender, endTime_, targetPrice_);
+        emit MarketCreated(
+            markets.length - 1,
+            msg.sender,
+            endTime_,
+            targetPrice_
+        );
     }
 
-    function placeBet(uint256 marketId_, uint256 amount_, BetDirection direction_) public {
-        require(marketId_ < markets.length, "BetRegistry::placeBet: marketId out of range.");
-        require(amount_ > MIN_BID, "BetRegistry::placeBet: amount must be greater than MIN_BID.");
+    function placeBet(
+        uint256 marketId_,
+        uint256 amount_,
+        BetDirection direction_
+    ) public {
+        require(
+            marketId_ < markets.length,
+            "BetRegistry::placeBet: marketId out of range."
+        );
+        require(
+            amount_ > MIN_BID,
+            "BetRegistry::placeBet: amount must be greater than MIN_BID."
+        );
         Market storage market = markets[marketId_];
-        require(block.timestamp < market.endTime, "BetRegistry::placeBet: market has ended.");
+        require(
+            block.timestamp < market.endTime,
+            "BetRegistry::placeBet: market has ended."
+        );
 
         degenToken.safeTransferFrom(msg.sender, address(this), amount_);
 
@@ -104,7 +141,9 @@ contract BetRegistry is IBetRegistry, Ownable {
         uint256 steaks = steakedDegen.deposit(amount_, address(this));
 
         // pay fee to totalStDegen in Market
-        uint256 feeSteaks = market.totalSteakedDegen == 0 ? 0 : steaks.mulDiv(MARKET_FEE, FEE_DIVISOR);
+        uint256 feeSteaks = market.totalSteakedDegen == 0
+            ? 0
+            : steaks.mulDiv(MARKET_FEE, FEE_DIVISOR);
         market.totalSteakedDegen += feeSteaks;
         steaks -= feeSteaks;
 
@@ -114,7 +153,10 @@ contract BetRegistry is IBetRegistry, Ownable {
         // market.totalHigher + market.totalLower == 0 means this is the first bet
         uint256 betShares = market.totalHigher + market.totalLower == 0
             ? steaks
-            : steaks.mulDiv(market.totalHigher + market.totalLower, market.totalSteakedDegen);
+            : steaks.mulDiv(
+                market.totalHigher + market.totalLower,
+                market.totalSteakedDegen
+            );
         market.totalSteakedDegen += steaks;
 
         if (direction_ == BetDirection.HIGHER) {
@@ -138,14 +180,27 @@ contract BetRegistry is IBetRegistry, Ownable {
 
     function resolveMarket(uint256 marketId_) public {
         Market storage market = markets[marketId_];
-        require(block.timestamp >= market.endTime, "BetRegistry::resolveMarket: market has not ended.");
-        require(block.timestamp >= market.endTime + gracePeriod, "BetRegistry::resolveMarket: grace period not over.");
+        require(
+            block.timestamp >= market.endTime,
+            "BetRegistry::resolveMarket: market has not ended."
+        );
+        require(
+            block.timestamp >= market.endTime + gracePeriod,
+            "BetRegistry::resolveMarket: grace period not over."
+        );
         uint256 price = priceFeed.getPrice();
-        require(price != market.targetPrice, "BetRegistry::resolveMarket: endPrice and targetPrice must differ.");
+        require(
+            price != market.targetPrice,
+            "BetRegistry::resolveMarket: endPrice and targetPrice must differ."
+        );
         market.endPrice = price;
 
         // unsteake degen
-        uint256 degen = steakedDegen.redeem(market.totalSteakedDegen, address(this), address(this));
+        uint256 degen = steakedDegen.redeem(
+            market.totalSteakedDegen,
+            address(this),
+            address(this)
+        );
 
         // deduct owner fee
         uint256 creatorFee = degen.mulDiv(CREATOR_FEE, FEE_DIVISOR);
@@ -162,8 +217,14 @@ contract BetRegistry is IBetRegistry, Ownable {
 
     function cashOut(uint256 marketId_) public {
         Market storage market = markets[marketId_];
-        require(market.endPrice != 0, "BetRegistry::cashOut: market not resolved.");
-        require(market.totalDegen > 0, "BetRegistry::cashOut: market has no degen.");
+        require(
+            market.endPrice != 0,
+            "BetRegistry::cashOut: market not resolved."
+        );
+        require(
+            market.totalDegen > 0,
+            "BetRegistry::cashOut: market has no degen."
+        );
 
         uint256 totalMarketShares;
         uint256 userMarketShares;
@@ -172,17 +233,31 @@ contract BetRegistry is IBetRegistry, Ownable {
         // winning direction is HIGHER
         if (market.endPrice > market.targetPrice) {
             totalMarketShares = market.totalHigher;
-            userMarketShares = marketToUserToBet[marketId_][msg.sender].amountHigher;
-            require(userMarketShares > 0, "BetRegistry::cashOut: Nothing to cash out.");
-            userDegenPayout = market.totalDegen.mulDiv(userMarketShares, totalMarketShares);
+            userMarketShares = marketToUserToBet[marketId_][msg.sender]
+                .amountHigher;
+            require(
+                userMarketShares > 0,
+                "BetRegistry::cashOut: Nothing to cash out."
+            );
+            userDegenPayout = market.totalDegen.mulDiv(
+                userMarketShares,
+                totalMarketShares
+            );
             marketToUserToBet[marketId_][msg.sender].amountHigher = 0;
             market.totalHigher -= userMarketShares;
             market.totalDegen -= userDegenPayout;
         } else {
             totalMarketShares = market.totalLower;
-            userMarketShares = marketToUserToBet[marketId_][msg.sender].amountLower;
-            require(userMarketShares > 0, "BetRegistry::cashOut: Nothing to cash out.");
-            userDegenPayout = market.totalDegen.mulDiv(userMarketShares, totalMarketShares);
+            userMarketShares = marketToUserToBet[marketId_][msg.sender]
+                .amountLower;
+            require(
+                userMarketShares > 0,
+                "BetRegistry::cashOut: Nothing to cash out."
+            );
+            userDegenPayout = market.totalDegen.mulDiv(
+                userMarketShares,
+                totalMarketShares
+            );
             marketToUserToBet[marketId_][msg.sender].amountLower = 0;
             market.totalLower -= userMarketShares;
             market.totalDegen -= userDegenPayout;
@@ -201,7 +276,8 @@ contract BetRegistry is IBetRegistry, Ownable {
     function slash(uint256 marketId_) public {
         Market storage market = markets[marketId_];
         require(
-            block.timestamp >= market.endTime + gracePeriod + slashPeriod, "BetRegistry::slash: Slash period not over."
+            block.timestamp >= market.endTime + gracePeriod + slashPeriod,
+            "BetRegistry::slash: Slash period not over."
         );
 
         uint256 totalDegen = market.totalDegen;
@@ -214,7 +290,21 @@ contract BetRegistry is IBetRegistry, Ownable {
         uint256 slashFee = totalDegen.mulDiv(CREATOR_FEE, FEE_DIVISOR);
         uint256 daoFee = totalDegen.mulDiv(CREATOR_FEE, FEE_DIVISOR);
 
-        totalDegen -= creatorFee + slashFee + daoFee;
+        if (creatorFee >= totalDegen) {
+            creatorFee = totalDegen;
+            slashFee = 0;
+            daoFee = 0;
+            totalDegen = 0;
+        } else if (creatorFee + slashFee >= totalDegen) {
+            slashFee = totalDegen - creatorFee;
+            daoFee = 0;
+            totalDegen = 0;
+        } else if (creatorFee + slashFee + daoFee >= totalDegen) {
+            daoFee = totalDegen - creatorFee - slashFee;
+            totalDegen = 0;
+        } else {
+            totalDegen -= creatorFee + slashFee + daoFee;
+        }
 
         degenToken.safeTransfer(address(steakedDegen), totalDegen);
         degenToken.safeTransfer(market.creator, creatorFee);
