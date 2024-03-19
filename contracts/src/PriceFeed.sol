@@ -20,35 +20,35 @@ contract PriceFeed is IPriceFeed {
     }
 
     /// @dev returns the usdc value of 1 mio DEGEN
-    function getPrice() external view returns (uint256) {
-        return degenToUsdc(1e6 * 1e18);
+    function getPrice(uint32 secondsAgo_) external view returns (uint256) {
+        return degenToUsdc(1e6 * 1e18, secondsAgo_);
     }
 
-    function degenToUsdc(uint128 degenAmount_) public view returns (uint256) {
-        uint256 quoteEth = degenToEth(degenAmount_);
-        uint256 quoteUsdc = ethToUsdc(uint128(quoteEth));
+    function degenToUsdc(uint128 degenAmount_, uint32 secondsAgo_) public view returns (uint256) {
+        uint256 quoteEth = degenToEth(degenAmount_, secondsAgo_);
+        uint256 quoteUsdc = ethToUsdc(uint128(quoteEth), secondsAgo_);
         return quoteUsdc;
     }
 
-    function degenToEth(uint128 degenAmount_) public view returns (uint256) {
+    function degenToEth(uint128 degenAmount_, uint32 secondsAgo_) public view returns (uint256) {
         uint32[] memory secondsAgos = new uint32[](2);
-        secondsAgos[0] = 0;
-        secondsAgos[1] = 60;
+        secondsAgos[0] = secondsAgo_ + 60;
+        secondsAgos[1] = secondsAgo_;
         (int56[] memory tickCumulatives,) = ethDegenPool.observe(secondsAgos);
-        int56 tickCumulative = tickCumulatives[1] - tickCumulatives[0];
-        int56 avgTickCumulative = tickCumulative / 60; // 0, 60 seconds
-        uint256 quote = OracleLibrary.getQuoteAtTick(int24(avgTickCumulative), degenAmount_, WETH_BASE, DEGEN_BASE);
+        int56 tickCumulativeDelta = tickCumulatives[1] - tickCumulatives[0];
+        int56 avgTick = tickCumulativeDelta / 60; // 0, 60 seconds
+        uint256 quote = OracleLibrary.getQuoteAtTick(int24(avgTick), degenAmount_, WETH_BASE, DEGEN_BASE);
         return quote;
     }
 
-    function ethToUsdc(uint128 ethAmount_) public view returns (uint256) {
+    function ethToUsdc(uint128 ethAmount_, uint32 secondsAgo_) public view returns (uint256) {
         uint32[] memory secondsAgos = new uint32[](2);
-        secondsAgos[0] = 0;
-        secondsAgos[1] = 60;
+        secondsAgos[0] = secondsAgo_ + 60;
+        secondsAgos[1] = secondsAgo_;
         (int56[] memory tickCumulatives,) = ethUsdcPool.observe(secondsAgos);
-        int56 tickCumulative = tickCumulatives[1] - tickCumulatives[0];
-        int56 avgTickCumulative = tickCumulative / 60; // 0, 60 seconds
-        uint256 quote = OracleLibrary.getQuoteAtTick(int24(avgTickCumulative), ethAmount_, USDC_BASE, WETH_BASE);
+        int56 tickCumulativeDelta = tickCumulatives[1] - tickCumulatives[0];
+        int56 avgTick = tickCumulativeDelta / 60; // 0, 60 seconds
+        uint256 quote = OracleLibrary.getQuoteAtTick(int24(avgTick), ethAmount_, USDC_BASE, WETH_BASE);
         return quote;
     }
 }
