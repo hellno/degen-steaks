@@ -71,10 +71,10 @@ contract SteakedDegen is ISteakedDegen, ERC4626, Ownable {
         whenInitialized
         returns (uint256)
     {
+        uint256 shares = previewDeposit(assets);
         uint256 steakFeeAmount = assets * steakFee / FEE_DIVISOR;
         uint256 daoFeeAmount = assets * daoFee / FEE_DIVISOR;
         uint256 assetsAfterFee = assets - steakFeeAmount - daoFeeAmount;
-        uint256 shares = previewDeposit(assetsAfterFee);
 
         // slither-disable-next-line reentrancy-no-eth
         SafeERC20.safeTransferFrom(IERC20(asset()), _msgSender(), daoFeeReceiver, daoFeeAmount);
