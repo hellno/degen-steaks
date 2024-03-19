@@ -215,4 +215,14 @@ contract WithActionHelpers is Script, WithFileHelpers {
         betRegistry.createMarket(uint40(endTime), targetPrice);
         vm.stopBroadcast();
     }
+
+    function traction_resolveMarket() public {
+        uint256 marketId = vm.envUint("MARKET_ID");
+        uint256 price = vm.envUint("PRICE");
+
+        vm.startBroadcast();
+        priceFeed.setPrice(price);
+        betRegistry.resolveMarket(marketId);
+        vm.stopBroadcast();
+    }
 }
