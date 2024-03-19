@@ -20,17 +20,17 @@ contract PriceFeed is IPriceFeed {
     }
 
     /// @dev returns the usdc value of 1 mio DEGEN
-    function getPrice(uint128 secondsAgo_) external view returns (uint256) {
+    function getPrice(uint32 secondsAgo_) external view returns (uint256) {
         return degenToUsdc(1e6 * 1e18, secondsAgo_);
     }
 
-    function degenToUsdc(uint128 degenAmount_, uint128 secondsAgo_) public view returns (uint256) {
+    function degenToUsdc(uint128 degenAmount_, uint32 secondsAgo_) public view returns (uint256) {
         uint256 quoteEth = degenToEth(degenAmount_, secondsAgo_);
         uint256 quoteUsdc = ethToUsdc(uint128(quoteEth), secondsAgo_);
         return quoteUsdc;
     }
 
-    function degenToEth(uint128 degenAmount_, uint128 secondsAgo_) public view returns (uint256) {
+    function degenToEth(uint128 degenAmount_, uint32 secondsAgo_) public view returns (uint256) {
         uint32[] memory secondsAgos = new uint32[](2);
         secondsAgos[0] = secondsAgo_ + 60;
         secondsAgos[1] = secondsAgo_;
@@ -41,7 +41,7 @@ contract PriceFeed is IPriceFeed {
         return quote;
     }
 
-    function ethToUsdc(uint128 ethAmount_, uint128 secondsAgo_) public view returns (uint256) {
+    function ethToUsdc(uint128 ethAmount_, uint32 secondsAgo_) public view returns (uint256) {
         uint32[] memory secondsAgos = new uint32[](2);
         secondsAgos[0] = secondsAgo_ + 60;
         secondsAgos[1] = secondsAgo_;
