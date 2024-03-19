@@ -142,7 +142,6 @@ contract BetRegistry is IBetRegistry, Ownable {
         require(block.timestamp >= market.endTime + gracePeriod, "BetRegistry::resolveMarket: grace period not over.");
         uint32 secondsAgo = uint32(block.timestamp - market.endTime);
         uint256 price = priceFeed.getPrice(secondsAgo);
-        require(price != market.targetPrice, "BetRegistry::resolveMarket: endPrice and targetPrice must differ.");
         market.endPrice = price;
 
         // unsteake degen
