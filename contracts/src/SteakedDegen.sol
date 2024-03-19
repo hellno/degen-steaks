@@ -95,7 +95,9 @@ contract SteakedDegen is ISteakedDegen, ERC4626, Ownable {
      */
     function previewDeposit(uint256 assets) public view override returns (uint256) {
         uint256 steakFeeAmount = assets * steakFee / FEE_DIVISOR;
+        uint256 daoFeeAmount = assets * daoFee / FEE_DIVISOR;
+        uint256 assetsAfterFee = assets - steakFeeAmount - daoFeeAmount;
         // adapted from _convertToShares, but uses totalAssets + steakFeeAmount instead of totalAssets
-        return assets.mulDiv(totalSupply() + 10 ** _decimalsOffset(), totalAssets() + steakFeeAmount + 1, rounding);
+        return assetsAfterFee.mulDiv(totalSupply() + 10 ** _decimalsOffset(), totalAssets() + steakFeeAmount + 1, rounding);
     }
 }
