@@ -60,7 +60,7 @@ contract SteakedDegen is ISteakedDegen, ERC4626, Ownable {
 
     /**
      * @dev See {IERC4626-deposit}.
-     * This is a complete override of deposit and _deposit.
+     * This is a complete override of deposit.
      * A steak fee is taken _before_ the deposit to be paid to all other token holders.
      * The fee increases the totalAssets in the pool. This increases the price for all share token holders.
      */
@@ -71,28 +71,31 @@ contract SteakedDegen is ISteakedDegen, ERC4626, Ownable {
         whenInitialized
         returns (uint256)
     {
-        uint256 steakFeeAmount = steakFee * assets / FEE_DIVISOR;
-        uint256 daoFeeAmount = steakFee * assets / FEE_DIVISOR;
+        uint256 steakFeeAmount = assets * steakFee / FEE_DIVISOR;
+        uint256 daoFeeAmount = assets * daoFee / FEE_DIVISOR;
         uint256 assetsAfterFee = assets - steakFeeAmount - daoFeeAmount;
+        uint256 shares = previewDeposit(assetsAfterFee);
 
         // slither-disable-next-line reentrancy-no-eth
         SafeERC20.safeTransferFrom(IERC20(asset()), _msgSender(), daoFeeReceiver, daoFeeAmount);
-
         emit DaoFeePaid(_msgSender(), daoFeeAmount);
 
         // slither-disable-next-line reentrancy-no-eth
         SafeERC20.safeTransferFrom(IERC20(asset()), _msgSender(), address(this), steakFeeAmount);
-
-        uint256 shares = previewDeposit(assetsAfterFee);
-
-        // slither-disable-next-line reentrancy-no-eth
-        SafeERC20.safeTransferFrom(IERC20(asset()), _msgSender(), address(this), assetsAfterFee);
-
         emit SteakFeePaid(_msgSender(), steakFeeAmount);
-        _mint(receiver, shares);
 
-        emit Deposit(_msgSender(), receiver, assetsAfterFee, shares);
-
+        _deposit(_msgSender(), receiver, assetsAfterFee, shares);
         return shares;
+    }
+
+    /**
+     * @dev See {IERC4626-previewDeposit}.
+     * This is an override of previewDeposit to match the shares the user should expect from calling deposit.
+     * This is to maintain compliancy with EIP-4626
+     */
+    function previewDeposit(uint256 assets) public view override returns (uint256) {
+        uint256 steakFeeAmount = assets * steakFee / FEE_DIVISOR;
+        // adapted from _convertToShares, but uses totalAssets + steakFeeAmount instead of totalAssets
+        return assets.mulDiv(totalSupply() + 10 ** _decimalsOffset(), totalAssets() + steakFeeAmount + 1, rounding);
     }
 }
