@@ -98,6 +98,6 @@ contract SteakedDegen is ISteakedDegen, ERC4626, Ownable {
         uint256 daoFeeAmount = assets * daoFee / FEE_DIVISOR;
         uint256 assetsAfterFee = assets - steakFeeAmount - daoFeeAmount;
         // adapted from _convertToShares, but uses totalAssets + steakFeeAmount instead of totalAssets
-        return assetsAfterFee.mulDiv(totalSupply() + 10 ** _decimalsOffset(), totalAssets() + steakFeeAmount + 1, rounding);
+        return assetsAfterFee.mulDiv(totalSupply() + 10 ** _decimalsOffset(), totalAssets() + steakFeeAmount + 1, Math.Rounding.Floor);
     }
 }
