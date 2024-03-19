@@ -216,12 +216,18 @@ contract WithActionHelpers is Script, WithFileHelpers {
         vm.stopBroadcast();
     }
 
-    function traction_resolveMarket() public {
-        uint256 marketId = vm.envUint("MARKET_ID");
+    function traction_setPrice() public {
         uint256 price = vm.envUint("PRICE");
 
         vm.startBroadcast();
         priceFeed.setPrice(price);
+        vm.stopBroadcast();
+    }
+
+    function traction_resolveMarket() public {
+        uint256 marketId = vm.envUint("MARKET_ID");
+
+        vm.startBroadcast();
         betRegistry.resolveMarket(marketId);
         vm.stopBroadcast();
     }

@@ -1,0 +1,35 @@
+{
+  "transactions": [
+    {
+      "hash": "0xea1d7ae7b054648cb7dc4dfb969cd5605f9ccac873e33e64d1848c5d5e5e916b",
+      "transactionType": "CALL",
+      "contractName": "MockPriceFeed",
+      "contractAddress": "0xD4bE8B3240123B737e7317eF490a6eB6b68c0A41",
+      "function": "setPrice(uint256)",
+      "arguments": [
+        "3468565539"
+      ],
+      "transaction": {
+        "type": "0x00",
+        "from": "0x00590bb9a26afcabff0311e937dd72066b4ffc38",
+        "to": "0xd4be8b3240123b737e7317ef490a6eb6b68c0a41",
+        "gas": "0x8e99",
+        "value": "0x0",
+        "data": "0x91b7f5ed00000000000000000000000000000000000000000000000000000000cebe1c23",
+        "nonce": "0x2a"
+      },
+      "additionalContracts": [],
+      "isFixedGasLimit": false
+    }
+  ],
+  "receipts": [],
+  "libraries": [],
+  "pending": [
+    "0xea1d7ae7b054648cb7dc4dfb969cd5605f9ccac873e33e64d1848c5d5e5e916b"
+  ],
+  "returns": {},
+  "timestamp": 1710858804,
+  "chain": 84532,
+  "multi": false,
+  "commit": "5f0ccde"
+}
