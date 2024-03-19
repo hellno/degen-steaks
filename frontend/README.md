@@ -9,7 +9,17 @@
 
 4. Visit [http://localhost:3000/debug](http://localhost:3000/debug) to debug your frame.
 
+5. Debug with Warpcast Frame validator
+    - Run app locally and ```cloudflared tunnel --url http://localhost:3000```
+    - Set xyz.trycloudflare.com as `NEXT_PUBLIC_HOST` in `.env` file
+    - Visit `https://warpcast.com/~/developers/frames`
+
+
 ## Todo:
 
-- add rainbowkit with template to add buttons
-- add buttons to transfer degen into contract with call xyz
+- assume default bet of 1000 DEGEN
+
+- after approval, add start betting payload
+    - add human-readable abi to add bet
+    - generate transaction payload
+

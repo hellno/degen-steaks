@@ -16,11 +16,11 @@ import { MarketType } from "./types";
 import isFunction from "lodash.isfunction";
 import { publicClient } from "./viemClient";
 import { degenAbi, degenContractAddress } from "./const/degenAbi";
-import { steakContractAddress } from "./const/steakAbi";
+import { betRegistryAddress } from "./const/betRegistryAbi";
 import { getDegenAllowance } from "./utils/onchainUtils";
 
 const DEFAULT_MARKET_ID = -1;
-const baseUrl = process.env.NEXT_PUBLIC_HOST;
+const baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL || process.env.NEXT_PUBLIC_HOST || "http://localhost:3000";
 
 enum PageState {
   start = "start",
@@ -33,26 +33,26 @@ const renderPaymentButton = async (data: any): Promise<any> => {
   const addresses = [data.requesterCustodyAddress].concat(
     ...data.requesterVerifiedAddresses
   );
-  const allowance = 0n; // await getDegenAllowance(addresses);
+  const allowance = await getDegenAllowance(addresses);
   const hasAllowance = allowance > 0n;
 
   if (hasAllowance) {
     return {
-      label: "Approve $DEGEN",
+      label: "Place bet",
       action: "tx",
-      target: `${baseUrl}/txdata/approvedegen`,
+      target: `${baseUrl}/txdata/placebet`,
     };
   } else {
     return {
-      label: "Start betting",
+      label: "Approve",
       action: "tx",
-      target: `${baseUrl}/txdata/placebet`,
+      target: `${baseUrl}/txdata/approvedegen`,
     };
   }
 };
 
 const stateToButtons: { [key in PageState]: any[] } = {
-  [PageState.start]: [{ label: "Start 🔥" }],
+  [PageState.start]: [{ label: "Start 🥩🔥" }],
   [PageState.decide]: [{ label: "Below 🔽" }, { label: "Above 🔼" }],
   [PageState.pending_payment]: [
     renderPaymentButton,
@@ -78,7 +78,7 @@ const reducer: FrameReducer<State> = (state, action) => {
   console.log("buttonIndex", buttonIndex);
   if (!state.marketId) {
     console.log("has no market id");
-    state = { ...state, marketId: 1 };
+    state = { ...state, marketId: 3 };
   }
 
   if (state.pageState === PageState.start) {
@@ -126,7 +126,7 @@ export default async function Home({
   });
 
   console.log("page state", state);
-  // console.log("frameMessage", frameMessage);
+  console.log("frameMessage", frameMessage);
   const { marketId, pageState } = state;
 
   let marketData: MarketType;
@@ -200,7 +200,7 @@ export default async function Home({
   );
 
   const renderDefaultFrame = () => (
-    <FrameImage>
+    <FrameImage aspectRatio="1:1">
       <div tw="flex flex-col">
         <div tw="flex flex-col self-center text-center justify-center items-center">
           <p tw="text-7xl">Want more $DEGEN?</p>
@@ -219,7 +219,7 @@ export default async function Home({
       const userWasCorrect = false;
 
       return (
-        <FrameImage>
+        <FrameImage aspectRatio="1:1">
           <div tw="flex flex-col">
             <div tw="flex flex-col self-center text-center justify-center items-center">
               <p tw="text-7xl">DEGEN steak is done 🔥🧑🏽‍🍳</p>
@@ -254,7 +254,7 @@ export default async function Home({
         : `Ended ${convertMillisecondsToDelta(timeDelta)} ago`;
 
     return (
-      <FrameImage>
+      <FrameImage aspectRatio="1:1">
         <div tw="flex flex-col">
           <div tw="flex flex-col self-center text-center justify-center items-center">
             <p tw="text-5xl">Will the $DEGEN price be</p>
@@ -274,11 +274,15 @@ export default async function Home({
   };
 
   const renderPaymentInstructionFrame = () => (
-    <FrameImage>
+    <FrameImage aspectRatio="1:1">
       <div tw="flex flex-col">
         <div tw="flex flex-col self-center text-center justify-center items-center">
           <p tw="text-7xl">Pending Payment</p>
-          <p tw="text-5xl">Please pay to continue</p>
+          <p tw="text-5xl">Place your bet to continue:</p>
+          <div tw="flex flex-col text-5xl">
+            <p>1. Approve $DEGEN</p>
+            <p>2. Place bet</p>
+          </div>
         </div>
       </div>
     </FrameImage>
@@ -297,7 +301,7 @@ export default async function Home({
 
   const renderButton = (idx: number, button: any) => (
     <FrameButton
-      action={button.action ? button.action : "post"}
+      action={button.action}
       target={button.target}
       key={idx}
     >
@@ -311,6 +315,7 @@ export default async function Home({
       renderButton(idx + 1, button) 
     ) as any;
   
+
   return (
     <div>
       <h1 className="text-4xl">degen steaks 🥩</h1>

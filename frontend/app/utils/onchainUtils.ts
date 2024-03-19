@@ -1,5 +1,5 @@
 import { degenAbi, degenContractAddress } from "../const/degenAbi"
-import { steakContractAddress } from "../const/steakAbi"
+import { betRegistryAddress } from "../const/betRegistryAbi"
 import { publicClient } from "../viemClient"
 
 const getDegenAllowance = async (addresses: `0x${string}`[]): Promise<bigint> => {
@@ -10,7 +10,7 @@ const getDegenAllowance = async (addresses: `0x${string}`[]): Promise<bigint> =>
         address: degenContractAddress,
         abi: degenAbi,
         functionName: 'allowance',
-        args: [addresses[0]!, steakContractAddress],
+        args: [addresses[0]!, betRegistryAddress],
     })
 
     return allowance;
