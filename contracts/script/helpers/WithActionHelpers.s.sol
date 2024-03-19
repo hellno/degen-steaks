@@ -286,4 +286,6 @@ contract WithActionHelpers is Script, WithFileHelpers {
         betRegistry.resolveMarket(marketId);
         vm.stopBroadcast();
     }
+
+    function test_WithActionHelpers() public {}
 }
