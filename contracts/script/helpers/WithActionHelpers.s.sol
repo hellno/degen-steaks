@@ -206,4 +206,13 @@ contract WithActionHelpers is Script, WithFileHelpers {
         betRegistry.cashOut(2);
         vm.stopBroadcast();
     }
+
+    function traction_openMarket() public {
+        uint256 endTime = vm.envOr("END_TIME", uint256(block.timestamp + 1 hours));
+        uint256 targetPrice = vm.envOr("TARGET_PRICE", DEGEN_PRICE_1);
+
+        vm.startBroadcast();
+        betRegistry.createMarket(uint40(endTime), targetPrice);
+        vm.stopBroadcast();
+    }
 }
