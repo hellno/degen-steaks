@@ -2,7 +2,7 @@ import { request, gql, Variables } from "graphql-request"
 import { BetType, MarketType } from "../types";
 import get from 'lodash.get';
 
-const GRAPHQL_ENDPOINT = process.env.GRAPHQL_ENDPOINT;
+const GRAPHQL_ENDPOINT = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT;
 
 const MARKET_FRAGMENT = gql`
     fragment MarketFragment on Market {
@@ -33,7 +33,7 @@ const BET_FRAGMENT = gql`
 `
 
 const runGraphqlRequest = async (query: string, variables: Variables, key: string) => {
-    console.log('graphql request', query, variables);
+    console.log('graphql request', query, variables, GRAPHQL_ENDPOINT);
     const response = await request(GRAPHQL_ENDPOINT!, query, variables);
     console.log('graphql response', response);
     return get(response, key);
@@ -44,7 +44,7 @@ const getDefaultOpenMarket = async (addresses: string[] = []): Promise<MarketTyp
         ${MARKET_FRAGMENT}
         ${BET_FRAGMENT}
         query Market ($addresses: [String!]) {
-            Market (where: {isResolved: {_eq: false}}, order_by: {betCount: desc}, limit: 1) {
+            Market (where: {isResolved: {_eq: false}}, order_by: {endTime: desc}, limit: 1) {
                 ...MarketFragment
                 bets (where:{user_id:{_in: $addresses}}) {
                     ...BetFragment
@@ -68,7 +68,7 @@ const getActiveMarkets = async ({ limit, offset }: { limit: number, offset: numb
     return await runGraphqlRequest(query, {}, 'Market') as MarketType[];
 };
 
-const getMarket = async (marketId: number, addresses: string[] = []): Promise<MarketType> => {
+const getMarket = async (marketId: string, addresses: string[] = []): Promise<MarketType> => {
     const query = gql`
         ${MARKET_FRAGMENT}
         ${BET_FRAGMENT}

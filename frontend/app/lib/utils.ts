@@ -24,4 +24,9 @@ export function convertMillisecondsToDelta(milliseconds: number): string {
     return timeString.replace(/, $/, '');
 };
 
-export const renderPrice = (price: bigint): string => price ? `$${formatEther(price)}` : "TBD";
+const DEGEN_CONTRACT_MULTIPLIER = 1000000;
+export const renderDegenPriceFromContract = (price: bigint): string => price ? `$${Number(formatEther(price * DEGEN_CONTRACT_MULTIPLIER)).toFixed(8)}` : "TBD";
+
+export const cn = (...classes: (string | boolean | undefined)[]): string => {
+    return classes.filter(Boolean).join(' ');
+}

@@ -1,121 +1,22 @@
 import {
   FrameButton,
   FrameContainer,
-  FrameImage,
-  FrameReducer,
-  NextServerPageProps,
+  FrameImage, NextServerPageProps,
   getFrameMessage,
   getPreviousFrame,
-  useFramesReducer,
+  useFramesReducer
 } from "frames.js/next/server";
 import { formatEther } from "viem";
 import clsx from "clsx";
+import { convertMillisecondsToDelta, renderDegenPriceFromContract } from "./lib/utils";
+import { getMarket, getDefaultOpenMarket } from "./lib/indexerUtils";
 import { MarketType } from "./types";
 import isFunction from "lodash.isfunction";
-import { publicClient } from "./viemClient";
-import { degenAbi, degenContractAddress } from "./const/degenAbi";
-import { betRegistryAddress } from "./const/betRegistryAbi";
-import { getDegenAllowance } from "./lib/onchainUtils";
-import { getDefaultOpenMarket, getMarket } from "./lib/indexerUtils";
+import { State, reducer, initialState, DEFAULT_MARKET_ID, PageState, stateToButtons } from "./page";
 
-const DEFAULT_MARKET_ID = -1;
-const baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL || process.env.NEXT_PUBLIC_HOST || "http://localhost:3000";
-
-enum PageState {
-  start = "start",
-  decide = "decide",
-  pending_payment = "pending_payment",
-  view_market = "view_market",
-}
-
-const renderPaymentButton = async (data: any): Promise<any> => {
-  const addresses = [data.requesterCustodyAddress].concat(
-    ...data.requesterVerifiedAddresses
-  );
-  const allowance = await getDegenAllowance(addresses);
-  const hasAllowance = allowance > 0n;
-
-  if (hasAllowance) {
-    return {
-      label: "Place bet",
-      action: "tx",
-      target: `${baseUrl}/txdata/placebet`,
-    };
-  } else {
-    return {
-      label: "Approve",
-      action: "tx",
-      target: `${baseUrl}/txdata/approvedegen`,
-    };
-  }
-};
-
-const stateToButtons: { [key in PageState]: any[] } = {
-  [PageState.start]: [{ label: "Start 🥩🔥" }],
-  [PageState.decide]: [{ label: "Below 🔽" }, { label: "Above 🔼" }],
-  [PageState.pending_payment]: [
-    renderPaymentButton,
-    { label: "Refresh 🔄" },
-    { label: "Back 🏠" },
-  ],
-  [PageState.view_market]: [{ label: "Refresh 🔄" }, { label: "Back 🏠" }],
-};
-
-type State = {
-  pageState: PageState;
-  marketId: number;
-};
-
-const initialState: State = {
-  pageState: PageState.start,
-  marketId: DEFAULT_MARKET_ID,
-};
-
-const reducer: FrameReducer<State> = (state, action) => {
-  console.log("reducer state", state);
-  const buttonIndex = action.postBody?.untrustedData.buttonIndex;
-  console.log("buttonIndex", buttonIndex);
-  if (!state.marketId) {
-    console.log("has no market id");
-    state = { ...state, marketId: 3 };
-  }
-
-  if (state.pageState === PageState.start) {
-    return { ...state, pageState: PageState.decide };
-  }
-
-  if (state.pageState === PageState.decide) {
-    return { ...state, pageState: PageState.pending_payment };
-  }
-
-  if (state.pageState === PageState.pending_payment) {
-    if (buttonIndex === 1) {
-      console.log("bet onchain");
-      return { ...state, pageState: PageState.pending_payment };
-    }
-    if (buttonIndex === 2) {
-      // refresh
-      return { ...state, pageState: PageState.pending_payment };
-    }
-    if (buttonIndex === 3) {
-      return { ...state, pageState: PageState.start };
-    }
-  }
-
-  if (state.pageState === PageState.view_market) {
-    if (buttonIndex === 1) {
-      return { ...state, pageState: PageState.view_market };
-    }
-    if (buttonIndex === 2) {
-      return { ...state, pageState: PageState.start };
-    }
-  }
-  return state;
-};
 
 export default async function Home({
-  params,
-  searchParams,
+  params, searchParams,
 }: NextServerPageProps) {
   const previousFrame = getPreviousFrame<State>(searchParams);
   const [state] = useFramesReducer<State>(reducer, initialState, previousFrame);
@@ -133,8 +34,8 @@ export default async function Home({
   const userAddresses = !frameMessage
     ? []
     : [frameMessage.requesterCustodyAddress].concat(
-        ...frameMessage.requesterVerifiedAddresses
-      );
+      ...frameMessage.requesterVerifiedAddresses
+    );
   if (marketId === DEFAULT_MARKET_ID) {
     marketData = await getDefaultOpenMarket(userAddresses);
     state.marketId = marketData.id;
@@ -165,7 +66,7 @@ export default async function Home({
     }
   };
 
-  const renderProgressBar = ({ a, b }: { a: number; b: number }) => (
+  const renderProgressBar = ({ a, b }: { a: number; b: number; }) => (
     <div tw="flex justify-center px-12">
       <div tw="flex h-24 rounded-lg">
         <div
@@ -223,7 +124,7 @@ export default async function Home({
             <div tw="flex flex-col self-center text-center justify-center items-center">
               <p tw="text-7xl">DEGEN steak is done 🔥🧑🏽‍🍳</p>
               <p tw="text-5xl">
-                Price was {renderPrice(endPrice)} {renderPrice(targetPrice)}-
+                Price was {renderDegenPriceFromContract(endPrice)} {renderDegenPriceFromContract(targetPrice)}-
                 {">"} {highWon || "TBD"}
               </p>
               <p tw="text-6xl">You {userWasCorrect ? "won 🤩" : "lost 🫡"} </p>
@@ -234,23 +135,14 @@ export default async function Home({
     }
 
     const timeDelta = marketData.endTime * 1000 - new Date().getTime();
-    const sharesLower =
-      marketData.totalSharesLower /
+    const sharesLower = marketData.totalSharesLower /
       (marketData.totalSharesLower + marketData.totalSharesHigher);
-    const sharesHigher =
-      marketData.totalSharesHigher /
+    const sharesHigher = marketData.totalSharesHigher /
       (marketData.totalSharesLower + marketData.totalSharesHigher);
-    console.log(
-      "timeDelta",
-      timeDelta,
-      marketData.endTime,
-      new Date().getTime()
-    );
 
-    const marketEndDescription =
-      timeDelta > 0
-        ? `Ends in ${convertMillisecondsToDelta(timeDelta)}`
-        : `Ended ${convertMillisecondsToDelta(timeDelta)} ago`;
+    const marketEndDescription = timeDelta > 0
+      ? `Ends in ${convertMillisecondsToDelta(timeDelta)}`
+      : `Ended ${convertMillisecondsToDelta(timeDelta)} ago`;
 
     return (
       <FrameImage aspectRatio="1:1">
@@ -291,8 +183,7 @@ export default async function Home({
     const buttons = stateToButtons[state.pageState];
     return await Promise.resolve(
       Promise.all(
-        buttons.map(async (button) =>
-          isFunction(button) ? button(frameMessage) : button
+        buttons.map(async (button) => isFunction(button) ? button(frameMessage) : button
         ) as any
       )
     );
@@ -309,15 +200,13 @@ export default async function Home({
   );
   console.log('marketData', marketData);
   console.log("generate buttons", await generateButtons());
-  const renderButtons = async () =>
-    (await generateButtons()).map((button, idx) =>
-      renderButton(idx + 1, button) 
-    ) as any;
-  
+  const renderButtons = async () => (await generateButtons()).map((button, idx) => renderButton(idx + 1, button)
+  ) as any;
 
   return (
     <div>
-      <h1 className="text-4xl">degen steaks 🥩</h1>
+      <h1 className="text-4xl">degen steaks 🥩 - {pageState}</h1>
+      <a href="/web" className="text-lg mt-4 underline">use web app ↗️</a>
       <FrameContainer
         postUrl="/frames"
         pathname="/"
