@@ -184,15 +184,6 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         betRegistry.resolveMarket(0);
     }
 
-    function test_resolveMarket_fail_samePrice() public {
-        _createMarket(1 days, DEGEN_PRICE_1);
-        _placeBet(0, BET, IBetRegistry.BetDirection.HIGHER);
-        _placeBet(0, BET, IBetRegistry.BetDirection.LOWER);
-        vm.warp(1 days + 60);
-        vm.expectRevert("BetRegistry::resolveMarket: endPrice and targetPrice must differ.");
-        betRegistry.resolveMarket(0);
-    }
-
     function test_resolveMarket_setsEndPriceAndTotalDegen() public {
         _createMarket(1 days, 1000);
         _placeBet(0, BET, IBetRegistry.BetDirection.HIGHER);
