@@ -1,0 +1,50 @@
+{
+  "transactions": [
+    {
+      "hash": "0xea1d7ae7b054648cb7dc4dfb969cd5605f9ccac873e33e64d1848c5d5e5e916b",
+      "transactionType": "CALL",
+      "contractName": "MockPriceFeed",
+      "contractAddress": "0xD4bE8B3240123B737e7317eF490a6eB6b68c0A41",
+      "function": "setPrice(uint256)",
+      "arguments": [
+        "3468565539"
+      ],
+      "transaction": {
+        "type": "0x00",
+        "from": "0x00590bb9a26afcabff0311e937dd72066b4ffc38",
+        "to": "0xd4be8b3240123b737e7317ef490a6eb6b68c0a41",
+        "gas": "0x8e99",
+        "value": "0x0",
+        "data": "0x91b7f5ed00000000000000000000000000000000000000000000000000000000cebe1c23",
+        "nonce": "0x2a"
+      },
+      "additionalContracts": [],
+      "isFixedGasLimit": false
+    }
+  ],
+  "receipts": [
+    {
+      "transactionHash": "0xea1d7ae7b054648cb7dc4dfb969cd5605f9ccac873e33e64d1848c5d5e5e916b",
+      "transactionIndex": "0x2",
+      "blockHash": "0xc1c79bed0f38c6714931c1984a90c38f16f411d0353e2af0d5b6b3f806a99ebe",
+      "blockNumber": "0x7321ab",
+      "from": "0x00590BB9a26AFCABfF0311E937DD72066B4fFC38",
+      "to": "0xD4bE8B3240123B737e7317eF490a6eB6b68c0A41",
+      "cumulativeGasUsed": "0x164a9",
+      "gasUsed": "0x673e",
+      "contractAddress": null,
+      "logs": [],
+      "status": "0x1",
+      "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "type": "0x0",
+      "effectiveGasPrice": "0x9c00927"
+    }
+  ],
+  "libraries": [],
+  "pending": [],
+  "returns": {},
+  "timestamp": 1710858810,
+  "chain": 84532,
+  "multi": false,
+  "commit": "5f0ccde"
+}
