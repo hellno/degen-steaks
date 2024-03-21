@@ -1,6 +1,6 @@
 on: [push]
 
-name: contracts test
+name: Contracts
 
 env:
   DEPLOYER: ${{ secrets.DEPLOYER }}
@@ -11,7 +11,7 @@ env:
 
 jobs:
   check:
-    name: Check contract formatting
+    name: Linting
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -26,7 +26,7 @@ jobs:
         run: forge fmt --check
 
   test:
-    name: Test contracts
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
