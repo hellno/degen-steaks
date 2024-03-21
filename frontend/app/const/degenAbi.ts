@@ -1,5 +1,28 @@
 export const degenAbi = [
     {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "_spender",
+                "type": "address"
+            },
+            {
+                "name": "_value",
+                "type": "uint256"
+            }
+        ],
+        "name": "approve",
+        "outputs": [
+            {
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
         "constant": true,
         "inputs": [
             {
@@ -67,4 +90,4 @@ export const degenAbi = [
   ] as const;
 
 
-export const degenContractAddress = '0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed';
+export const degenContractAddress = '0xA3A362433d84dA940aaA9DE518d0e49a7aa4df06';

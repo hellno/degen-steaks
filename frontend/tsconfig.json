@@ -24,6 +24,10 @@
     "strict": true,
     "target": "ES2022",
     "allowJs": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    },
   },
   "include": [
     "next-env.d.ts",
