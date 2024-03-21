@@ -1,0 +1,27 @@
+on: [push]
+
+name: contracts test
+
+jobs:
+  check:
+    name: Check contracts using Foundry
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name : Lint
+        working-directory: ./contracts
+        run: forge fmt --check
+
+      - name: Run tests
+        working-directory: ./contracts
+        run: forge test -vvv
+
+      - name: Run snapshot
+        working-directory: ./contracts
+        run: forge snapshot
