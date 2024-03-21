@@ -81,10 +81,10 @@ export default function Page({ params }: { params: { slug: string[] } }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { address, isConnected } = useAccount();
 
-  const [betAmount, setBetAmount] = useState<number>(); // in user readable format
+  const [betAmount, setBetAmount] = useState<string>(); // in user readable format
   const [market, setMarket] = useState<MarketType>();
   const [allowance, setAllowance] = useState<bigint>(0n); // in wei
-  const [pendingAllowance, setPendingAllowance] = useState<number>();
+  const [pendingAllowance, setPendingAllowance] = useState<string>();
 
   const {
     data: hash,
@@ -166,7 +166,7 @@ export default function Page({ params }: { params: { slug: string[] } }) {
     if (!market?.id) return;
 
     const betSize = parseEther(
-      betAmount?.toString() || MAX_ALLOWANCE.toString()
+      betAmount || MAX_ALLOWANCE.toString()
     );
     writeContract({
       abi: betRegistryAbi,
@@ -193,7 +193,7 @@ export default function Page({ params }: { params: { slug: string[] } }) {
             size="lg"
             className="ml-3 h-12"
             variant="outline"
-            onClick={() => setPendingAllowance(MAX_ALLOWANCE)}
+            onClick={() => setPendingAllowance(MAX_ALLOWANCE.toString())}
           >
             Max
           </Button>
@@ -245,7 +245,7 @@ export default function Page({ params }: { params: { slug: string[] } }) {
             size="lg"
             className="ml-3 h-12"
             variant="outline"
-            onClick={() => setBetAmount(Number(formatEther(allowance)))}
+            onClick={() => setBetAmount(formatEther(allowance))}
           >
             Max
           </Button>

@@ -68,7 +68,7 @@ const MarketOverview = ({ market }: { market: MarketType | undefined }) => {
 
   const renderUserBets = () => (
     <div className="flex flex-col gap-2">
-      {market.bets.map((bet) => (
+      {market.bets && market.bets.map((bet) => (
         <div key={bet.id} className="flex flex-col gap-2">
           <span className="text-2xl text-gray-600">
             {bet.sharesHigher ? "Higher" : "Lower"}

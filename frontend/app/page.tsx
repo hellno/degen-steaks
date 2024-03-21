@@ -17,6 +17,7 @@ import { degenAbi, degenContractAddress } from "./const/degenAbi";
 import { betRegistryAddress } from "./const/betRegistryAbi";
 import { getDegenAllowance } from "./lib/onchainUtils";
 import { getDefaultOpenMarket, getMarket } from "./lib/indexerUtils";
+import { convertMillisecondsToDelta, renderDegenPriceFromContract } from "./lib/utils";
 
 const DEFAULT_MARKET_ID = -1;
 const baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL || process.env.NEXT_PUBLIC_HOST || "http://localhost:3000";
@@ -139,7 +140,7 @@ export default async function Home({
     marketData = await getDefaultOpenMarket(userAddresses);
     state.marketId = marketData.id;
   } else {
-    marketData = await getMarket(marketId, userAddresses);
+    marketData = await getMarket(marketId.toString(), userAddresses);
   }
 
   if (pageState === PageState.pending_payment) {
@@ -223,7 +224,7 @@ export default async function Home({
             <div tw="flex flex-col self-center text-center justify-center items-center">
               <p tw="text-7xl">DEGEN steak is done 🔥🧑🏽‍🍳</p>
               <p tw="text-5xl">
-                Price was {renderPrice(endPrice)} {renderPrice(targetPrice)}-
+                Price was {renderDegenPriceFromContract(endPrice)} {renderDegenPriceFromContract(targetPrice)}-
                 {">"} {highWon || "TBD"}
               </p>
               <p tw="text-6xl">You {userWasCorrect ? "won 🤩" : "lost 🫡"} </p>
