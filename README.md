@@ -15,4 +15,5 @@ To show secrets (if you've been added to the keychain):
 To tell a new developer:
 1. Get their gpg key and add it to your key chain.
 2. Run `git secret tell <email@address.com>`
-3. Commit the added address to version control
+3. `git secret hide`
+4. Commit the added address to version control
