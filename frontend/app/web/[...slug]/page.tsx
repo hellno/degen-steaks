@@ -10,13 +10,13 @@ import {
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
-import { getDegenAllowance } from "../lib/onchainUtils";
+import { getDegenAllowanceForAddress } from "../../lib/onchainUtils";
 import { Button } from "components/ui/button";
-import { degenAbi, degenContractAddress } from "../const/degenAbi";
-import { betRegistryAbi, betRegistryAddress } from "../const/betRegistryAbi";
-import { getDefaultOpenMarket, getMarket } from "../lib/indexerUtils";
+import { degenAbi, degenContractAddress } from "../../const/degenAbi";
+import { betRegistryAbi, betRegistryAddress } from "../../const/betRegistryAbi";
+import { getDefaultOpenMarket, getMarket } from "../../lib/indexerUtils";
 import MarketOverview from "@/components/MarketOverview";
-import { BetDirection, MarketType } from "../types";
+import { BetDirection, MarketType } from "../../types";
 import { Input } from "@/components/ui/input";
 import { formatEther, parseEther } from "viem";
 
@@ -76,6 +76,7 @@ const getMarketIdFromSlug = (slug: string[]): string | undefined => {
 }
 
 export default function Page({ params }: { params: { slug: string[] } }) {
+  console.log('Page params', params);
   const marketId = getMarketIdFromSlug(params.slug);
   const [pageState, setPageState] = useState<State>(State.view_market);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -95,12 +96,10 @@ export default function Page({ params }: { params: { slug: string[] } }) {
     error,
   } = useWriteContract();
 
-  console.log('pageState', pageState);
-
   const updateAllowance = async () => {
     if (!address) return;
 
-    getDegenAllowance([address]).then((allowance) => {
+    getDegenAllowanceForAddress(address).then((allowance) => {
       setAllowance(allowance);
     });
   };
@@ -109,6 +108,9 @@ export default function Page({ params }: { params: { slug: string[] } }) {
     status: transactionStatus,
     error: transactionError,
   } = useWaitForTransactionReceipt({ hash });
+
+  console.log('writeContract', status, error);
+  console.log('transactionStatus', transactionStatus, transactionError);
 
   useEffect(() => {
     if (pageState === State.start && status === "success") {
@@ -164,7 +166,6 @@ export default function Page({ params }: { params: { slug: string[] } }) {
 
   const onPlaceBet = async (betDirection: BetDirection) => {
     if (!market?.id) return;
-
     const betSize = parseEther(
       betAmount || MAX_ALLOWANCE.toString()
     );

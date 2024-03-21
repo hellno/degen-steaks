@@ -2,25 +2,30 @@ import {
   FrameButton,
   FrameContainer,
   FrameImage,
+  FrameInput,
   FrameReducer,
   NextServerPageProps,
   getFrameMessage,
   getPreviousFrame,
   useFramesReducer,
 } from "frames.js/next/server";
-import { formatEther } from "viem";
 import clsx from "clsx";
-import { MarketType } from "./types";
+import { BetDirection, MarketType } from "./types";
 import isFunction from "lodash.isfunction";
-import { publicClient } from "./viemClient";
-import { degenAbi, degenContractAddress } from "./const/degenAbi";
-import { betRegistryAddress } from "./const/betRegistryAbi";
-import { getDegenAllowance } from "./lib/onchainUtils";
+import { hasAnyDegenAllowance } from "./lib/onchainUtils";
 import { getDefaultOpenMarket, getMarket } from "./lib/indexerUtils";
-import { convertMillisecondsToDelta, renderDegenPriceFromContract } from "./lib/utils";
+import {
+  convertMillisecondsToDelta,
+  renderDegenPriceFromContract,
+} from "./lib/utils";
+import { formatEther, parseEther } from "viem";
 
+const DEFAULT_DEGEN_BETSIZE = "420690000000000000000";
 const DEFAULT_MARKET_ID = -1;
-const baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL || process.env.NEXT_PUBLIC_HOST || "http://localhost:3000";
+const baseUrl =
+  process.env.NEXT_PUBLIC_VERCEL_URL ||
+  process.env.NEXT_PUBLIC_HOST ||
+  "http://localhost:3000";
 
 enum PageState {
   start = "start",
@@ -29,18 +34,13 @@ enum PageState {
   view_market = "view_market",
 }
 
-const renderPaymentButton = async (data: any): Promise<any> => {
-  const addresses = [data.requesterCustodyAddress].concat(
-    ...data.requesterVerifiedAddresses
-  );
-  const allowance = await getDegenAllowance(addresses);
-  const hasAllowance = allowance > 0n;
-
-  if (hasAllowance) {
+const renderPaymentButton = async (state: State): Promise<any> => {
+  if (state.hasAllowance) {
+    const { marketId, betSize, betDirection } = state;
     return {
       label: "Place bet",
       action: "tx",
-      target: `${baseUrl}/txdata/placebet`,
+      target: `${baseUrl}/txdata/placebet?marketId=${marketId}&betSize=${betSize}&betDirection=${betDirection}`,
     };
   } else {
     return {
@@ -51,12 +51,22 @@ const renderPaymentButton = async (data: any): Promise<any> => {
   }
 };
 
+const stateToInput: { [key in PageState]: any } = {
+  [PageState.start]: {},
+  [PageState.decide]: {
+    text: `Default: ${formatEther(BigInt(DEFAULT_DEGEN_BETSIZE))} $DEGEN`,
+  },
+  [PageState.pending_payment]: {},
+  [PageState.view_market]: {},
+};
+
 const stateToButtons: { [key in PageState]: any[] } = {
   [PageState.start]: [{ label: "Start 🥩🔥" }],
   [PageState.decide]: [{ label: "Below 🔽" }, { label: "Above 🔼" }],
   [PageState.pending_payment]: [
     renderPaymentButton,
     { label: "Refresh 🔄" },
+    { label: "Web", action: "link", target: "https://degensteaks.com" },
     { label: "Back 🏠" },
   ],
   [PageState.view_market]: [{ label: "Refresh 🔄" }, { label: "Back 🏠" }],
@@ -65,15 +75,19 @@ const stateToButtons: { [key in PageState]: any[] } = {
 type State = {
   pageState: PageState;
   marketId: number;
+  hasAllowance?: boolean;
+  betSize?: string;
+  betDirection?: BetDirection;
 };
 
 const initialState: State = {
   pageState: PageState.start,
   marketId: DEFAULT_MARKET_ID,
+  hasAllowance: undefined,
 };
 
 const reducer: FrameReducer<State> = (state, action) => {
-  console.log("reducer state", state);
+  // console.log("reducer state", state);
   const buttonIndex = action.postBody?.untrustedData.buttonIndex;
   console.log("buttonIndex", buttonIndex);
   if (!state.marketId) {
@@ -86,7 +100,16 @@ const reducer: FrameReducer<State> = (state, action) => {
   }
 
   if (state.pageState === PageState.decide) {
-    return { ...state, pageState: PageState.pending_payment };
+    const inputText = action.postBody?.untrustedData?.inputText;
+    console.log("decide state", state);
+    const betSize = (inputText ? parseEther(inputText) : DEFAULT_DEGEN_BETSIZE).toString();
+    const betDirection = buttonIndex === 1 ? BetDirection.LOWER : BetDirection.HIGHER;
+    return {
+      ...state,
+      pageState: PageState.pending_payment,
+      betSize,
+      betDirection
+    };
   }
 
   if (state.pageState === PageState.pending_payment) {
@@ -98,7 +121,8 @@ const reducer: FrameReducer<State> = (state, action) => {
       // refresh
       return { ...state, pageState: PageState.pending_payment };
     }
-    if (buttonIndex === 3) {
+    // buttonIndex === 3 -> link to webapp
+    if (buttonIndex === 4) {
       return { ...state, pageState: PageState.start };
     }
   }
@@ -119,11 +143,11 @@ export default async function Home({
   searchParams,
 }: NextServerPageProps) {
   const previousFrame = getPreviousFrame<State>(searchParams);
-  const [state] = useFramesReducer<State>(reducer, initialState, previousFrame);
   const frameMessage = await getFrameMessage(previousFrame.postBody, {
     // hubHttpUrl: '',
     fetchHubContext: true,
   });
+  const [state] = useFramesReducer<State>(reducer, initialState, previousFrame);
 
   console.log("page state", state);
   console.log("frameMessage", frameMessage);
@@ -134,7 +158,8 @@ export default async function Home({
   const userAddresses = !frameMessage
     ? []
     : [frameMessage.requesterCustodyAddress].concat(
-        ...frameMessage.requesterVerifiedAddresses
+        ...frameMessage.requesterVerifiedAddresses,
+        "0x36E31d250686E9B700c8A2a08E98458004E4D988"
       );
   if (marketId === DEFAULT_MARKET_ID) {
     marketData = await getDefaultOpenMarket(userAddresses);
@@ -143,8 +168,14 @@ export default async function Home({
     marketData = await getMarket(marketId.toString(), userAddresses);
   }
 
+  // console.log('inputText in state', pageState, ' ->>>>>', frameMessage?.inputText)
+  // if (pageState === PageState.decide) {
+  // }
+
   if (pageState === PageState.pending_payment) {
-    // check if user made a payment
+    if (state.hasAllowance === undefined) {
+      state.hasAllowance = await hasAnyDegenAllowance(userAddresses);
+    }
     console.log("pending payment");
   }
 
@@ -177,7 +208,7 @@ export default async function Home({
           style={{ width: `${a + b > 0 ? (a / (a + b)) * 100 : 0}%` }}
         >
           {a ? (
-            <div tw="flex justify-center items-center w-full font-bold text-white">
+            <div tw="flex justify-center items-center w-full font-bold text-gray-100">
               {a}%
             </div>
           ) : null}
@@ -185,12 +216,12 @@ export default async function Home({
         <div
           tw={clsx(
             a ? "rounded-r-full" : "rounded-full",
-            "flex w-full bg-red-400"
+            "flex w-full bg-red-500"
           )}
           style={{ width: `${a + b > 0 ? (b / (a + b)) * 100 : 0}%` }}
         >
           {b ? (
-            <div tw="flex justify-center items-center w-full font-bold text-white">
+            <div tw="flex justify-center items-center w-full font-bold text-gray-100">
               {b}%
             </div>
           ) : null}
@@ -204,7 +235,7 @@ export default async function Home({
       <div tw="flex flex-col">
         <div tw="flex flex-col self-center text-center justify-center items-center">
           <p tw="text-7xl">Want more $DEGEN?</p>
-          <p tw="text-5xl">Start staking and betting today!</p>
+          <p tw="text-5xl">Start steaking and earn today!</p>
         </div>
         <div tw="flex">{renderProgressBar({ a: 69, b: 21 })}</div>
       </div>
@@ -224,8 +255,9 @@ export default async function Home({
             <div tw="flex flex-col self-center text-center justify-center items-center">
               <p tw="text-7xl">DEGEN steak is done 🔥🧑🏽‍🍳</p>
               <p tw="text-5xl">
-                Price was {renderDegenPriceFromContract(endPrice)} {renderDegenPriceFromContract(targetPrice)}-
-                {">"} {highWon || "TBD"}
+                Price was {renderDegenPriceFromContract(endPrice)}{" "}
+                {renderDegenPriceFromContract(targetPrice)}-{">"}{" "}
+                {highWon || "TBD"}
               </p>
               <p tw="text-6xl">You {userWasCorrect ? "won 🤩" : "lost 🫡"} </p>
             </div>
@@ -259,7 +291,9 @@ export default async function Home({
           <div tw="flex flex-col self-center text-center justify-center items-center">
             <p tw="text-5xl">Will the $DEGEN price be</p>
             above 🔼 or below 🔽
-            <p tw="text-7xl">{formatEther(marketData.targetPrice)}</p>
+            <p tw="text-7xl">
+              {renderDegenPriceFromContract(BigInt(marketData.targetPrice))}
+            </p>
             {marketEndDescription}
             <div tw="flex mt-24">
               {renderProgressBar({
@@ -273,48 +307,65 @@ export default async function Home({
     );
   };
 
-  const renderPaymentInstructionFrame = () => (
-    <FrameImage aspectRatio="1:1">
-      <div tw="flex flex-col">
-        <div tw="flex flex-col self-center text-center justify-center items-center">
-          <p tw="text-7xl">Pending Payment</p>
-          <p tw="text-5xl">Place your bet to continue:</p>
-          <div tw="flex flex-col text-5xl">
-            <p>1. Approve $DEGEN</p>
-            <p>2. Place bet</p>
+  const renderPaymentInstructionFrame = () => {
+    const { hasAllowance, betSize, betDirection } = state;
+    const youAreHere = " ← You are here";
+    return (
+      <FrameImage aspectRatio="1:1">
+        <div tw="flex flex-col">
+          <div tw="flex flex-col self-center text-center justify-center items-center">
+            <p tw="text-7xl">Two steps to </p>
+            <p tw="text-7xl">start steaking your $DEGEN</p>
+            <div tw="flex flex-col text-5xl">
+              <p>1. Approve $DEGEN {!hasAllowance && youAreHere}</p>
+              <p>2. Place bet {hasAllowance && youAreHere}</p>
+            </div>
           </div>
+          {betSize && betDirection !== undefined ? (
+            <div tw="flex flex-col mt-36">
+              <span>
+                Your bet: {formatEther(BigInt(betSize))} $DEGEN{" "}
+                {betDirection === BetDirection.LOWER ? "below" : "above"}{" "}
+                {renderDegenPriceFromContract(BigInt(marketData.targetPrice))}{" "}
+                on{" "}
+              </span>
+              <span>
+                {new Date(marketData.endTime * 1000).toString().split("(")[0] ||
+                  ""}
+              </span>
+            </div>
+          ) : null}
         </div>
-      </div>
-    </FrameImage>
-  );
+      </FrameImage>
+    );
+  };
 
   const generateButtons = async () => {
     const buttons = stateToButtons[state.pageState];
     return await Promise.resolve(
       Promise.all(
         buttons.map(async (button) =>
-          isFunction(button) ? button(frameMessage) : button
+          isFunction(button) ? button(state) : button
         ) as any
       )
     );
   };
 
   const renderButton = (idx: number, button: any) => (
-    <FrameButton
-      action={button.action}
-      target={button.target}
-      key={idx}
-    >
+    <FrameButton action={button.action} target={button.target} key={idx}>
       {button.label}
     </FrameButton>
   );
-  console.log('marketData', marketData);
-  console.log("generate buttons", await generateButtons());
+  // console.log("generate buttons", await generateButtons());
   const renderButtons = async () =>
     (await generateButtons()).map((button, idx) =>
-      renderButton(idx + 1, button) 
+      renderButton(idx + 1, button)
     ) as any;
-  
+
+  const renderInput = () =>
+    stateToInput[state.pageState] && (
+      <FrameInput text={stateToInput[state.pageState].text} />
+    );
 
   return (
     <div>
@@ -327,6 +378,7 @@ export default async function Home({
       >
         {renderImage()}
         {await renderButtons()}
+        {renderInput()}
       </FrameContainer>
     </div>
   );

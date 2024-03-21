@@ -1,9 +1,8 @@
 import { TransactionTargetResponse } from "frames.js";
 import { NextRequest, NextResponse } from "next/server";
 import { degenAbi, degenContractAddress } from "../../const/degenAbi";
-import { encodeAbiParameters, encodeFunctionData, encodePacked, parseAbiParameters } from "viem";
+import { encodeFunctionData } from "viem";
 import { betRegistryAddress } from "../../const/betRegistryAbi";
-import { publicClient } from "../../viemClient";
 
 
 const chainId = "eip155:84532"; // BASE SEPOLIA
