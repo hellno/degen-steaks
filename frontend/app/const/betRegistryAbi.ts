@@ -543,4 +543,4 @@ export const betRegistryAbi = [
     }
   ] as const;
 
-export const betRegistryAddress = "0x68D8E45939926154BD4356105F9bA120169EF606";
+export const betRegistryAddress = "0xA6D58a15918DA51999354F9e47B65111F5bbC124";
