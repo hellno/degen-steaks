@@ -51,6 +51,14 @@ const renderPaymentButton = async (state: State): Promise<any> => {
   }
 };
 
+const renderMarketWebLinkButton = async (state: State): Promise<any> => {
+  return {
+    label: "Web",
+    action: "link",
+    target: `${baseUrl}/web/market/${state.marketId}`,
+  };
+};
+
 const stateToInput: { [key in PageState]: any } = {
   [PageState.start]: {},
   [PageState.decide]: {
@@ -66,7 +74,7 @@ const stateToButtons: { [key in PageState]: any[] } = {
   [PageState.pending_payment]: [
     renderPaymentButton,
     { label: "Refresh 🔄" },
-    { label: "Web", action: "link", target: "https://degensteaks.com" },
+    renderMarketWebLinkButton,
     { label: "Back 🏠" },
   ],
   [PageState.view_market]: [{ label: "Refresh 🔄" }, { label: "Back 🏠" }],
@@ -102,13 +110,16 @@ const reducer: FrameReducer<State> = (state, action) => {
   if (state.pageState === PageState.decide) {
     const inputText = action.postBody?.untrustedData?.inputText;
     console.log("decide state", state);
-    const betSize = (inputText ? parseEther(inputText) : DEFAULT_DEGEN_BETSIZE).toString();
-    const betDirection = buttonIndex === 1 ? BetDirection.LOWER : BetDirection.HIGHER;
+    const betSize = (
+      inputText ? parseEther(inputText) : DEFAULT_DEGEN_BETSIZE
+    ).toString();
+    const betDirection =
+      buttonIndex === 1 ? BetDirection.LOWER : BetDirection.HIGHER;
     return {
       ...state,
       pageState: PageState.pending_payment,
       betSize,
-      betDirection
+      betDirection,
     };
   }
 
@@ -159,7 +170,6 @@ export default async function Home({
     ? []
     : [frameMessage.requesterCustodyAddress].concat(
         ...frameMessage.requesterVerifiedAddresses,
-        "0x36E31d250686E9B700c8A2a08E98458004E4D988"
       );
   if (marketId === DEFAULT_MARKET_ID) {
     marketData = await getDefaultOpenMarket(userAddresses);

@@ -78,7 +78,7 @@ const getMarketIdFromSlug = (slug: string[]): string | undefined => {
 export default function Page({ params }: { params: { slug: string[] } }) {
   console.log('Page params', params);
   const marketId = getMarketIdFromSlug(params.slug);
-  const [pageState, setPageState] = useState<State>(State.view_market);
+  const [pageState, setPageState] = useState<State>(State.start);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { address, isConnected } = useAccount();
 
