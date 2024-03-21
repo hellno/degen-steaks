@@ -7,12 +7,16 @@ const getDegenAllowanceForAddress = async (address: string): Promise<bigint> => 
         return 0n;
     }
     
-    return await publicClient.readContract({
-        address: degenContractAddress,
-        abi: degenAbi,
-        functionName: 'allowance',
-        args: [address as `0x${string}`, betRegistryAddress],
-    })
+    try {
+        return await publicClient.readContract({
+            address: degenContractAddress,
+            abi: degenAbi,
+            functionName: 'allowance',
+            args: [address as `0x${string}`, betRegistryAddress],
+        })
+    } catch (error) {
+        return 0n;
+    }
 }
 
 const hasAnyDegenAllowance = async (addresses: string[]): Promise<boolean> => {
@@ -21,8 +25,6 @@ const hasAnyDegenAllowance = async (addresses: string[]): Promise<boolean> => {
     }
     
     for (const address of addresses) {
-        if (!address || !address.startsWith('0x')) continue;
-         
         const allowance = await getDegenAllowanceForAddress(address);
         if (allowance > 0n) {
             return true;
