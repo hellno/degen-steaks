@@ -39,7 +39,3 @@ jobs:
       - name: Run tests
         working-directory: ./contracts
         run: forge test -vvv
-
-      - name: Run snapshot
-        working-directory: ./contracts
-        run: forge snapshot
