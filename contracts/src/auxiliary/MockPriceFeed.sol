@@ -8,7 +8,7 @@ contract MockPriceFeed {
     uint256 price;
 
     /// @dev returns the usdc value of 1 mio DEGEN
-    function getPrice() external view returns (uint256) {
+    function getPrice(uint32) external view returns (uint256) {
         return price;
     }
 

@@ -65,6 +65,12 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         assertEq(market.totalDegen, 0);
     }
 
+    function test_CreateMarket_returnsMarketId() public {
+        assertEq(_createMarket(1 days, 1000), 0);
+        assertEq(_createMarket(1 days, 1000), 1);
+        assertEq(_createMarket(1 days, 1000), 2);
+    }
+
     function test_createMarket_afterSetFan() public {
         vm.expectEmit();
         emit FanSet(ALICE, true);
@@ -154,7 +160,7 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
 
     function test_placeBet_fail_underMinBid() public {
         _createMarket(1 days, 1000);
-        vm.expectRevert("BetRegistry::placeBet: amount must be greater than MIN_BID.");
+        vm.expectRevert("BetRegistry::placeBet: amount must be at least MIN_BID.");
         betRegistry.placeBet(0, 1e18 - 1, IBetRegistry.BetDirection.HIGHER);
     }
 
@@ -181,15 +187,6 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         _placeBet(0, BET, IBetRegistry.BetDirection.LOWER);
         vm.warp(1 days + 59);
         vm.expectRevert("BetRegistry::resolveMarket: grace period not over.");
-        betRegistry.resolveMarket(0);
-    }
-
-    function test_resolveMarket_fail_samePrice() public {
-        _createMarket(1 days, DEGEN_PRICE_1);
-        _placeBet(0, BET, IBetRegistry.BetDirection.HIGHER);
-        _placeBet(0, BET, IBetRegistry.BetDirection.LOWER);
-        vm.warp(1 days + 60);
-        vm.expectRevert("BetRegistry::resolveMarket: endPrice and targetPrice must differ.");
         betRegistry.resolveMarket(0);
     }
 

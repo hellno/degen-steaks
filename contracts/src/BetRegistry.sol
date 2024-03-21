@@ -72,7 +72,7 @@ contract BetRegistry is IBetRegistry, Ownable {
         return marketToUserToBet[marketId_][user_];
     }
 
-    function createMarket(uint40 endTime_, uint256 targetPrice_) public onlyFans {
+    function createMarket(uint40 endTime_, uint256 targetPrice_) public onlyFans returns (uint256) {
         require(endTime_ > block.timestamp, "BetRegistry::createMarket: endTime must be in the future.");
         require(targetPrice_ > 0, "BetRegistry::createMarket: targetPrice must be greater than zero.");
         markets.push(
@@ -89,11 +89,12 @@ contract BetRegistry is IBetRegistry, Ownable {
         );
 
         emit MarketCreated(markets.length - 1, msg.sender, endTime_, targetPrice_);
+        return markets.length - 1;
     }
 
     function placeBet(uint256 marketId_, uint256 amount_, BetDirection direction_) public {
         require(marketId_ < markets.length, "BetRegistry::placeBet: marketId out of range.");
-        require(amount_ > MIN_BID, "BetRegistry::placeBet: amount must be greater than MIN_BID.");
+        require(amount_ >= MIN_BID, "BetRegistry::placeBet: amount must be at least MIN_BID.");
         Market storage market = markets[marketId_];
         require(block.timestamp < market.endTime, "BetRegistry::placeBet: market has ended.");
 
@@ -140,8 +141,8 @@ contract BetRegistry is IBetRegistry, Ownable {
         Market storage market = markets[marketId_];
         require(block.timestamp >= market.endTime, "BetRegistry::resolveMarket: market has not ended.");
         require(block.timestamp >= market.endTime + gracePeriod, "BetRegistry::resolveMarket: grace period not over.");
-        uint256 price = priceFeed.getPrice();
-        require(price != market.targetPrice, "BetRegistry::resolveMarket: endPrice and targetPrice must differ.");
+        uint32 secondsAgo = uint32(block.timestamp - market.endTime);
+        uint256 price = priceFeed.getPrice(secondsAgo);
         market.endPrice = price;
 
         // unsteake degen

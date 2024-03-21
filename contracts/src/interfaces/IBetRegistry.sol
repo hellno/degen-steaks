@@ -51,7 +51,7 @@ interface IBetRegistry {
     event GracePeriodSet(uint256 gracePeriod);
     event SlashPeriodSet(uint256 slashPeriod);
 
-    function createMarket(uint40 endTime, uint256 targetPrice) external;
+    function createMarket(uint40 endTime, uint256 targetPrice) external returns (uint256 marketId);
     function getMarket(uint256 marketId) external view returns (Market memory);
     function placeBet(uint256 marketId, uint256 amount, BetDirection direction) external;
     function getBet(uint256 marketId, address user) external view returns (Bet memory);
