@@ -1,0 +1,41 @@
+on: [push]
+
+name: Contracts
+
+env:
+  DEPLOYER: ${{ secrets.DEPLOYER }}
+  DEPLOYER_PK: ${{ secrets.DEPLOYER_PK }}
+  ALICE_PK: ${{ secrets.ALICE_PK }}
+  BOB_PK: ${{ secrets.BOB_PK }}
+  CAROL_PK: ${{ secrets.CAROL_PK }}
+
+jobs:
+  check:
+    name: Linting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name : Lint
+        working-directory: ./contracts
+        run: forge fmt --check
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Run tests
+        working-directory: ./contracts
+        run: forge test -vvv
