@@ -94,7 +94,7 @@ contract BetRegistry is IBetRegistry, Ownable {
 
     function placeBet(uint256 marketId_, uint256 amount_, BetDirection direction_) public {
         require(marketId_ < markets.length, "BetRegistry::placeBet: marketId out of range.");
-        require(amount_ > MIN_BID, "BetRegistry::placeBet: amount must be greater than MIN_BID.");
+        require(amount_ >= MIN_BID, "BetRegistry::placeBet: amount must be at least MIN_BID.");
         Market storage market = markets[marketId_];
         require(block.timestamp < market.endTime, "BetRegistry::placeBet: market has ended.");
 

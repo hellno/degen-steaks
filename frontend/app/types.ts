@@ -22,3 +22,8 @@ export type BetType = {
     cashedOutDegen: bigint;
     cashOutTransaction: string;
 }
+
+export enum BetDirection {
+    HIGHER,
+    LOWER
+}

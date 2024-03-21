@@ -9,7 +9,7 @@
 
 4. Visit [http://localhost:3000/debug](http://localhost:3000/debug) to debug your frame.
 
-## Todo:
-
-- add rainbowkit with template to add buttons
-- add buttons to transfer degen into contract with call xyz
+5. Debug with Warpcast Frame validator
+    - Run app locally and ```cloudflared tunnel --url http://localhost:3000```
+    - Set xyz.trycloudflare.com as `NEXT_PUBLIC_HOST` in `.env` file
+    - Visit `https://warpcast.com/~/developers/frames`
