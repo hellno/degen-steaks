@@ -110,6 +110,7 @@ BetRegistryContract_BetPlaced_handler(({ event, context }) => {
   };
 
   if (event.params.direction === 0n) {
+    context.log.info('event params', JSON.stringify(event.params));
     // BetDirection is HIGHER
     market = {
       ...market,
