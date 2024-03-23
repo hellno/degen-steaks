@@ -1,8 +1,9 @@
 import {
   convertMillisecondsToDelta,
+  getUserWasRight,
   renderDegenPriceFromContract,
 } from "@/app/lib/utils";
-import { MarketType } from "@/app/types";
+import { UserWasRight, MarketType } from "@/app/types";
 import MarketBetRatioBar from "./MarketBetRatioBar";
 import { formatEther, parseEther } from "viem";
 import { Button } from "./ui/button";
@@ -28,12 +29,9 @@ const MarketOverview = ({ market }: { market: MarketType | undefined }) => {
       ? `ends in ${convertMillisecondsToDelta(timeDelta)}.`
       : `ended ${convertMillisecondsToDelta(timeDelta)} ago.`;
 
-  const sharesLower =
-    market.totalSharesLower /
-    (market.totalSharesLower + market.totalSharesHigher);
-  const sharesHigher =
-    market.totalSharesHigher /
-    (market.totalSharesLower + market.totalSharesHigher);
+  const allShares = market.totalSharesLower + market.totalSharesHigher;
+  const sharesLower = market.totalSharesLower / allShares;
+  const sharesHigher = market.totalSharesHigher / allShares;
 
   const renderData = (label: string, value: string | React.ReactNode) => (
     <div className="flex flex-col bg-gray-400/5 p-8">
@@ -74,14 +72,28 @@ const MarketOverview = ({ market }: { market: MarketType | undefined }) => {
             <span className="text-xl text-gray-600 truncate">
               {Number(
                 formatEther(
-                  BigInt(bet.sharesHigher ? bet.sharesHigher : bet.sharesLower)
+                  bet.sharesHigher ? bet.sharesHigher : bet.sharesLower
+                  / allShares * market.degenCollected
                 ).toString()
               ).toFixed(2)}{" "}
-              shares
+              $DEGEN
             </span>
           </div>
         ))}
     </div>
+  );
+
+  const renderClaimButton = () => (
+    <Button variant="secondary" className="mb-2" size="lg" onClick={() => {
+      writeContract({
+        abi: betRegistryAbi,
+        address: betRegistryAddress,
+        functionName: "cashOut",
+        args: [BigInt(market.id)],
+      });
+    }}>
+      {isPending ? "Claiming..." : "Claim"}
+    </Button>
   );
 
   return (
@@ -92,7 +104,8 @@ const MarketOverview = ({ market }: { market: MarketType | undefined }) => {
             Latest DEGEN steaks 🔥🥩 bet
           </h2> */}
           <p className="text-lg leading-8 text-gray-800">
-            {timeDelta < 0 ? "This market is closed" : "Place your bets below"}.{" "}
+            {timeDelta < 0 ? "This market is closed." : ""}{" "}
+            {timeDelta < 0 && !market?.bets?.length ? "Place your bets below" : ""}
             The bet {marketEndDescription}
           </p>
         </div>
@@ -131,6 +144,7 @@ const MarketOverview = ({ market }: { market: MarketType | undefined }) => {
           {market?.bets?.length
             ? renderData("Your bet", renderUserBets())
             : null}
+          {market.isResolved && getUserWasRight(market) && renderData("Claim your winnings", renderClaimButton())}
           {!market.isResolved &&
             timeDelta < 0 &&
             renderData("", renderResolveButton())}

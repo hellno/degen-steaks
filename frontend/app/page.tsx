@@ -378,7 +378,7 @@ export default async function Home({
     );
 
   return (
-    <div>
+    <div className="p-4">
       <h1 className="text-4xl">degen steaks 🥩</h1>
       <FrameContainer
         postUrl="/frames"

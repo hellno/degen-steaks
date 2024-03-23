@@ -2,11 +2,12 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Dialog } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import {
   useAccount,
+  useSwitchChain,
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
@@ -19,8 +20,13 @@ import MarketOverview from "@/components/MarketOverview";
 import { BetDirection, MarketType } from "../../types";
 import { Input } from "@/components/ui/input";
 import { formatEther, parseEther } from "viem";
+import { CHAIN } from "@/app/lib/rainbowkit";
+import { useRouter } from "next/navigation";
 
-const baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL || process.env.NEXT_PUBLIC_HOST || "http://localhost:3000";
+const baseUrl =
+  process.env.NEXT_PUBLIC_VERCEL_URL ||
+  process.env.NEXT_PUBLIC_HOST ||
+  "http://localhost:3000";
 
 const navigation = [
   { name: "FAQ", href: "#faq" },
@@ -56,8 +62,9 @@ const faqs = [
   {
     id: 5,
     question: "How do I create a market?",
-    answer: "Markets are created by the team (for now). You can bet on any open market.",
-  }
+    answer:
+      "Markets are created by the team (for now). You can bet on any open market.",
+  },
 ];
 
 const MAX_ALLOWANCE = 10000;
@@ -73,57 +80,112 @@ const getMarketIdFromSlug = (slug: string[]): string | undefined => {
     return slug[1];
   }
   return undefined;
-}
+};
 
 export default function Page({ params }: { params: { slug: string[] } }) {
-  console.log('Page params', params);
+  const router = useRouter();
+
+  const { switchChain } = useSwitchChain();
   const marketId = getMarketIdFromSlug(params.slug);
   const [pageState, setPageState] = useState<State>(State.start);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { address, isConnected } = useAccount();
+  const { address, isConnected, chainId } = useAccount();
 
   const [betAmount, setBetAmount] = useState<string>(); // in user readable format
   const [market, setMarket] = useState<MarketType>();
   const [allowance, setAllowance] = useState<bigint>(0n); // in wei
   const [pendingAllowance, setPendingAllowance] = useState<string>();
+  const [errorMessage, setErrorMessage] = useState<string>();
+
+  const timeDelta = market && market.endTime * 1000 - new Date().getTime();
 
   const {
-    data: hash,
-    isPending: isPendingWrite,
-    isSuccess: isSuccessWrite,
-    writeContract,
-    status,
-    error,
+    data: writeAllowanceHash,
+    isPending: isPendingWriteAllowance,
+    isSuccess: isSuccessWriteAllowance,
+    writeContract: writeAllowance,
+    status: writeAllowanceStatus,
+    error: writeAllowanceError,
   } = useWriteContract();
 
-  const updateAllowance = async () => {
-    if (!address) return;
+  const {
+    data: writeBetHash,
+    isPending: isPendingWriteBet,
+    isSuccess: isSuccessWriteBet,
+    writeContract: writeBet,
+    status: writeBetStatus,
+    error: writeBetError,
+  } = useWriteContract();
 
+  const updateAllowance = useCallback(async () => {
+    if (!address) return;
     getDegenAllowanceForAddress(address).then((allowance) => {
       setAllowance(allowance);
     });
+  }, [address]); 
+
+  const waitUntilAllowanceUpdated = async () => {
+    let startAllowance = allowance;
+
+    const interval = setInterval(() => {
+      updateAllowance();
+      if (allowance !== startAllowance) {
+        clearInterval(interval);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
   };
 
   const {
-    status: transactionStatus,
-    error: transactionError,
-  } = useWaitForTransactionReceipt({ hash });
+    status: allowanceTransactionStatus,
+    error: allowanceTransactionError,
+  } = useWaitForTransactionReceipt({ hash: writeAllowanceHash });
+  const { status: betTransactionStatus, error: betTransactionError } =
+    useWaitForTransactionReceipt({ hash: writeBetHash });
 
-  console.log('writeContract', status, error);
-  console.log('transactionStatus', transactionStatus, transactionError);
+  // console.log("writeContract", writeAllowanceStatus, writeAllowanceError);
+  // console.log(
+  //   "transactionStatus",
+  //   allowanceTransactionStatus,
+  //   allowanceTransactionError
+  // );
 
   useEffect(() => {
-    if (pageState === State.start && status === "success") {
-      updateAllowance();
-      setPageState(State.pending_bet);
-    } else if (pageState === State.pending_bet && status === "success") {
+    if (isConnected && chainId !== CHAIN.id) {
+      switchChain({ chainId: CHAIN.id });
+    }
+  }, [switchChain, chainId, isConnected]);
+
+  useEffect(() => {
+    if (timeDelta && timeDelta <= 0) {
       setPageState(State.view_market);
     }
-  }, [transactionStatus]);
+  }, [timeDelta]);
+
+  useEffect(() => {
+    if (pageState === State.start && writeAllowanceStatus === "success") {
+      // we call updateAllowance, but it might not be updated yet
+
+      waitUntilAllowanceUpdated().then(() => {
+        setPageState(State.pending_bet);
+      });
+    } else if (
+      pageState === State.pending_bet &&
+      writeBetStatus === "success"
+    ) {
+      setPageState(State.view_market);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allowanceTransactionStatus, betTransactionStatus]);
 
   useEffect(() => {
     updateAllowance();
-  }, [address, isSuccessWrite, error]);
+
+    if (writeAllowanceError) {
+      setErrorMessage(writeAllowanceError?.message);
+    }
+  }, [updateAllowance, address, isSuccessWriteAllowance, writeAllowanceError]);
 
   useEffect(() => {
     const addresses = address ? [address] : [];
@@ -131,7 +193,7 @@ export default function Page({ params }: { params: { slug: string[] } }) {
       getDefaultOpenMarket(addresses).then((market) => {
         setMarket(market);
       });
-    }
+    };
 
     if (marketId) {
       getMarket(marketId, addresses).then((market) => {
@@ -144,7 +206,7 @@ export default function Page({ params }: { params: { slug: string[] } }) {
     } else {
       updateToDefaultMarket();
     }
-  }, [marketId, address]);
+  }, [marketId, address, pageState]);
 
   useEffect(() => {
     if (allowance > 0n) {
@@ -153,7 +215,7 @@ export default function Page({ params }: { params: { slug: string[] } }) {
   }, [allowance]);
 
   const onIncreaseAllowance = async () => {
-    writeContract({
+    writeAllowance({
       abi: degenAbi,
       address: degenContractAddress,
       functionName: "approve",
@@ -166,10 +228,11 @@ export default function Page({ params }: { params: { slug: string[] } }) {
 
   const onPlaceBet = async (betDirection: BetDirection) => {
     if (!market?.id) return;
-    const betSize = parseEther(
-      betAmount || MAX_ALLOWANCE.toString()
-    );
-    writeContract({
+
+    const betSize = parseEther(betAmount || MAX_ALLOWANCE.toString());
+    console.log(`placing a bet - size: ${betSize}, direction: ${betDirection}`);
+
+    writeBet({
       abi: betRegistryAbi,
       address: betRegistryAddress,
       functionName: "placeBet",
@@ -178,7 +241,7 @@ export default function Page({ params }: { params: { slug: string[] } }) {
   };
 
   const getHumanReadableAllowance = () =>
-    Number(formatEther(allowance)).toFixed(6);
+    Number(formatEther(allowance)).toFixed(4);
 
   const renderAllowanceForm = () =>
     pageState === State.start && (
@@ -203,9 +266,9 @@ export default function Page({ params }: { params: { slug: string[] } }) {
           <Button
             size="lg"
             onClick={() => onIncreaseAllowance()}
-            disabled={isPendingWrite}
+            disabled={isPendingWriteAllowance}
           >
-            {isPendingWrite ? "Approving..." : "Approve 🔥"}
+            {isPendingWriteAllowance ? "Approving..." : "Approve 🔥"}
           </Button>
           {allowance > 0n && (
             <Button
@@ -219,16 +282,18 @@ export default function Page({ params }: { params: { slug: string[] } }) {
         </div>
       </div>
     );
-    
-  const renderShareView = () => {
-    const intentUrl = `https://warpcast.com/~/compose?text=just%20steaked%20some%20%24DEGEN%20%F0%9F%A5%A9%F0%9F%94%A5&embeds[]=${baseUrl}/market/1`;
 
-    return pageState === State.view_market && (
-      <div className="flex flex-col gap-4">
-        <Button size="lg" onClick={() => window.open(intentUrl, '_blank')}>
-          Share on Warpcast
-        </Button>
-      </div>
+  const renderShareView = () => {
+    const intentUrl = `https://warpcast.com/~/compose?text=just%20steaked%20some%20%24DEGEN%20%F0%9F%A5%A9%F0%9F%94%A5%20on%20${baseUrl}&embeds[]=${baseUrl}`;
+
+    return (
+      pageState === State.view_market && (
+        <div className="flex flex-col gap-4">
+          <Button size="lg" onClick={() => window.open(intentUrl, "_blank")}>
+            Share on Warpcast
+          </Button>
+        </div>
+      )
     );
   };
 
@@ -237,7 +302,7 @@ export default function Page({ params }: { params: { slug: string[] } }) {
       <div className="flex flex-col gap-4">
         <div className="flex">
           <Input
-            placeholder={`Bet amount (max: ${getHumanReadableAllowance()})`}
+            placeholder={`Amount (max: ${getHumanReadableAllowance()})`}
             type="number"
             value={betAmount}
             onChange={(e) => setBetAmount(e.target.value)}
@@ -255,20 +320,24 @@ export default function Page({ params }: { params: { slug: string[] } }) {
           <Button
             size="lg"
             onClick={() => onPlaceBet(BetDirection.LOWER)}
-            disabled={isPendingWrite}
+            disabled={isPendingWriteBet}
           >
-            {isPendingWrite ? "Placing bet..." : "Place bet 🔽"}
+            {isPendingWriteBet ? "Placing bet..." : "Place bet 🔽"}
           </Button>
           <Button
             size="lg"
             onClick={() => onPlaceBet(BetDirection.HIGHER)}
-            disabled={isPendingWrite}
+            disabled={isPendingWriteBet}
           >
-            {isPendingWrite ? "Placing bet..." : "Place bet 🔼"}
+            {isPendingWriteBet ? "Placing bet..." : "Place bet 🔼"}
           </Button>
         </div>
         <div>
-          <Button size="default" variant="outline" onClick={() => setPageState(State.start)}>
+          <Button
+            size="default"
+            variant="outline"
+            onClick={() => setPageState(State.start)}
+          >
             Increase allowance
           </Button>
         </div>
@@ -278,13 +347,38 @@ export default function Page({ params }: { params: { slug: string[] } }) {
   const renderCtaButtons = () => {
     return (
       <div className="mt-10 flex items-center justify-center gap-x-6">
-        {!isConnected && <ConnectButton />}
-        {renderAllowanceForm()}
-        {renderPlaceBetForm()}
+        {isConnected ? (
+          renderAllowanceForm()
+        ) : (
+          <ConnectButton label="Connect Wallet 🥩🔥" />
+        )}
+        {isConnected && renderPlaceBetForm()}
         {renderShareView()}
       </div>
     );
   };
+
+  const renderExploreButtons = () =>
+    marketId ? (
+      <div className="mt-12 flex items-center justify-center gap-x-6">
+        {Number(marketId) > 0 && (
+          <Button
+            size="lg"
+            variant="outline"
+            onClick={() => router.push(`/web/market/${Number(marketId) - 1}`)}
+          >
+            ⬅️ Previous market
+          </Button>
+        )}
+        <Button
+          size="lg"
+          variant="outline"
+          onClick={() => router.push(`/web/market/${Number(marketId) + 1}`)}
+        >
+          Next Market ➡️
+        </Button>
+      </div>
+    ) : null;
 
   return (
     <div className="bg-white">
@@ -406,6 +500,11 @@ export default function Page({ params }: { params: { slug: string[] } }) {
                 </p>
                 {renderCtaButtons()}
               </div>
+              {errorMessage && (
+                <div className="mt-4 text-center text-red-500">
+                  {errorMessage}
+                </div>
+              )}
               <div className="mt-2 lg:mt-4 text-center mx-auto max-w-sm">
                 <a
                   href="https://warpcast.com/~/channel/degen-steaks"
@@ -415,6 +514,7 @@ export default function Page({ params }: { params: { slug: string[] } }) {
                 </a>
               </div>
               <MarketOverview market={market} />
+              {renderExploreButtons()}
               {/* App Screenshot */}
               {/* <div className="mt-16 flow-root sm:mt-24">
                 <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-4 lg:rounded-2xl lg:p-4">
