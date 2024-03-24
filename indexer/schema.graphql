@@ -1,3 +1,8 @@
+enum BetDirection {
+  HIGHER
+  LOWER
+}
+
 type Dao {
   id: ID!
   totalDegenFee: BigInt!
@@ -55,6 +60,6 @@ type PlacedBet {
   steaks: BigInt!
   feeSteaks: BigInt!
   betShares: BigInt!
-  direction: BigInt!
+  direction: BetDirection!
   transaction: String!
 }

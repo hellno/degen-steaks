@@ -10,6 +10,7 @@ import {
   BetRegistryContract_MarketSlashed_handler,
   BetRegistryContract_MarketSlashed_loader,
 } from "../../generated/src/Handlers.gen";
+import { BetDirection } from "../../generated/src/Enums.gen";
 
 BetRegistryContract_MarketCreated_loader(({ event, context }) => {
   context.Market.load(event.params.id.toString(), {});
@@ -80,7 +81,7 @@ BetRegistryContract_BetPlaced_handler(({ event, context }) => {
   if (market === undefined) {
     context.log.error(
       "BetRegistry::BetPlaced: Market not found: " +
-        event.params.marketId.toString()
+      event.params.marketId.toString()
     );
     return;
   }
@@ -109,9 +110,8 @@ BetRegistryContract_BetPlaced_handler(({ event, context }) => {
     degenCollected: market.degenCollected + event.params.degen,
   };
 
-  if (event.params.direction === 0n) {
-    context.log.info(`event params ${JSON.stringify(event.params)}`);
-    // BetDirection is HIGHER
+  const direction: BetDirection = event.params.direction.toString() === "0" ? "HIGHER" : "LOWER";
+  if (direction === "HIGHER") {
     market = {
       ...market,
       totalSharesHigher: market.totalSharesHigher + event.params.betShares,
@@ -148,11 +148,11 @@ BetRegistryContract_BetPlaced_handler(({ event, context }) => {
     bet_id: bet.id,
     market_id: market.id,
     betShares: event.params.betShares,
-    direction: event.params.direction,
     degen: event.params.degen,
     steaks: event.params.steaks,
     feeSteaks: event.params.feeSteaks,
     transaction: event.transactionHash,
+    direction,
   };
 
   context.PlacedBet.set(placedBet);
@@ -160,7 +160,7 @@ BetRegistryContract_BetPlaced_handler(({ event, context }) => {
 
 BetRegistryContract_MarketResolved_loader(({ event, context }) => {
   context.Market.load(event.params.marketId.toString(), {
-    loaders: { loadCreator: true },
+    // loaders: { loadCreator: true },
   });
 });
 
@@ -169,7 +169,7 @@ BetRegistryContract_MarketResolved_handler(({ event, context }) => {
   if (market === undefined) {
     context.log.error(
       "BetRegistry::MarketResolved: Market not found: " +
-        event.params.marketId.toString()
+      event.params.marketId.toString()
     );
     return;
   }
@@ -213,7 +213,7 @@ BetRegistryContract_BetCashedOut_handler(({ event, context }) => {
   if (market === undefined) {
     context.log.error(
       "BetRegistry::BetCashedOut: Market not found: " +
-        event.params.marketId.toString()
+      event.params.marketId.toString()
     );
     return;
   }
@@ -232,9 +232,9 @@ BetRegistryContract_BetCashedOut_handler(({ event, context }) => {
   if (bet === undefined) {
     context.log.error(
       "BetRegistry::BetCashedOut: Bet not found: " +
-        event.params.marketId.toString() +
-        "-" +
-        event.params.user
+      event.params.marketId.toString() +
+      "-" +
+      event.params.user
     );
     return;
   }
@@ -275,7 +275,7 @@ BetRegistryContract_BetCashedOut_handler(({ event, context }) => {
 
 BetRegistryContract_MarketSlashed_loader(({ event, context }) => {
   context.Market.load(event.params.marketId.toString(), {
-    loaders: { loadCreator: true },
+    // loaders: { loadCreator: true },
   });
   context.User.load(event.params.slasher);
   context.Dao.load("1");
@@ -286,7 +286,7 @@ BetRegistryContract_MarketSlashed_handler(({ event, context }) => {
   if (market === undefined) {
     context.log.error(
       "BetRegistry::MarketSlashed: Market not found: " +
-        event.params.marketId.toString()
+      event.params.marketId.toString()
     );
     return;
   }
