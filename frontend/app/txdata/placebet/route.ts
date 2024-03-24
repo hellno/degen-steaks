@@ -45,6 +45,6 @@ export function POST(
   }
 
   const placeBetData = generatePlaceBetData({ marketId, betSize, betDirection });
-  console.log('POST /txdata/placebet req', JSON.stringify(req), placeBetData);
+  console.log('POST /txdata/placebet req', placeBetData);
   return NextResponse.json(placeBetData);
 }

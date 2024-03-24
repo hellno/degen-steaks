@@ -647,4 +647,4 @@ export const degenAbi = [
    ]as const;
 
 
-export const degenContractAddress = '0x11efF3a7cbEBA2071105DD9b9DE02DefC8F95217';
+export const degenContractAddress = '0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed';

@@ -1,9 +1,9 @@
 "use client";
 
-import { getDefaultConfig, lightTheme, midnightTheme } from "@rainbow-me/rainbowkit";
-import { base, baseSepolia } from "@wagmi/core/chains";
+import { getDefaultConfig, lightTheme } from "@rainbow-me/rainbowkit";
+import { base } from "@wagmi/core/chains";
 
-export const CHAIN = baseSepolia; // base
+export const CHAIN = base;
 
 export const config = getDefaultConfig({
     appName: "degen steaks 🥩",
