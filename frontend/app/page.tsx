@@ -44,10 +44,11 @@ const renderPaymentButton = async (state: State): Promise<any> => {
       target: `${baseUrl}/txdata/placebet?marketId=${marketId}&betSize=${betSize}&betDirection=${betDirection}`,
     };
   } else {
+    const { betSize } = state;
     return {
       label: "Approve",
       action: "tx",
-      target: `${baseUrl}/txdata/approvedegen`,
+      target: `${baseUrl}/txdata/approvedegen?approvalAmount=${betSize}`,
     };
   }
 };
@@ -282,7 +283,9 @@ export default async function Home({
                 {renderDegenPriceFromContract(targetPrice)}-{">"}{" "}
                 {highWon || "TBD"}
               </p>
-              {userWasRight !== undefined && <p tw="text-6xl">You {userWasRight ? "won 🤩" : "lost 🫡"} </p>}
+              {userWasRight !== undefined && (
+                <p tw="text-6xl">You {userWasRight ? "won 🤩" : "lost 🫡"} </p>
+              )}
             </div>
           </div>
         </FrameImage>
@@ -361,7 +364,9 @@ export default async function Home({
                 {new Date(marketData.endTime * 1000).toString().split("(")[0] ||
                   ""}
               </span>
-              <span tw="mt-4">You can lose your funds if you bet on the wrong side!</span>
+              <span tw="mt-4">
+                You can lose your funds if you bet on the wrong side!
+              </span>
             </div>
           ) : null}
         </div>
