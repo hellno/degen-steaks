@@ -20,7 +20,7 @@ const MarketBetRatioBar = ({ lower, higher }: { lower: number; higher: number })
                 >
                     {lower ? (
                         <div className="text-clip overflow-hidden flex justify-center items-center w-full font-bold text-white">
-                            {lowerPercentage.toFixed(2)}% {lowerPercentage > 20 && "lower"}
+                            {lowerPercentage.toFixed(2)}% {lowerPercentage > 30 && "lower"}
                         </div>
                     ) : null}
                 </div>
@@ -33,7 +33,7 @@ const MarketBetRatioBar = ({ lower, higher }: { lower: number; higher: number })
                 >
                     {higher ? (
                         <div className="text-clip overflow-hidden flex justify-center items-center w-full font-bold text-white">
-                            {higherPercentage.toFixed(2)}% {higherPercentage > 20 && "higher"}
+                            {higherPercentage.toFixed(2)}% {higherPercentage > 30 && "higher"}
                         </div>
                     ) : null}
                 </div>
