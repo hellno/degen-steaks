@@ -192,6 +192,7 @@ export default function Page({ params }: { params: { slug: string[] } }) {
     const updateToDefaultMarket = () => {
       getDefaultOpenMarket(addresses).then((market) => {
         setMarket(market);
+        router.push(`/web/market/${market.id}`);
       });
     };
 

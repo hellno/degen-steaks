@@ -6,32 +6,34 @@ import clsx from "clsx";
 const MarketBetRatioBar = ({ lower, higher }: { lower: number; higher: number }) => {
     if (!lower && !higher) return null;
 
+    const lowerPercentage = ((lower / (lower + higher)) * 100);
+    const higherPercentage = ((higher / (lower + higher)) * 100);
     return (
         <div className="flex justify-center lg:px-12">
             <div className="flex h-12 rounded-lg w-full">
                 <div
                     className={clsx(
                         higher ? "rounded-l-full" : "rounded-full",
-                        "flex border-gray-500 w-full bg-green-400"
+                        "flex border-gray-500 w-full bg-red-400"
                     )}
                     style={{ width: `${lower + higher > 0 ? (lower / (lower + higher)) * 100 : 0}%` }}
                 >
                     {lower ? (
                         <div className="text-clip overflow-hidden flex justify-center items-center w-full font-bold text-white">
-                            {lower}% {lower > 20 && "lower"}
+                            {lowerPercentage.toFixed(2)}% {lowerPercentage > 20 && "lower"}
                         </div>
                     ) : null}
                 </div>
                 <div
                     className={clsx(
                         lower ? "rounded-r-full" : "rounded-full",
-                        "flex w-full bg-red-400"
+                        "flex w-full bg-green-400"
                     )}
                     style={{ width: `${lower + higher > 0 ? (higher / (lower + higher)) * 100 : 0}%` }}
                 >
                     {higher ? (
                         <div className="text-clip overflow-hidden flex justify-center items-center w-full font-bold text-white">
-                            {higher}% {higher > 20 && "higher"}
+                            {higherPercentage.toFixed(2)}% {higherPercentage > 20 && "higher"}
                         </div>
                     ) : null}
                 </div>
