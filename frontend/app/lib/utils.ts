@@ -1,4 +1,5 @@
 import { formatEther } from "viem";
+import { BetDirection, MarketType, UserWasRight } from "../types";
 
 export function convertMillisecondsToDelta(milliseconds: number): string {
     if (milliseconds < 0) {
@@ -29,4 +30,14 @@ export const renderDegenPriceFromContract = (price: bigint): string => price ? `
 
 export const cn = (...classes: (string | boolean | undefined)[]): string => {
     return classes.filter(Boolean).join(' ');
+}
+
+export const getUserWasRight = (market: MarketType): boolean | undefined => {
+    if (!market.isResolved) return undefined;
+
+    const bet = market.bets?.[0];
+    if (!bet) return undefined;
+
+    const userDirection = bet.sharesHigher > 0 ? BetDirection.HIGHER : BetDirection.LOWER;
+    return market.highWon === (userDirection === BetDirection.HIGHER);
 }

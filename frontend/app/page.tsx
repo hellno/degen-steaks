@@ -16,6 +16,7 @@ import { hasAnyDegenAllowance } from "./lib/onchainUtils";
 import { getDefaultOpenMarket, getMarket } from "./lib/indexerUtils";
 import {
   convertMillisecondsToDelta,
+  getUserWasRight,
   renderDegenPriceFromContract,
 } from "./lib/utils";
 import { formatEther, parseEther } from "viem";
@@ -169,7 +170,7 @@ export default async function Home({
   const userAddresses = !frameMessage
     ? []
     : [frameMessage.requesterCustodyAddress].concat(
-        ...frameMessage.requesterVerifiedAddresses,
+        ...frameMessage.requesterVerifiedAddresses
       );
   if (marketId === DEFAULT_MARKET_ID) {
     marketData = await getDefaultOpenMarket(userAddresses);
@@ -178,15 +179,10 @@ export default async function Home({
     marketData = await getMarket(marketId.toString(), userAddresses);
   }
 
-  // console.log('inputText in state', pageState, ' ->>>>>', frameMessage?.inputText)
-  // if (pageState === PageState.decide) {
-  // }
-
   if (pageState === PageState.pending_payment) {
     if (state.hasAllowance === undefined) {
       state.hasAllowance = await hasAnyDegenAllowance(userAddresses);
     }
-    console.log("pending payment");
   }
 
   if (pageState === PageState.view_market) {
@@ -207,57 +203,74 @@ export default async function Home({
     }
   };
 
-  const renderProgressBar = ({ a, b }: { a: number; b: number }) => (
-    <div tw="flex justify-center px-12">
-      <div tw="flex h-24 rounded-lg">
-        <div
-          tw={clsx(
-            b ? "rounded-l-full" : "rounded-full",
-            "flex border-gray-500 w-full bg-green-400"
-          )}
-          style={{ width: `${a + b > 0 ? (a / (a + b)) * 100 : 0}%` }}
-        >
-          {a ? (
-            <div tw="flex justify-center items-center w-full font-bold text-gray-100">
-              {a}%
-            </div>
-          ) : null}
-        </div>
-        <div
-          tw={clsx(
-            a ? "rounded-r-full" : "rounded-full",
-            "flex w-full bg-red-500"
-          )}
-          style={{ width: `${a + b > 0 ? (b / (a + b)) * 100 : 0}%` }}
-        >
-          {b ? (
-            <div tw="flex justify-center items-center w-full font-bold text-gray-100">
-              {b}%
-            </div>
-          ) : null}
+  const renderProgressBar = ({ a, b }: { a: number; b: number }) => {
+    if (!a && !b) return null;
+
+    const aPercentage = (a / (a + b)) * 100;
+    const bPercentage = (b / (a + b)) * 100;
+    return (
+      <div tw="flex justify-center px-12">
+        <div tw="flex h-24 rounded-lg">
+          <div
+            tw={clsx(
+              b ? "rounded-l-full" : "rounded-full",
+              "flex border-gray-500 w-full bg-green-400"
+            )}
+            style={{ width: `${a + b > 0 ? (a / (a + b)) * 100 : 0}%` }}
+          >
+            {a ? (
+              <div tw="flex justify-center items-center w-full font-bold text-gray-100">
+                {aPercentage.toFixed(2)}%
+              </div>
+            ) : null}
+          </div>
+          <div
+            tw={clsx(
+              a ? "rounded-r-full" : "rounded-full",
+              "flex w-full bg-red-500"
+            )}
+            style={{ width: `${a + b > 0 ? (b / (a + b)) * 100 : 0}%` }}
+          >
+            {b ? (
+              <div tw="flex justify-center items-center w-full font-bold text-gray-100">
+                {bPercentage.toFixed(2)}%
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
+  const client = {
+    id: 1,
+    name: "Tuple",
+    imageUrl: "https://tailwindui.com/img/logos/48x48/tuple.svg",
+    lastInvoice: {
+      date: "December 13, 2022",
+      dateTime: "2022-12-13",
+      amount: "$2,000.00",
+      status: "Overdue",
+    },
+  };
 
   const renderDefaultFrame = () => (
     <FrameImage aspectRatio="1:1">
       <div tw="flex flex-col">
         <div tw="flex flex-col self-center text-center justify-center items-center">
-          <p tw="text-7xl">Want more $DEGEN?</p>
+          <p tw="text-7xl font-bold tracking-tight text-gray-900">
+            Want to earn more $DEGEN?
+          </p>
           <p tw="text-5xl">Start steaking and earn today!</p>
         </div>
-        <div tw="flex">{renderProgressBar({ a: 69, b: 21 })}</div>
+        <div tw="flex">{renderProgressBar({ a: 69, b: 31 })}</div>
       </div>
     </FrameImage>
   );
 
   const renderFrameForMarket = () => {
     const { isResolved, endPrice, targetPrice, highWon, bets } = marketData;
-    console.log("renderFrameForMarket", marketData);
     if (isResolved && endPrice) {
-      const userPlacedBet = bets && bets.length > 0;
-      const userWasCorrect = false;
+      const userWasRight = getUserWasRight(marketData);
 
       return (
         <FrameImage aspectRatio="1:1">
@@ -269,7 +282,7 @@ export default async function Home({
                 {renderDegenPriceFromContract(targetPrice)}-{">"}{" "}
                 {highWon || "TBD"}
               </p>
-              <p tw="text-6xl">You {userWasCorrect ? "won 🤩" : "lost 🫡"} </p>
+              {userWasRight !== undefined && <p tw="text-6xl">You {userWasRight ? "won 🤩" : "lost 🫡"} </p>}
             </div>
           </div>
         </FrameImage>
@@ -300,7 +313,7 @@ export default async function Home({
         <div tw="flex flex-col">
           <div tw="flex flex-col self-center text-center justify-center items-center">
             <p tw="text-5xl">Will the $DEGEN price be</p>
-            above 🔼 or below 🔽
+            <p>above 🔼 or below 🔽</p>
             <p tw="text-7xl">
               {renderDegenPriceFromContract(BigInt(marketData.targetPrice))}
             </p>
@@ -310,6 +323,11 @@ export default async function Home({
                 a: 100 * Number(sharesLower),
                 b: 100 * Number(sharesHigher),
               })}
+            </div>
+            <div tw="flex mt-24">
+              <p tw="text-5xl">
+                {formatEther(BigInt(marketData.degenCollected))} DEGEN steaked
+              </p>
             </div>
           </div>
         </div>
@@ -343,6 +361,7 @@ export default async function Home({
                 {new Date(marketData.endTime * 1000).toString().split("(")[0] ||
                   ""}
               </span>
+              <span tw="mt-4">You can lose your funds if you bet on the wrong side!</span>
             </div>
           ) : null}
         </div>
@@ -378,7 +397,7 @@ export default async function Home({
     );
 
   return (
-    <div>
+    <div className="p-4">
       <h1 className="text-4xl">degen steaks 🥩</h1>
       <FrameContainer
         postUrl="/frames"

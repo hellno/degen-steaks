@@ -24,6 +24,12 @@ export type BetType = {
 }
 
 export enum BetDirection {
-    HIGHER,
-    LOWER
+    HIGHER = 0,
+    LOWER = 1,
+}
+
+export enum UserWasRight {
+    UNKNOWN = 0,
+    YES = 1,
+    NO = 2,
 }
