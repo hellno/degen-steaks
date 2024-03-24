@@ -5,7 +5,7 @@ networks:
     start_block: 12250857
     contracts:
       - name: BetRegistry
-        address: "0x8eCa90aB5DD9b876F70D4599651e640B9C172852"
+        address: "0x8aA47373bb61D5CA93098182420A454B7039d1a2"
         abi_file_path: ./abi/BetRegistry.json
         handler: ./src/event-handlers/BetRegistry.ts
         events:
@@ -34,7 +34,7 @@ networks:
               - name: User
               - name: Dao
       - name: SteakedDegen
-        address: "0x3a857574957ba327287a5a5B3245bFdA7419433c"
+        address: "0xa30176701DB4Df8023516FFaa9Ee8cBC98E0d359"
         abi_file_path: ./abi/SteakedDegen.json
         handler: ./src/event-handlers/SteakedDegen.ts
         events:
