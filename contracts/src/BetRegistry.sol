@@ -141,6 +141,8 @@ contract BetRegistry is IBetRegistry, Ownable {
         Market storage market = markets[marketId_];
         require(block.timestamp >= market.endTime, "BetRegistry::resolveMarket: market has not ended.");
         require(block.timestamp >= market.endTime + gracePeriod, "BetRegistry::resolveMarket: grace period not over.");
+        require(market.endPrice == 0, "BetRegistry::resolveMarket: market already resolved.");
+
         uint32 secondsAgo = uint32(block.timestamp - market.endTime);
         uint256 price = priceFeed.getPrice(secondsAgo);
         market.endPrice = price;
