@@ -21,7 +21,7 @@ export function convertMillisecondsToDelta(milliseconds: number): string {
     if (days > 0) timeString += `${days} days, `;
     if (hours > 0) timeString += `${hours} hours, `;
     if (minutes > 0) timeString += `${minutes} minutes, `;
-    if (seconds > 0) timeString += `${seconds} seconds`;
+    // if (seconds > 0) timeString += `${seconds} seconds`;
     return timeString.replace(/, $/, '');
 };
 

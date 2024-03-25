@@ -33,6 +33,7 @@ const MarketOverview = ({ market }: { market: MarketType | undefined }) => {
   }, []);
 
   if (!market) return null;
+  console.log('market', market);
 
   const timeDelta = market.endTime * 1000 - new Date().getTime();
   const marketEndDescription =
@@ -121,7 +122,7 @@ const MarketOverview = ({ market }: { market: MarketType | undefined }) => {
           </h2> */}
           <p className="text-lg leading-8 text-gray-800">
             {timeDelta < 0 ? "This market is closed." : ""}{" "}
-            {timeDelta < 0 && !market?.bets?.length
+            {timeDelta > 0 && !market?.bets?.length
               ? "Place your bets below"
               : ""}
             The bet {marketEndDescription}

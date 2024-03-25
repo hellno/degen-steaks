@@ -284,13 +284,13 @@ export default function Page({ params }: { params: { slug: string[] } }) {
           <Button size="lg" onClick={() => window.open(intentUrl, "_blank")}>
             Share on Warpcast
           </Button>
-          <Button
+          {/* <Button
             size="lg"
             variant="outline"
             onClick={() => router.push(`/web/market/${Number(marketId) + 1}`)}
           >
             Next Market ➡️
-          </Button>
+          </Button> */}
         </div>
       )
     );
@@ -492,10 +492,10 @@ export default function Page({ params }: { params: { slug: string[] } }) {
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
               <div className="mx-auto max-w-2xl text-center">
                 <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-                  Want to earn more $DEGEN?
+                  Want to get more out of your $DEGEN?
                 </h1>
-                <p className="mt-2 lg:mt-6 text-lg leading-8 text-gray-600">
-                  Degen Steaks is Base x Degen x Prediction Market
+                <p className="mt-2 text-lg lg:mt-4 lg:text-xl leading-8 text-gray-600">
+                  Degen Steaks 🥩🔥 is Base x Degen x Prediction Market
                 </p>
                 {renderCtaButtons()}
               </div>
