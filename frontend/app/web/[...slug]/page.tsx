@@ -122,9 +122,9 @@ export default function Page({ params }: { params: { slug: string[] } }) {
     getDegenAllowanceForAddress(address).then((allowance) => {
       setAllowance(allowance);
     });
-  }, [address]); 
+  }, [address]);
 
-  const waitUntilAllowanceUpdated = async () => {
+  const waitUntilAllowanceUpdated = useCallback(async () => {
     let startAllowance = allowance;
 
     const interval = setInterval(() => {
@@ -135,7 +135,7 @@ export default function Page({ params }: { params: { slug: string[] } }) {
     }, 1000);
 
     return () => clearInterval(interval);
-  };
+  }, [allowance, updateAllowance]);
 
   const {
     status: allowanceTransactionStatus,
@@ -143,13 +143,6 @@ export default function Page({ params }: { params: { slug: string[] } }) {
   } = useWaitForTransactionReceipt({ hash: writeAllowanceHash });
   const { status: betTransactionStatus, error: betTransactionError } =
     useWaitForTransactionReceipt({ hash: writeBetHash });
-
-  // console.log("writeContract", writeAllowanceStatus, writeAllowanceError);
-  // console.log(
-  //   "transactionStatus",
-  //   allowanceTransactionStatus,
-  //   allowanceTransactionError
-  // );
 
   useEffect(() => {
     if (isConnected && chainId !== CHAIN.id) {
@@ -165,19 +158,17 @@ export default function Page({ params }: { params: { slug: string[] } }) {
 
   useEffect(() => {
     if (pageState === State.start && writeAllowanceStatus === "success") {
-      // we call updateAllowance, but it might not be updated yet
-
       waitUntilAllowanceUpdated().then(() => {
         setPageState(State.pending_bet);
       });
-    } else if (
-      pageState === State.pending_bet &&
-      writeBetStatus === "success"
-    ) {
+    }
+  }, [pageState, writeAllowanceStatus, waitUntilAllowanceUpdated]);
+
+  useEffect(() => {
+    if (pageState === State.pending_bet && writeBetStatus === "success") {
       setPageState(State.view_market);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allowanceTransactionStatus, betTransactionStatus]);
+  }, [pageState, writeBetStatus]);
 
   useEffect(() => {
     updateAllowance();
@@ -207,7 +198,7 @@ export default function Page({ params }: { params: { slug: string[] } }) {
     } else {
       updateToDefaultMarket();
     }
-  }, [marketId, address, pageState]);
+  }, [marketId, address, pageState, router]);
 
   useEffect(() => {
     if (allowance > 0n) {
@@ -289,9 +280,16 @@ export default function Page({ params }: { params: { slug: string[] } }) {
 
     return (
       pageState === State.view_market && (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-row gap-4">
           <Button size="lg" onClick={() => window.open(intentUrl, "_blank")}>
             Share on Warpcast
+          </Button>
+          <Button
+            size="lg"
+            variant="outline"
+            onClick={() => router.push(`/web/market/${Number(marketId) + 1}`)}
+          >
+            Next Market ➡️
           </Button>
         </div>
       )
@@ -593,7 +591,10 @@ export default function Page({ params }: { params: { slug: string[] } }) {
         </div>
 
         {/* FAQs */}
-        <div className="mx-auto max-w-2xl divide-y divide-gray-900/10 px-6 pb-8 sm:pb-24 sm:pt-12 lg:max-w-7xl lg:px-8 lg:pb-32">
+        <div
+          id="#faq"
+          className="mx-auto max-w-2xl divide-y divide-gray-900/10 px-6 pb-8 sm:pb-24 sm:pt-12 lg:max-w-7xl lg:px-8 lg:pb-32"
+        >
           <h2 className="text-2xl font-bold leading-10 tracking-tight text-gray-900">
             Frequently asked questions
           </h2>

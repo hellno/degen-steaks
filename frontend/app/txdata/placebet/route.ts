@@ -13,10 +13,10 @@ type GeneratePlaceBetData = {
 
 const generatePlaceBetData = (data: GeneratePlaceBetData): TransactionTargetResponse => {
   const { marketId, betSize, betDirection } = data;
-  console.log('generatePlaceBetData', data)
-  console.log('as args', [BigInt(marketId), BigInt(betSize), Number(betDirection)])
+  // console.log('generatePlaceBetData', data)
+  // console.log('as args', [BigInt(marketId), BigInt(betSize), Number(betDirection)])
   return {
-    chainId: "eip155:84532",
+    chainId: "eip155:8453",
     method: "eth_sendTransaction",
     // attribution: false,
     params: {

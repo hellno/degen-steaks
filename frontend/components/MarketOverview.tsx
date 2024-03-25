@@ -7,14 +7,16 @@ import { BetType, MarketType } from "@/app/types";
 import MarketBetRatioBar from "./MarketBetRatioBar";
 import { formatEther, parseEther } from "viem";
 import { Button } from "./ui/button";
-import { useChainId, useWriteContract } from "wagmi";
+import { useAccount, useChainId, useWriteContract } from "wagmi";
 import { betRegistryAbi, betRegistryAddress } from "@/app/const/betRegistryAbi";
 import { useEffect, useState } from "react";
 import { getDegenUsdPrice } from "@/app/lib/dexScreener";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 const MarketOverview = ({ market }: { market: MarketType | undefined }) => {
   const [currentPrice, setCurrentPrice] = useState<number>(0);
   const chainId = useChainId();
+  const { isConnected } = useAccount();
   const {
     data: hash,
     isPending,
@@ -23,7 +25,7 @@ const MarketOverview = ({ market }: { market: MarketType | undefined }) => {
     status,
     error,
   } = useWriteContract();
-
+  // console.log("hash", hash, "isPending", isPending, "isSuccess", isSuccess, "status", status, "error", error)
   useEffect(() => {
     getDegenUsdPrice().then((price) => {
       setCurrentPrice(price);
@@ -64,11 +66,11 @@ const MarketOverview = ({ market }: { market: MarketType | undefined }) => {
     });
   };
 
-  const renderResolveButton = () => (
+  const renderResolveButton = () => isConnected ? (
     <Button variant="secondary" size="lg" onClick={() => onResolveMarket()}>
       {isPending ? "Resolve market..." : "Resolve market"}
     </Button>
-  );
+  ) : <ConnectButton accountStatus="avatar" />;
 
   const getBetSize = (bet: BetType) => {
     const shares = bet.sharesHigher > 0 ? bet.sharesHigher : bet.sharesLower;

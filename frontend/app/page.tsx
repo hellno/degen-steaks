@@ -181,9 +181,13 @@ export default async function Home({
   }
 
   if (pageState === PageState.pending_payment) {
-    if (state.hasAllowance === undefined) {
+    if (!state.hasAllowance) {
       state.hasAllowance = await hasAnyDegenAllowance(userAddresses);
     }
+  }
+
+  if (marketData.bets && marketData.bets.length) {
+    state.pageState = PageState.view_market;
   }
 
   if (pageState === PageState.view_market) {
@@ -299,17 +303,13 @@ export default async function Home({
     const sharesHigher =
       marketData.totalSharesHigher /
       (marketData.totalSharesLower + marketData.totalSharesHigher);
-    console.log(
-      "timeDelta",
-      timeDelta,
-      marketData.endTime,
-      new Date().getTime()
-    );
 
     const marketEndDescription =
       timeDelta > 0
         ? `Ends in ${convertMillisecondsToDelta(timeDelta)}`
         : `Ended ${convertMillisecondsToDelta(timeDelta)} ago`;
+
+    console.log("marketData", marketData);
 
     return (
       <FrameImage aspectRatio="1:1">
@@ -348,8 +348,24 @@ export default async function Home({
             <p tw="text-7xl">Two steps to </p>
             <p tw="text-7xl">start steaking your $DEGEN</p>
             <div tw="flex flex-col text-5xl">
-              <p>1. Approve $DEGEN {!hasAllowance && youAreHere}</p>
-              <p>2. Place bet {hasAllowance && youAreHere}</p>
+              <p
+                tw={clsx(
+                  !hasAllowance
+                    ? "p-4 bg-green-400 rounded-lg underline"
+                    : "text-gray-500"
+                )}
+              >
+                1. Approve $DEGEN {!hasAllowance && youAreHere}
+              </p>
+              <p
+                tw={clsx(
+                  hasAllowance
+                    ? "p-4 bg-green-400 rounded-lg underline"
+                    : "text-gray-500"
+                )}
+              >
+                2. Place bet {hasAllowance && youAreHere}
+              </p>
             </div>
           </div>
           {betSize && betDirection !== undefined ? (
@@ -365,8 +381,9 @@ export default async function Home({
                   ""}
               </span>
               <span tw="mt-4">
-                You can lose your funds if you bet on the wrong side!
+                You lose your funds if you bet on the wrong side! 🤯
               </span>
+              <span tw="mt-4">Refresh to check allowance or bet status</span>
             </div>
           ) : null}
         </div>
@@ -390,7 +407,7 @@ export default async function Home({
       {button.label}
     </FrameButton>
   );
-  // console.log("generate buttons", await generateButtons());
+
   const renderButtons = async () =>
     (await generateButtons()).map((button, idx) =>
       renderButton(idx + 1, button)
@@ -400,6 +417,8 @@ export default async function Home({
     stateToInput[state.pageState] && (
       <FrameInput text={stateToInput[state.pageState].text} />
     );
+
+  console.log("marketData", marketData);
 
   return (
     <div className="p-4">
