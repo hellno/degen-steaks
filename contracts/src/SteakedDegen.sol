@@ -72,7 +72,7 @@ contract SteakedDegen is ISteakedDegen, ERC4626, Ownable {
         returns (uint256)
     {
         uint256 steakFeeAmount = steakFee * assets / FEE_DIVISOR;
-        uint256 daoFeeAmount = steakFee * assets / FEE_DIVISOR;
+        uint256 daoFeeAmount = daoFee * assets / FEE_DIVISOR;
         uint256 assetsAfterFee = assets - steakFeeAmount - daoFeeAmount;
 
         // slither-disable-next-line reentrancy-no-eth
