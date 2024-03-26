@@ -81,7 +81,7 @@ contract WithActionHelpers is Script, WithFileHelpers {
 
         priceFeed = new PriceFeed({ethDegenPool_: ethDegenPool, ethUsdcPool_: ethUsdcPool});
         degenToken = DegenToken(degenTokenAddress);
-        steakedDegen = new SteakedDegen("Steaked Degen", "SDEGEN", degenToken, address(this));
+        steakedDegen = new SteakedDegen("Steaked Degen", "SDEGEN", degenToken, dude);
         betRegistry = new BetRegistry(degenToken, steakedDegen, IPriceFeed(address(priceFeed)), dude);
         steakedDegen.setFan(address(betRegistry), true);
         betRegistry.setFan(hellno, true);
