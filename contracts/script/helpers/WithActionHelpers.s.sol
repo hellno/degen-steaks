@@ -81,12 +81,12 @@ contract WithActionHelpers is Script, WithFileHelpers {
 
         priceFeed = new PriceFeed({ethDegenPool_: ethDegenPool, ethUsdcPool_: ethUsdcPool});
         degenToken = DegenToken(degenTokenAddress);
-        steakedDegen = new SteakedDegen("Steaked Degen", "SDEGEN", degenToken, address(this));
+        steakedDegen = new SteakedDegen("Steaked Degen", "SDEGEN", degenToken, dude);
         betRegistry = new BetRegistry(degenToken, steakedDegen, IPriceFeed(address(priceFeed)), dude);
         steakedDegen.setFan(address(betRegistry), true);
         betRegistry.setFan(hellno, true);
 
-        uint256 initialDeposit = 1_000_000 * 1e18;
+        uint256 initialDeposit = 420 * 1e18;
         degenToken.approve(address(steakedDegen), initialDeposit);
         steakedDegen.initialDeposit(initialDeposit, address(this));
 
@@ -288,4 +288,20 @@ contract WithActionHelpers is Script, WithFileHelpers {
     }
 
     function test_WithActionHelpers() public {}
+
+
+    /// @dev
+    function deployPriceFeedOnly() public {
+        uint256 deployerPrivateKey = vm.envUint("DEPLOYER_PK");
+
+        address ethDegenPool = 0xc9034c3E7F58003E6ae0C8438e7c8f4598d5ACAA;
+        address ethUsdcPool = 0x4C36388bE6F416A29C8d8Eee81C771cE6bE14B18;
+        address degenTokenAddress = 0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed;
+
+        vm.startBroadcast(deployerPrivateKey);
+
+        priceFeed = new PriceFeed({ethDegenPool_: ethDegenPool, ethUsdcPool_: ethUsdcPool});
+        
+        vm.stopBroadcast();
+    }
 }
