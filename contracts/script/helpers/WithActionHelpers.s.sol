@@ -288,4 +288,20 @@ contract WithActionHelpers is Script, WithFileHelpers {
     }
 
     function test_WithActionHelpers() public {}
+
+
+    /// @dev
+    function deployPriceFeedOnly() public {
+        uint256 deployerPrivateKey = vm.envUint("DEPLOYER_PK");
+
+        address ethDegenPool = 0xc9034c3E7F58003E6ae0C8438e7c8f4598d5ACAA;
+        address ethUsdcPool = 0x4C36388bE6F416A29C8d8Eee81C771cE6bE14B18;
+        address degenTokenAddress = 0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed;
+
+        vm.startBroadcast(deployerPrivateKey);
+
+        priceFeed = new PriceFeed({ethDegenPool_: ethDegenPool, ethUsdcPool_: ethUsdcPool});
+        
+        vm.stopBroadcast();
+    }
 }
