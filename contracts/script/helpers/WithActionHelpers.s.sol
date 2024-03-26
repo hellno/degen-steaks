@@ -86,7 +86,7 @@ contract WithActionHelpers is Script, WithFileHelpers {
         steakedDegen.setFan(address(betRegistry), true);
         betRegistry.setFan(hellno, true);
 
-        uint256 initialDeposit = 1_000_000 * 1e18;
+        uint256 initialDeposit = 420 * 1e18;
         degenToken.approve(address(steakedDegen), initialDeposit);
         steakedDegen.initialDeposit(initialDeposit, address(this));
 
