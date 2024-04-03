@@ -289,7 +289,6 @@ contract WithActionHelpers is Script, WithFileHelpers {
 
     function test_WithActionHelpers() public {}
 
-
     /// @dev
     function deployPriceFeedOnly() public {
         uint256 deployerPrivateKey = vm.envUint("DEPLOYER_PK");
@@ -301,7 +300,7 @@ contract WithActionHelpers is Script, WithFileHelpers {
         vm.startBroadcast(deployerPrivateKey);
 
         priceFeed = new PriceFeed({ethDegenPool_: ethDegenPool, ethUsdcPool_: ethUsdcPool});
-        
+
         vm.stopBroadcast();
     }
 }
