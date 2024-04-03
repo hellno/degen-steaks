@@ -1,10 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # To load the variables in the .env file
 source .env
 
 # To deploy and verify our contract
-NETWORK=testnet forge script script/testnet/Deployment.s.sol --rpc-url https://sepolia.base.org --broadcast -vvvv 
+NETWORK=testnet forge script script/testnet/Deployment.s.sol --rpc-url https://sepolia.base.org --broadcast -vvvv --verify
 NETWORK=testnet STEP=1 MARKET_DURATION=90 forge script script/testnet/Traction.s.sol --rpc-url https://sepolia.base.org --broadcast -vvvv 
 echo "start sleep"
 sleep 90
