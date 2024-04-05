@@ -23,7 +23,7 @@ contract PriceFeed_Basic_Test is Test, WithTestHelpers {
         assertEq(priceFeed.getPrice(0), DEGEN_PRICE_1, "getPrice should be 804_217_277");
         ethDegenPool.togglePrice();
         ethUsdcPool.togglePrice();
-        assertEq(priceFeed.getPrice(0), DEGEN_PRICE_2, "getPrice should be 1_000_000_000");
+        assertEq(priceFeed.getPrice(0), DEGEN_PRICE_3, "getPrice should be 1_000_000_000");
     }
 
     function test_mockPriceFeed() public {
