@@ -10,7 +10,7 @@ contract BaseDeployTest is WithFileHelpers, Test {
 
     function setUp() public {
         string memory BASE_RPC_URL = vm.envOr("BASE_RPC_URL", string("https://mainnet.base.org"));
-        uint256 BASE_BLOCK_NUMBER = vm.envOr("BASE_BLOCK_NUMBER", uint256(12037278));
+        uint256 BASE_BLOCK_NUMBER = vm.envOr("BASE_BLOCK_NUMBER", uint256(BLOCK_NUMBER_2));
         fork = vm.createFork(BASE_RPC_URL);
         vm.selectFork(fork);
         vm.rollFork(BASE_BLOCK_NUMBER);
@@ -39,5 +39,16 @@ contract BaseDeployTest is WithFileHelpers, Test {
         assertEq(address(steakedDegen.asset()), address(degenToken), "steakedDegen.degenToken");
         assertTrue(steakedDegen.isFan(address(betRegistry)), "steakedDegen.isFan");
         assertTrue(betRegistry.isFan(vm.envAddress("DEPLOYER")), "betRegistry.isFan");
+    }
+
+    function test_priceFeed_success() public {
+        IPriceFeed priceFeed = IPriceFeed(_getAddress("priceFeed"));
+        assertEq(priceFeed.getPrice(0), DEGEN_PRICE_2, "priceFeed.getPrice");
+    }
+
+    function test_priceFeed_failsWithOld() public {
+        IPriceFeed priceFeed = IPriceFeed(_getAddress("priceFeed"));
+        vm.expectRevert();
+        priceFeed.getPrice(2 hours);
     }
 }

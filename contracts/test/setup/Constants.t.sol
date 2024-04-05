@@ -30,4 +30,5 @@ uint256 constant SDEGENS_FIFTH_DEPOSIT = STAKE_AFTER_FEES
 uint256 constant BET = 100 * 1e18;
 
 uint256 constant DEGEN_PRICE_1 = 804_217_277;
-uint256 constant DEGEN_PRICE_2 = 3_468_565_538;
+uint256 constant BLOCK_NUMBER_2 = 12037278;
+uint256 constant DEGEN_PRICE_2 = 3_829_890_314; // at block 12037278
