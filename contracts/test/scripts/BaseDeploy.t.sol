@@ -63,4 +63,44 @@ contract BaseDeployTest is WithFileHelpers, Test {
         IBetRegistry.Market memory market = betRegistry.getMarket(0);
         assertEq(uint256(market.status), uint256(IBetRegistry.MarketStatus.ERROR), "market.status");
     }
+
+    function test_cashOut_ERROR() public {
+        uint256 deployerBalanceBefore = degenToken.balanceOf(vm.envAddress("DEPLOYER"));
+
+        // Create Market
+        vm.warp(block.timestamp - 1 days);
+        vm.prank(vm.envAddress("DEPLOYER"));
+        betRegistry.createMarket(uint40(block.timestamp + 1 hours), DEGEN_PRICE_2);
+
+        // Place Bets
+        deal(address(degenToken), ALICE, 1_000 * 1e18);
+        vm.startPrank(ALICE);
+        degenToken.approve(address(betRegistry), 1_000 * 1e18);
+        betRegistry.placeBet(0, 1_000 * 1e18, IBetRegistry.BetDirection.HIGHER);
+
+        deal(address(degenToken), BOB, 1_000 * 1e18);
+        vm.startPrank(BOB);
+        degenToken.approve(address(betRegistry), 1_000 * 1e18);
+        betRegistry.placeBet(0, 1_000 * 1e18, IBetRegistry.BetDirection.LOWER);
+
+        // Resolve Market too late
+        vm.warp(block.timestamp + 1 days);
+        betRegistry.resolveMarket(0);
+
+        vm.startPrank(ALICE);
+        betRegistry.cashOut(0);
+
+        vm.startPrank(BOB);
+        betRegistry.cashOut(0);
+
+        assertEq(uint256(betRegistry.getMarket(0).status), uint256(IBetRegistry.MarketStatus.ERROR), "market.status");
+        assertEq(degenToken.balanceOf(ALICE) / 1e18, 997, "ALICE balance");
+        assertEq(degenToken.balanceOf(BOB) / 1e18, 979, "BOB balance");
+        assertGt(degenToken.balanceOf(ALICE), degenToken.balanceOf(BOB), "ALICE > BOB, should have received fee");
+        assertEq(
+            degenToken.balanceOf(vm.envAddress("DEPLOYER")) - deployerBalanceBefore,
+            0,
+            "DEPLOYER balance should not change"
+        );
+    }
 }

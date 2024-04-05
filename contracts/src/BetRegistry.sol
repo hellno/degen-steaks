@@ -179,30 +179,47 @@ contract BetRegistry is IBetRegistry, Ownable {
 
     function cashOut(uint256 marketId_) public {
         Market storage market = markets[marketId_];
-        require(market.endPrice != 0, "BetRegistry::cashOut: market not resolved.");
+        require(market.status != MarketStatus.OPEN, "BetRegistry::cashOut: market not resolved.");
         require(market.totalDegen > 0, "BetRegistry::cashOut: market has no degen.");
 
         uint256 totalMarketShares;
         uint256 userMarketShares;
         uint256 userDegenPayout;
 
-        // winning direction is HIGHER
-        if (market.endPrice > market.targetPrice) {
-            totalMarketShares = market.totalHigher;
-            userMarketShares = marketToUserToBet[marketId_][msg.sender].amountHigher;
+        // if the market is in error state, users can cash out all their shares, nobody looses
+        if (market.status == MarketStatus.ERROR) {
+            totalMarketShares = market.totalHigher + market.totalLower;
+            userMarketShares = marketToUserToBet[marketId_][msg.sender].amountHigher
+                + marketToUserToBet[marketId_][msg.sender].amountLower;
             require(userMarketShares > 0, "BetRegistry::cashOut: Nothing to cash out.");
+            market.totalHigher -= marketToUserToBet[marketId_][msg.sender].amountHigher;
+            market.totalLower -= marketToUserToBet[marketId_][msg.sender].amountLower;
+
             userDegenPayout = market.totalDegen.mulDiv(userMarketShares, totalMarketShares);
+
+            market.totalDegen -= userDegenPayout;
             marketToUserToBet[marketId_][msg.sender].amountHigher = 0;
-            market.totalHigher -= userMarketShares;
-            market.totalDegen -= userDegenPayout;
-        } else {
-            totalMarketShares = market.totalLower;
-            userMarketShares = marketToUserToBet[marketId_][msg.sender].amountLower;
-            require(userMarketShares > 0, "BetRegistry::cashOut: Nothing to cash out.");
-            userDegenPayout = market.totalDegen.mulDiv(userMarketShares, totalMarketShares);
             marketToUserToBet[marketId_][msg.sender].amountLower = 0;
-            market.totalLower -= userMarketShares;
-            market.totalDegen -= userDegenPayout;
+        } else if (market.status == MarketStatus.RESOLVED) {
+            // When the market got resolved correctly, the winning side receives all shares
+            // winning direction is HIGHER
+            if (market.endPrice > market.targetPrice) {
+                totalMarketShares = market.totalHigher;
+                userMarketShares = marketToUserToBet[marketId_][msg.sender].amountHigher;
+                require(userMarketShares > 0, "BetRegistry::cashOut: Nothing to cash out.");
+                userDegenPayout = market.totalDegen.mulDiv(userMarketShares, totalMarketShares);
+                marketToUserToBet[marketId_][msg.sender].amountHigher = 0;
+                market.totalHigher -= userMarketShares;
+                market.totalDegen -= userDegenPayout;
+            } else {
+                totalMarketShares = market.totalLower;
+                userMarketShares = marketToUserToBet[marketId_][msg.sender].amountLower;
+                require(userMarketShares > 0, "BetRegistry::cashOut: Nothing to cash out.");
+                userDegenPayout = market.totalDegen.mulDiv(userMarketShares, totalMarketShares);
+                marketToUserToBet[marketId_][msg.sender].amountLower = 0;
+                market.totalLower -= userMarketShares;
+                market.totalDegen -= userDegenPayout;
+            }
         }
 
         degenToken.safeTransfer(msg.sender, userDegenPayout);
