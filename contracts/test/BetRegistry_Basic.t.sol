@@ -63,6 +63,7 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         assertEq(market.totalLower, 0);
         assertEq(market.totalSteakedDegen, 0);
         assertEq(market.totalDegen, 0);
+        assertEq(uint256(market.status), uint256(IBetRegistry.MarketStatus.OPEN), "status should be open");
     }
 
     function test_CreateMarket_returnsMarketId() public {
@@ -200,6 +201,7 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         IBetRegistry.Market memory market = _getMarket(0);
         assertEq(market.endPrice, DEGEN_PRICE_1, "endPrice");
         assertEq(market.totalDegen / 1e18, 196, "totalDegen");
+        assertEq(uint256(market.status), uint256(IBetRegistry.MarketStatus.RESOLVED), "status should be resolved");
     }
 
     function test_resolveMarket_unsteaksDegen() public {

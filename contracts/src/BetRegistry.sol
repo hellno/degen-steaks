@@ -79,6 +79,7 @@ contract BetRegistry is IBetRegistry, Ownable {
             Market({
                 creator: msg.sender,
                 endTime: endTime_,
+                status: MarketStatus.OPEN,
                 targetPrice: targetPrice_,
                 endPrice: 0,
                 totalHigher: 0,
@@ -146,6 +147,7 @@ contract BetRegistry is IBetRegistry, Ownable {
         uint32 secondsAgo = uint32(block.timestamp - market.endTime);
         uint256 price = priceFeed.getPrice(secondsAgo);
         market.endPrice = price;
+        market.status = MarketStatus.RESOLVED;
 
         // unsteake degen
         uint256 degen = steakedDegen.redeem(market.totalSteakedDegen, address(this), address(this));

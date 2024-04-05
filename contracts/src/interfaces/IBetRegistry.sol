@@ -11,9 +11,16 @@ interface IBetRegistry {
         LOWER
     }
 
+    enum MarketStatus {
+        OPEN,
+        RESOLVED,
+        ERROR
+    }
+
     struct Market {
         address creator;
         uint40 endTime;
+        MarketStatus status;
         uint256 targetPrice;
         uint256 endPrice;
         uint256 totalHigher; // virtual shares
