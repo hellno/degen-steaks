@@ -51,4 +51,15 @@ contract BaseDeployTest is WithFileHelpers, Test {
         vm.expectRevert();
         priceFeed.getPrice(2 hours);
     }
+
+    function test_marketResolve_errorStatus() public {
+        IBetRegistry betRegistry = IBetRegistry(_getAddress("betRegistry"));
+        vm.warp(block.timestamp - 1 days);
+        vm.startPrank(vm.envAddress("DEPLOYER"));
+        betRegistry.createMarket(uint40(block.timestamp + 1 hours), DEGEN_PRICE_2);
+        vm.warp(block.timestamp + 1 days);
+        betRegistry.resolveMarket(0);
+        IBetRegistry.Market memory market = betRegistry.getMarket(0);
+        assertEq(uint256(market.status), uint256(IBetRegistry.MarketStatus.ERROR), "market.status");
+    }
 }
