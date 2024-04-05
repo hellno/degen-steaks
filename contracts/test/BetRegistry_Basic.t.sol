@@ -258,7 +258,7 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         uint256 totalDegen = 196_218_105_111_735_487_432;
 
         vm.expectEmit();
-        emit MarketResolved(0, DEGEN_PRICE_1, totalDegen, creatorFee);
+        emit MarketResolved(0, DEGEN_PRICE_1, totalDegen, creatorFee, IBetRegistry.MarketStatus.RESOLVED);
         betRegistry.resolveMarket(0);
 
         assertEq(degenToken.balanceOf(address(this)), creatorBalanceBefore + creatorFee, "creator balance after");

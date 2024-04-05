@@ -145,23 +145,35 @@ contract BetRegistry is IBetRegistry, Ownable {
         require(market.endPrice == 0, "BetRegistry::resolveMarket: market already resolved.");
 
         uint32 secondsAgo = uint32(block.timestamp - market.endTime);
-        uint256 price = priceFeed.getPrice(secondsAgo);
-        market.endPrice = price;
-        market.status = MarketStatus.RESOLVED;
+        // Try to get a historical price from the price feed
+        // This may fail if the market gets resolved too late. In this case, the market will be marked as error and all
+        // users can get their funds back.
+        try priceFeed.getPrice(secondsAgo) returns (uint256 price) {
+            market.endPrice = price;
+            market.status = MarketStatus.RESOLVED;
+        } catch {
+            market.status = MarketStatus.ERROR;
+        }
 
         // unsteake degen
         uint256 degen = steakedDegen.redeem(market.totalSteakedDegen, address(this), address(this));
+        uint256 creatorFee;
 
-        // deduct owner fee
-        uint256 creatorFee = degen.mulDiv(CREATOR_FEE, FEE_DIVISOR);
-        market.totalDegen = degen - creatorFee;
-        degenToken.safeTransfer(market.creator, creatorFee);
+        // deduct creator fee when market got resolved successfully
+        if (market.status == MarketStatus.RESOLVED) {
+            creatorFee = degen.mulDiv(CREATOR_FEE, FEE_DIVISOR);
+            market.totalDegen = degen - creatorFee;
+            degenToken.safeTransfer(market.creator, creatorFee);
+        } else {
+            market.totalDegen = degen;
+        }
 
         emit MarketResolved({
             marketId: marketId_,
-            endPrice: price,
-            totalDegen: degen - creatorFee,
-            creatorFee: creatorFee
+            endPrice: market.endPrice,
+            totalDegen: market.totalDegen,
+            creatorFee: creatorFee,
+            status: market.status
         });
     }
 
