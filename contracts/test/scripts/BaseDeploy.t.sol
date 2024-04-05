@@ -93,6 +93,10 @@ contract BaseDeployTest is WithFileHelpers, Test {
         vm.startPrank(BOB);
         betRegistry.cashOut(0);
 
+        // cannot cash out twice
+        vm.expectRevert();
+        betRegistry.cashOut(0);
+
         assertEq(uint256(betRegistry.getMarket(0).status), uint256(IBetRegistry.MarketStatus.ERROR), "market.status");
         assertEq(degenToken.balanceOf(ALICE) / 1e18, 997, "ALICE balance");
         assertEq(degenToken.balanceOf(BOB) / 1e18, 979, "BOB balance");
