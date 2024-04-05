@@ -7,6 +7,10 @@ import "script/base/Deployment.s.sol";
 
 contract BaseDeployTest is WithFileHelpers, Test {
     uint256 fork;
+    IBetRegistry betRegistry;
+    DegenToken degenToken;
+    ISteakedDegen steakedDegen;
+    IPriceFeed priceFeed;
 
     function setUp() public {
         string memory BASE_RPC_URL = vm.envOr("BASE_RPC_URL", string("https://mainnet.base.org"));
@@ -25,14 +29,14 @@ contract BaseDeployTest is WithFileHelpers, Test {
         BaseDeployment baseDeployment = new BaseDeployment();
         baseDeployment.setNetwork("testrun_base");
         baseDeployment.run();
+
+        betRegistry = IBetRegistry(_getAddress("betRegistry"));
+        degenToken = DegenToken(_getAddress("degenToken"));
+        steakedDegen = ISteakedDegen(_getAddress("steakedDegen"));
+        priceFeed = IPriceFeed(_getAddress("priceFeed"));
     }
 
     function test_BaseDeployment_success() public {
-        IBetRegistry betRegistry = IBetRegistry(_getAddress("betRegistry"));
-        DegenToken degenToken = DegenToken(_getAddress("degenToken"));
-        ISteakedDegen steakedDegen = ISteakedDegen(_getAddress("steakedDegen"));
-        MockPriceFeed priceFeed = MockPriceFeed(_getAddress("priceFeed"));
-
         assertEq(address(betRegistry.degenToken()), address(degenToken), "betRegistry.degenToken");
         assertEq(address(betRegistry.steakedDegen()), address(steakedDegen), "betRegistry.steakedDegen");
         assertEq(address(betRegistry.priceFeed()), address(priceFeed), "betRegistry.priceFeed");
@@ -42,18 +46,15 @@ contract BaseDeployTest is WithFileHelpers, Test {
     }
 
     function test_priceFeed_success() public {
-        IPriceFeed priceFeed = IPriceFeed(_getAddress("priceFeed"));
         assertEq(priceFeed.getPrice(0), DEGEN_PRICE_2, "priceFeed.getPrice");
     }
 
     function test_priceFeed_failsWithOld() public {
-        IPriceFeed priceFeed = IPriceFeed(_getAddress("priceFeed"));
         vm.expectRevert();
         priceFeed.getPrice(2 hours);
     }
 
     function test_marketResolve_errorStatus() public {
-        IBetRegistry betRegistry = IBetRegistry(_getAddress("betRegistry"));
         vm.warp(block.timestamp - 1 days);
         vm.startPrank(vm.envAddress("DEPLOYER"));
         betRegistry.createMarket(uint40(block.timestamp + 1 hours), DEGEN_PRICE_2);
