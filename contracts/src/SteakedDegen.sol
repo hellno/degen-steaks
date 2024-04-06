@@ -72,27 +72,28 @@ contract SteakedDegen is ISteakedDegen, ERC4626, Ownable {
         returns (uint256)
     {
         uint256 steakFeeAmount = steakFee * assets / FEE_DIVISOR;
-        uint256 daoFeeAmount = daoFee * assets / FEE_DIVISOR;
-        uint256 assetsAfterFee = assets - steakFeeAmount - daoFeeAmount;
+        uint256 assetsAfterFee = assets - steakFeeAmount;
 
-        // slither-disable-next-line reentrancy-no-eth
-        SafeERC20.safeTransferFrom(IERC20(asset()), _msgSender(), daoFeeReceiver, daoFeeAmount);
-
-        emit DaoFeePaid(_msgSender(), daoFeeAmount);
+        // // slither-disable-next-line reentrancy-no-eth
+        // SafeERC20.safeTransferFrom(IERC20(asset()), _msgSender(), daoFeeReceiver, daoFeeAmount);
 
         // slither-disable-next-line reentrancy-no-eth
         SafeERC20.safeTransferFrom(IERC20(asset()), _msgSender(), address(this), steakFeeAmount);
+        emit SteakFeePaid(_msgSender(), steakFeeAmount);
 
         uint256 shares = previewDeposit(assetsAfterFee);
+        uint256 daoFeeShares = daoFee * shares / FEE_DIVISOR;
+        uint256 sharesAfterFee = shares - daoFeeShares;
 
         // slither-disable-next-line reentrancy-no-eth
         SafeERC20.safeTransferFrom(IERC20(asset()), _msgSender(), address(this), assetsAfterFee);
 
-        emit SteakFeePaid(_msgSender(), steakFeeAmount);
-        _mint(receiver, shares);
+        _mint(receiver, sharesAfterFee);
+        emit Deposit(_msgSender(), receiver, assetsAfterFee, sharesAfterFee);
 
-        emit Deposit(_msgSender(), receiver, assetsAfterFee, shares);
+        _mint(daoFeeReceiver, daoFeeShares);
+        emit DaoFeePaid(_msgSender(), daoFeeShares);
 
-        return shares;
+        return sharesAfterFee;
     }
 }
