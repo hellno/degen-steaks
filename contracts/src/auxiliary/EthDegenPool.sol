@@ -8,11 +8,11 @@ contract EthDegenPool {
 
     constructor() {
         // https://basescan.org/address/0xc9034c3E7F58003E6ae0C8438e7c8f4598d5ACAA
-        tickCumulatives.push(634014745890);
         tickCumulatives.push(634005678098);
+        tickCumulatives.push(634014745890);
 
-        secondsPerLiquidityCumulativeX128s.push(4393803726156327879739);
         secondsPerLiquidityCumulativeX128s.push(4393764076792916487575);
+        secondsPerLiquidityCumulativeX128s.push(4393803726156327879739);
     }
 
     function observe(uint32[] calldata) external view returns (int56[] memory, uint160[] memory) {
@@ -21,10 +21,10 @@ contract EthDegenPool {
 
     /// @dev Sets price to price at block ~11812708
     function togglePrice() external {
-        tickCumulatives[0] = 881433984878;
-        tickCumulatives[1] = 881425616080;
+        tickCumulatives[0] = 881425616080;
+        tickCumulatives[1] = 881433984878;
 
-        secondsPerLiquidityCumulativeX128s[0] = 5172507467328360302808;
-        secondsPerLiquidityCumulativeX128s[1] = 5172479472281388991202;
+        secondsPerLiquidityCumulativeX128s[0] = 5172479472281388991202;
+        secondsPerLiquidityCumulativeX128s[1] = 5172507467328360302808;
     }
 }

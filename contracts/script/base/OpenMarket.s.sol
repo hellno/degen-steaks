@@ -5,11 +5,13 @@ pragma solidity ^0.8.18;
 import "forge-std/Script.sol";
 import "script/helpers/WithActionHelpers.s.sol";
 
-contract BaseDeployment is Script, WithActionHelpers {
+contract OpenMarket is Script, WithActionHelpers {
     function run() public {
-        setNetwork(vm.envOr("NETWORK", string("testrun_base")));
+        setNetwork(vm.envOr("NETWORK", string("testrun")));
 
-        deployBaseMainnet();
+        traction_setup();
+
+        traction_openMarket();
     }
 
     function test_script() public {}
