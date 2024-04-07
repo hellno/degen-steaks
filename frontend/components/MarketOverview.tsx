@@ -25,7 +25,7 @@ const MarketOverview = ({ market }: { market: MarketType | undefined }) => {
     status,
     error,
   } = useWriteContract();
-  // console.log("hash", hash, "isPending", isPending, "isSuccess", isSuccess, "status", status, "error", error)
+  console.log("writeContract MarketOverview: hash", hash, "isPending", isPending, "isSuccess", isSuccess, "status", status, "error", error)
   useEffect(() => {
     getDegenUsdPrice().then((price) => {
       setCurrentPrice(price);
@@ -123,7 +123,7 @@ const MarketOverview = ({ market }: { market: MarketType | undefined }) => {
           <p className="text-lg leading-8 text-gray-800">
             {timeDelta < 0 ? "This market is closed." : ""}{" "}
             {timeDelta > 0 && !market?.bets?.length
-              ? "Place your bets below"
+              ? "Place your bets below."
               : ""}
             The bet {marketEndDescription}
           </p>
