@@ -98,6 +98,7 @@ BetRegistryContract_BetPlaced_handler(({ event, context }) => {
       sharesLower: 0n,
       cashedOut: false,
       cashedOutDegen: undefined,
+      investedDegen: 0n,
       cashOutTransaction: undefined,
     };
   }
@@ -120,6 +121,7 @@ BetRegistryContract_BetPlaced_handler(({ event, context }) => {
     bet = {
       ...bet,
       sharesHigher: bet.sharesHigher + event.params.betShares,
+      investedDegen: bet.investedDegen + event.params.degen,
     };
   } else {
     // BetDirection is LOWER
@@ -127,10 +129,11 @@ BetRegistryContract_BetPlaced_handler(({ event, context }) => {
       ...market,
       totalSharesLower: market.totalSharesLower + event.params.betShares,
     };
-
+    
     bet = {
       ...bet,
       sharesLower: bet.sharesLower + event.params.betShares,
+      investedDegen: bet.investedDegen + event.params.degen,
     };
   }
 
