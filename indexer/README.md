@@ -1,3 +1,12 @@
-## Envio ERC20 Template
+## Degen Steaks 🥩🔥
 
-*Please refer to the [documentation website](https://docs.envio.dev) for a thorough guide on all Envio indexer features*
+powered by Envio. Docs are at the [documentation website](https://docs.envio.dev).
+
+## Run locally
+
+You can run envio with Docker:
+`envio dev`
+
+### Access Hasura dashboard:
+
+Access to local hasura dashboard: `testing`

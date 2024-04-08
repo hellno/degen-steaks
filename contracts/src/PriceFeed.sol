@@ -37,7 +37,7 @@ contract PriceFeed is IPriceFeed {
         (int56[] memory tickCumulatives,) = ethDegenPool.observe(secondsAgos);
         int56 tickCumulativeDelta = tickCumulatives[1] - tickCumulatives[0];
         int56 avgTick = tickCumulativeDelta / 60; // 0, 60 seconds
-        uint256 quote = OracleLibrary.getQuoteAtTick(int24(avgTick), degenAmount_, WETH_BASE, DEGEN_BASE);
+        uint256 quote = OracleLibrary.getQuoteAtTick(int24(avgTick), degenAmount_, DEGEN_BASE, WETH_BASE);
         return quote;
     }
 
@@ -48,7 +48,7 @@ contract PriceFeed is IPriceFeed {
         (int56[] memory tickCumulatives,) = ethUsdcPool.observe(secondsAgos);
         int56 tickCumulativeDelta = tickCumulatives[1] - tickCumulatives[0];
         int56 avgTick = tickCumulativeDelta / 60; // 0, 60 seconds
-        uint256 quote = OracleLibrary.getQuoteAtTick(int24(avgTick), ethAmount_, USDC_BASE, WETH_BASE);
+        uint256 quote = OracleLibrary.getQuoteAtTick(int24(avgTick), ethAmount_, WETH_BASE, USDC_BASE);
         return quote;
     }
 }

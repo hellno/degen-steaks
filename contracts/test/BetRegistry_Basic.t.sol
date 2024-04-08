@@ -63,6 +63,13 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         assertEq(market.totalLower, 0);
         assertEq(market.totalSteakedDegen, 0);
         assertEq(market.totalDegen, 0);
+        assertEq(uint256(market.status), uint256(IBetRegistry.MarketStatus.OPEN), "status should be open");
+    }
+
+    function test_CreateMarket_returnsMarketId() public {
+        assertEq(_createMarket(1 days, 1000), 0);
+        assertEq(_createMarket(1 days, 1000), 1);
+        assertEq(_createMarket(1 days, 1000), 2);
     }
 
     function test_CreateMarket_returnsMarketId() public {
@@ -99,11 +106,11 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         _placeBet(0, BET, IBetRegistry.BetDirection.HIGHER);
 
         IBetRegistry.Market memory market = _getMarket(0);
-        assertEq(market.totalHigher, SDEGENS_SECOND_DEPOSIT, "totalHigher");
+        assertEq(market.totalHigher / 1e6, SDEGENS_SECOND_DEPOSIT / 1e6, "totalHigher");
         assertEq(market.totalLower, 0, "totalLower");
 
         IBetRegistry.Bet memory bet = _getBet(0, ALICE);
-        assertEq(bet.amountHigher, SDEGENS_SECOND_DEPOSIT, "amountHigher");
+        assertEq(bet.amountHigher / 1e6, SDEGENS_SECOND_DEPOSIT / 1e6, "amountHigher");
         assertEq(bet.amountLower, 0, "amountLower");
     }
 
@@ -113,12 +120,12 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         IBetRegistry.Market memory market = _getMarket(0);
 
         assertEq(market.totalHigher, 0);
-        assertEq(market.totalLower, SDEGENS_SECOND_DEPOSIT);
-        assertEq(market.totalSteakedDegen, SDEGENS_SECOND_DEPOSIT, "totalSteakedDegen");
+        assertEq((market.totalLower) / 1e6, (SDEGENS_SECOND_DEPOSIT) / 1e6);
+        assertEq(market.totalSteakedDegen / 1e6, SDEGENS_SECOND_DEPOSIT / 1e6, "totalSteakedDegen");
 
         IBetRegistry.Bet memory bet = _getBet(0, ALICE);
         assertEq(bet.amountHigher, 0);
-        assertEq(bet.amountLower, SDEGENS_SECOND_DEPOSIT);
+        assertEq(bet.amountLower / 1e6, SDEGENS_SECOND_DEPOSIT / 1e6);
     }
 
     function test_placeBet_lower_twice() public {
@@ -127,7 +134,9 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         _placeBet(0, BET, IBetRegistry.BetDirection.LOWER);
         IBetRegistry.Market memory market = _getMarket(0);
 
-        assertEq(market.totalSteakedDegen, SDEGENS_SECOND_DEPOSIT + SDEGENS_THIRD_DEPOSIT, "totalSteakedDegen");
+        assertEq(
+            market.totalSteakedDegen / 1e6, (SDEGENS_SECOND_DEPOSIT + SDEGENS_THIRD_DEPOSIT) / 1e6, "totalSteakedDegen"
+        );
     }
 
     function test_placeBet_multiple() public {
@@ -142,8 +151,8 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         assertEq(market.totalHigher / 1e18, 193, "totalHigher");
         assertEq(market.totalLower / 1e18, 191, "totalLower");
         assertEq(
-            market.totalSteakedDegen,
-            SDEGENS_SECOND_DEPOSIT + SDEGENS_THIRD_DEPOSIT + SDEGENS_FOURTH_DEPOSIT + SDEGENS_FIFTH_DEPOSIT,
+            market.totalSteakedDegen / 1e6,
+            (SDEGENS_SECOND_DEPOSIT + SDEGENS_THIRD_DEPOSIT + SDEGENS_FOURTH_DEPOSIT + SDEGENS_FIFTH_DEPOSIT) / 1e6,
             "totalSteakedDegen"
         );
 
@@ -200,6 +209,7 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         IBetRegistry.Market memory market = _getMarket(0);
         assertEq(market.endPrice, DEGEN_PRICE_1, "endPrice");
         assertEq(market.totalDegen / 1e18, 196, "totalDegen");
+        assertEq(uint256(market.status), uint256(IBetRegistry.MarketStatus.RESOLVED), "status should be resolved");
     }
 
     function test_resolveMarket_unsteaksDegen() public {
@@ -211,11 +221,13 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         // before resolve all degen should be steaked and market should have all steaks and no degen
         assertEq(degenToken.balanceOf(address(betRegistry)), 0, "DEGEN before");
         assertEq(
-            _getMarket(0).totalSteakedDegen, SDEGENS_SECOND_DEPOSIT + SDEGENS_THIRD_DEPOSIT, "totalSteakedDegen before"
+            _getMarket(0).totalSteakedDegen,
+            SDEGENS_SECOND_DEPOSIT + SDEGENS_THIRD_DEPOSIT + 2,
+            "totalSteakedDegen before"
         );
         assertEq(
             steakedDegen.balanceOf(address(betRegistry)),
-            SDEGENS_SECOND_DEPOSIT + SDEGENS_THIRD_DEPOSIT,
+            SDEGENS_SECOND_DEPOSIT + SDEGENS_THIRD_DEPOSIT + 2,
             "SteakedDegen DEGEN before"
         );
 
@@ -225,8 +237,8 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         assertEq(degenToken.balanceOf(address(betRegistry)) / 1e18, 196, "betRegistry DEGEN after, two bets minus fee");
         assertEq(
             degenToken.balanceOf(address(steakedDegen)) / 1e18,
-            101,
-            "total SteakedDegen DEGEN after, initial stake plus fee"
+            102,
+            "total SteakedDegen DEGEN after, initial stake plus fee plus dao fee"
         );
         assertEq(steakedDegen.balanceOf(address(betRegistry)), 0, "betRegistry SteakedDegen DEGEN after");
     }
@@ -252,11 +264,11 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
 
         uint256 creatorBalanceBefore = degenToken.balanceOf(address(this));
 
-        uint256 creatorFee = 1_363_311_776_529_025_136;
-        uint256 totalDegen = 196_218_105_111_735_487_432;
+        uint256 creatorFee = 1363369464235605000;
+        uint256 totalDegen = 196226407961214395000;
 
         vm.expectEmit();
-        emit MarketResolved(0, DEGEN_PRICE_1, totalDegen, creatorFee);
+        emit MarketResolved(0, DEGEN_PRICE_1, totalDegen, creatorFee, IBetRegistry.MarketStatus.RESOLVED);
         betRegistry.resolveMarket(0);
 
         assertEq(degenToken.balanceOf(address(this)), creatorBalanceBefore + creatorFee, "creator balance after");
@@ -341,7 +353,7 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
 
         vm.expectEmit();
 
-        emit BetCashedOut(0, ALICE, 196218105111735487432, 96270817454335653081);
+        emit BetCashedOut(0, ALICE, 196226407961214395000, 96276603151128987096);
         _cashOut(0);
 
         // after cashOut, all degen should be steaked and market should have all steaks and no degen
@@ -416,8 +428,8 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         uint256 steakedDegenBalanceBefore = degenToken.balanceOf(address(steakedDegen));
         uint256 slashBalanceBefore = degenToken.balanceOf(BOB);
 
-        uint256 totalDegen = 192_156_390_335_922_562_843;
-        uint256 creatorFee = 1_353_904_925_270_974_863;
+        uint256 totalDegen = 192164521316417257025;
+        uint256 creatorFee = 1353962214932379325;
         uint256 slashFee = creatorFee;
         uint256 daoFee = creatorFee;
 

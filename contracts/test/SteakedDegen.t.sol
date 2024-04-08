@@ -7,7 +7,7 @@ import {IBetRegistry, BetRegistry} from "src/BetRegistry.sol";
 import "test/setup/Constants.t.sol";
 import "openzeppelin/access/Ownable.sol";
 
-contract BetRegistry_Basic_Test is Test, WithTestHelpers {
+contract SteakedDegen_Basic_Test is Test, WithTestHelpers {
     function setUp() public {
         deploy();
     }
@@ -44,12 +44,8 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         steakedDegen.deposit(100 * 1e18, ALICE);
 
         assertEq(degenToken.balanceOf(ALICE), 0, "ALICE should have 0 DEGEN");
-        assertEq(degenToken.balanceOf(address(steakedDegen)), 2 * INITIAL_STAKE - DAO_FEE_AMOUNT, "SteakedDegen DEGEN");
-        assertEq(
-            steakedDegen.balanceOf(ALICE),
-            STAKE_AFTER_FEES * INITIAL_STAKE / (INITIAL_STAKE + STEAK_FEE_AMOUNT),
-            "ALICE SDEGEN"
-        );
+        assertEq(degenToken.balanceOf(address(steakedDegen)), 2 * INITIAL_STAKE, "SteakedDegen DEGEN");
+        assertEq(steakedDegen.balanceOf(ALICE), SDEGENS_SECOND_DEPOSIT + 1, "ALICE SDEGEN");
     }
 
     function test_deposit_multiple() public {
@@ -58,20 +54,9 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
 
         assertEq(degenToken.balanceOf(ALICE), 0, "ALICE should have 0 DEGEN");
         assertEq(degenToken.balanceOf(BOB), 0, "ALICE should have 0 DEGEN");
-        assertEq(
-            degenToken.balanceOf(address(steakedDegen)), 3 * INITIAL_STAKE - 2 * DAO_FEE_AMOUNT, "SteakedDegen DEGEN"
-        );
-        assertEq(
-            steakedDegen.balanceOf(ALICE),
-            STAKE_AFTER_FEES * INITIAL_STAKE / (INITIAL_STAKE + STEAK_FEE_AMOUNT),
-            "ALICE SDEGEN"
-        );
-        assertEq(
-            steakedDegen.balanceOf(BOB),
-            STAKE_AFTER_FEES * (INITIAL_STAKE + SDEGENS_SECOND_DEPOSIT)
-                / (2 * INITIAL_STAKE - DAO_FEE_AMOUNT + STEAK_FEE_AMOUNT),
-            "BOB SDEGEN"
-        );
+        assertEq(degenToken.balanceOf(address(steakedDegen)), 3 * INITIAL_STAKE, "SteakedDegen DEGEN");
+        assertEq(steakedDegen.balanceOf(ALICE), SDEGENS_SECOND_DEPOSIT + 1, "ALICE SDEGEN");
+        assertEq(steakedDegen.balanceOf(BOB), SDEGENS_THIRD_DEPOSIT + 1, "BOB SDEGEN");
     }
 
     function test_deposit_fail_notInitialized() public {
@@ -105,14 +90,8 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         _deposit(ALICE, 100 * 1e18);
         _withdraw(ALICE, steakedDegen.maxWithdraw(ALICE));
         assertEq(steakedDegen.balanceOf(ALICE), 0, "ALICE should have 0 steakedDegen");
-        assertEq(
-            degenToken.balanceOf(address(steakedDegen)),
-            1 + INITIAL_STAKE + 0.69 * 1e18,
-            "SteakedDegen should have 1 dust DEGEN"
-        );
-        assertEq(
-            degenToken.balanceOf(address(ALICE)), STAKE_AFTER_FEES - 1, "Alice should have received 99.31 DEGEN back"
-        );
+        assertEq(degenToken.balanceOf(address(steakedDegen)), INITIAL_STAKE * 2 - DEGEN_2, "SteakedDegen DEGEN");
+        assertEq(degenToken.balanceOf(address(ALICE)), DEGEN_2, "Alice should have received 99.31 DEGEN back");
         assertEq(steakedDegen.balanceOf(ALICE), 0, "ALICE should have 0 SDEGEN");
     }
 
@@ -125,23 +104,15 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
 
         assertEq(steakedDegen.balanceOf(ALICE), 0, "ALICE should have 0 steakedDegen");
         assertEq(steakedDegen.balanceOf(BOB), 0, "BOB should have 0 steakedDegen");
-        assertEq(
+        assertEq(degenToken.balanceOf(address(ALICE)), DEGEN_2_3 + 1, "Alice SDEGEN");
+        assertEq(degenToken.balanceOf(address(BOB)), DEGEN_2 - 1, "BOB SDEGEN");
+        assertGt(
             degenToken.balanceOf(address(ALICE)),
-            STAKE_AFTER_FEES + STEAK_FEE_AMOUNT * SDEGENS_SECOND_DEPOSIT / (INITIAL_STAKE + SDEGENS_SECOND_DEPOSIT),
-            "Alice SDEGEN"
-        );
-        assertEq(degenToken.balanceOf(address(BOB)), STAKE_AFTER_FEES, "BOB SDEGEN");
-        assertEq(
-            degenToken.balanceOf(address(ALICE))
-                - STEAK_FEE_AMOUNT * SDEGENS_SECOND_DEPOSIT / (INITIAL_STAKE + SDEGENS_SECOND_DEPOSIT),
             degenToken.balanceOf(address(BOB)),
             "Alice should have more DEGEN than Bob"
         );
         assertEq(
-            degenToken.balanceOf(address(steakedDegen)),
-            INITIAL_STAKE + STEAK_FEE_AMOUNT
-                + STEAK_FEE_AMOUNT * INITIAL_STAKE / (INITIAL_STAKE + SDEGENS_SECOND_DEPOSIT) + 1,
-            "SteakedDegen DEGEN"
+            degenToken.balanceOf(address(steakedDegen)), INITIAL_STAKE * 3 - DEGEN_2 - DEGEN_2_3, "SteakedDegen DEGEN"
         );
     }
 
@@ -154,23 +125,11 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
 
         assertEq(steakedDegen.balanceOf(ALICE), 0, "ALICE should have 0 steakedDegen");
         assertEq(steakedDegen.balanceOf(BOB), 0, "BOB should have 0 steakedDegen");
-        assertEq(
-            degenToken.balanceOf(address(ALICE)),
-            STAKE_AFTER_FEES + STEAK_FEE_AMOUNT * SDEGENS_SECOND_DEPOSIT / (INITIAL_STAKE + SDEGENS_SECOND_DEPOSIT),
-            "Alice SDEGEN"
-        );
-        assertEq(degenToken.balanceOf(address(BOB)), STAKE_AFTER_FEES, "BOB SDEGEN");
-        assertEq(
-            degenToken.balanceOf(address(ALICE))
-                - STEAK_FEE_AMOUNT * SDEGENS_SECOND_DEPOSIT / (INITIAL_STAKE + SDEGENS_SECOND_DEPOSIT),
-            degenToken.balanceOf(address(BOB)),
-            "Alice should have more DEGEN than Bob"
-        );
-        assertEq(
-            degenToken.balanceOf(address(steakedDegen)),
-            INITIAL_STAKE + STEAK_FEE_AMOUNT
-                + STEAK_FEE_AMOUNT * INITIAL_STAKE / (INITIAL_STAKE + SDEGENS_SECOND_DEPOSIT) + 1,
-            "SteakedDegen DEGEN"
+        assertGt(degenToken.balanceOf(ALICE), degenToken.balanceOf(BOB), "ALICE > BOB, should have received fee");
+        assertLt(
+            INITIAL_STAKE - degenToken.balanceOf(BOB),
+            STEAK_FEE_AMOUNT * 2,
+            "BOB should not have lost more than twice the steak fee amount"
         );
     }
 

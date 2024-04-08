@@ -1,19 +1,20 @@
 import {
   convertMillisecondsToDelta,
+  getUserWasRight,
   renderDegenPriceFromContract,
 } from "@/app/lib/utils";
-import { MarketType } from "@/app/types";
+import { BetType, MarketType } from "@/app/types";
 import MarketBetRatioBar from "./MarketBetRatioBar";
-import { formatEther } from "viem";
+import { formatEther, parseEther } from "viem";
 import { Button } from "./ui/button";
-import {
-  useAccount,
-  useWaitForTransactionReceipt,
-  useWriteContract,
-} from "wagmi";
+import { useChainId, useWriteContract } from "wagmi";
 import { betRegistryAbi, betRegistryAddress } from "@/app/const/betRegistryAbi";
+import { useEffect, useState } from "react";
+import { getDegenUsdPrice } from "@/app/lib/dexScreener";
 
 const MarketOverview = ({ market }: { market: MarketType | undefined }) => {
+  const [currentPrice, setCurrentPrice] = useState<number>(0);
+  const chainId = useChainId();
   const {
     data: hash,
     isPending,
@@ -22,21 +23,24 @@ const MarketOverview = ({ market }: { market: MarketType | undefined }) => {
     status,
     error,
   } = useWriteContract();
-  console.log("MarketOverview", market, status, error);
+
+  useEffect(() => {
+    getDegenUsdPrice().then((price) => {
+      setCurrentPrice(price);
+    });
+  }, []);
+
   if (!market) return null;
 
   const timeDelta = market.endTime * 1000 - new Date().getTime();
-  const marketEndDescription =  
+  const marketEndDescription =
     timeDelta > 0
       ? `ends in ${convertMillisecondsToDelta(timeDelta)}.`
       : `ended ${convertMillisecondsToDelta(timeDelta)} ago.`;
 
-  const sharesLower =
-    market.totalSharesLower /
-    (market.totalSharesLower + market.totalSharesHigher);
-  const sharesHigher =
-    market.totalSharesHigher /
-    (market.totalSharesLower + market.totalSharesHigher);
+  const allShares = market.totalSharesLower + market.totalSharesHigher;
+  const sharesLower = market.totalSharesLower / allShares;
+  const sharesHigher = market.totalSharesHigher / allShares;
 
   const renderData = (label: string, value: string | React.ReactNode) => (
     <div className="flex flex-col bg-gray-400/5 p-8">
@@ -66,19 +70,44 @@ const MarketOverview = ({ market }: { market: MarketType | undefined }) => {
     </Button>
   );
 
+  const getBetSize = (bet: BetType) => {
+    const shares = bet.sharesHigher > 0 ? bet.sharesHigher : bet.sharesLower;
+    const betSize = Number(shares / allShares * market.degenCollected).toFixed(2);
+    return betSize;
+  }
   const renderUserBets = () => (
     <div className="flex flex-col gap-2">
-      {market.bets && market.bets.map((bet) => (
-        <div key={bet.id} className="flex flex-col gap-2">
-          <span className="text-2xl text-gray-600">
-            {bet.sharesHigher ? "Higher" : "Lower"}
-          </span>
-          <span className="text-xl text-gray-600 truncate">
-            {Number(formatEther(BigInt(bet.sharesHigher ? bet.sharesHigher : bet.sharesLower)).toString()).toFixed(2)} shares
-          </span>
-        </div>
-      ))}
+      {market.bets &&
+        market.bets.map((bet) => (
+          <div key={bet.id} className="flex flex-col gap-2">
+            <span className="text-2xl text-gray-600">
+              {bet.sharesHigher > 0 ? "Higher" : "Lower"}
+            </span>
+            <span className="text-xl text-gray-600 truncate">
+              {getBetSize(bet)}{" "}
+              $DEGEN
+            </span>
+          </div>
+        ))}
     </div>
+  );
+
+  const renderClaimButton = () => (
+    <Button
+      variant="secondary"
+      className="mb-2"
+      size="lg"
+      onClick={() => {
+        writeContract({
+          abi: betRegistryAbi,
+          address: betRegistryAddress,
+          functionName: "cashOut",
+          args: [BigInt(market.id)],
+        });
+      }}
+    >
+      {isPending ? "Claiming..." : "Claim"}
+    </Button>
   );
 
   return (
@@ -89,9 +118,11 @@ const MarketOverview = ({ market }: { market: MarketType | undefined }) => {
             Latest DEGEN steaks 🔥🥩 bet
           </h2> */}
           <p className="text-lg leading-8 text-gray-800">
-            {timeDelta < 0 ? "This market is closed" : "Place your bets below"}.
-            {' '}
-            The bet{' '}{marketEndDescription}
+            {timeDelta < 0 ? "This market is closed." : ""}{" "}
+            {timeDelta < 0 && !market?.bets?.length
+              ? "Place your bets below"
+              : ""}
+            The bet {marketEndDescription}
           </p>
         </div>
         <div className="mt-4 max-w-lg mx-auto">
@@ -102,19 +133,27 @@ const MarketOverview = ({ market }: { market: MarketType | undefined }) => {
         </div>
         <dl className="mt-8 grid grid-cols-1 gap-0.5 overflow-hidden rounded-2xl text-center sm:grid-cols-2 lg:grid-cols-3">
           {renderData(
-            "ends at",
+            "closing time",
             new Date(market.endTime * 1000).toString().split("(")[0] || ""
           )}
           {renderData(
             "Who won?",
-            market.isResolved ? (market.highWon ? "Higher 🔼" : "Lower 🔽") : "TBD"
+            market.isResolved
+              ? market.highWon
+                ? "Higher 🔼"
+                : "Lower 🔽"
+              : "TBD"
           )}
           {renderData(
             "Threshold price",
             renderDegenPriceFromContract(market.targetPrice)
           )}
+          {currentPrice && renderData(
+            "Current price",
+            `$${currentPrice}`
+          )}
           {renderData(
-            "started at",
+            "start time",
             new Date(market.startTime * 1000).toString().split("(")[0] || ""
           )}
           {renderData(
@@ -122,8 +161,46 @@ const MarketOverview = ({ market }: { market: MarketType | undefined }) => {
             formatEther(BigInt(market.degenCollected)).toString()
           )}
           {renderData("Market ID", market.id.toString())}
-          {market?.bets?.length ? renderData("Your bet", renderUserBets()) : null}
-          {!market.isResolved && timeDelta < 0 && renderData("", renderResolveButton())}
+          {market?.bets?.length
+            ? renderData("Your bet", renderUserBets())
+            : null}
+          {market.isResolved &&
+            getUserWasRight(market) &&
+            renderData("Claim your winnings", renderClaimButton())}
+          {!market.isResolved &&
+            timeDelta < 0 &&
+            renderData("", renderResolveButton())}
+          {chainId === 84532 &&
+            renderData(
+              "get test degen",
+              <Button
+                onClick={() => {
+                  writeContract({
+                    abi: [
+                      {
+                        constant: true,
+                        inputs: [
+                          {
+                            name: "shares",
+                            type: "uint256",
+                          },
+                        ],
+                        name: "mint",
+                        outputs: [],
+                        payable: false,
+                        stateMutability: "view",
+                        type: "function",
+                      },
+                    ],
+                    address: "0x11efF3a7cbEBA2071105DD9b9DE02DefC8F95217",
+                    functionName: "mint",
+                    args: [parseEther("420.69")],
+                  });
+                }}
+              >
+                Mint
+              </Button>
+            )}
         </dl>
       </div>
     </div>
