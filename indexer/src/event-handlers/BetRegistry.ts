@@ -191,7 +191,8 @@ BetRegistryContract_MarketResolved_handler(({ event, context }) => {
     return;
   }
 
-  if (event.params.status === 1) {
+  if (event.params.status === 1n) {
+    // Market Resolved successfully
     user = {
       ...user,
       creatorFeeReceived: user.creatorFeeReceived + event.params.creatorFee,
@@ -200,7 +201,7 @@ BetRegistryContract_MarketResolved_handler(({ event, context }) => {
     
     market = {
       ...market,
-      status: event.params.status
+      status: event.params.status,
       endPrice: event.params.endPrice,
       totalDegen: event.params.totalDegen,
       creatorFee: event.params.creatorFee,
@@ -208,6 +209,7 @@ BetRegistryContract_MarketResolved_handler(({ event, context }) => {
       highWon: event.params.endPrice > market.targetPrice,
     }
   } else {
+    // Market had price error
     market = {
       ...market,
       status: event.params.status,
