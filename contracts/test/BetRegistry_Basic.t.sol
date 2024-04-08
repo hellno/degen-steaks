@@ -72,12 +72,6 @@ contract BetRegistry_Basic_Test is Test, WithTestHelpers {
         assertEq(_createMarket(1 days, 1000), 2);
     }
 
-    function test_CreateMarket_returnsMarketId() public {
-        assertEq(_createMarket(1 days, 1000), 0);
-        assertEq(_createMarket(1 days, 1000), 1);
-        assertEq(_createMarket(1 days, 1000), 2);
-    }
-
     function test_createMarket_afterSetFan() public {
         vm.expectEmit();
         emit FanSet(ALICE, true);
