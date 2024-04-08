@@ -49,6 +49,8 @@ type Bet {
   cashOutTransaction: String
   cashedOutDegen: BigInt
   investedDegen: BigInt!
+  investedSteaksHigher: BigInt!
+  investedSteaksLower: BigInt!
   placedBets: [PlacedBet!]! @derivedFrom(field: "bet")
 }
 
