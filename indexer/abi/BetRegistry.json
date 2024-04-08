@@ -29,11 +29,7 @@
     "type": "function",
     "name": "cashOut",
     "inputs": [
-      {
-        "name": "marketId_",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
+      { "name": "marketId_", "type": "uint256", "internalType": "uint256" }
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
@@ -42,24 +38,10 @@
     "type": "function",
     "name": "createMarket",
     "inputs": [
-      {
-        "name": "endTime_",
-        "type": "uint40",
-        "internalType": "uint40"
-      },
-      {
-        "name": "targetPrice_",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
+      { "name": "endTime_", "type": "uint40", "internalType": "uint40" },
+      { "name": "targetPrice_", "type": "uint256", "internalType": "uint256" }
     ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
     "stateMutability": "nonpayable"
   },
   {
@@ -67,11 +49,7 @@
     "name": "degenToken",
     "inputs": [],
     "outputs": [
-      {
-        "name": "",
-        "type": "address",
-        "internalType": "contract IERC20"
-      }
+      { "name": "", "type": "address", "internalType": "contract IERC20" }
     ],
     "stateMutability": "view"
   },
@@ -79,29 +57,15 @@
     "type": "function",
     "name": "degenUtilityDao",
     "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
+    "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
     "stateMutability": "view"
   },
   {
     "type": "function",
     "name": "getBet",
     "inputs": [
-      {
-        "name": "marketId_",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "user_",
-        "type": "address",
-        "internalType": "address"
-      }
+      { "name": "marketId_", "type": "uint256", "internalType": "uint256" },
+      { "name": "user_", "type": "address", "internalType": "address" }
     ],
     "outputs": [
       {
@@ -128,11 +92,7 @@
     "type": "function",
     "name": "getMarket",
     "inputs": [
-      {
-        "name": "marketId_",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
+      { "name": "marketId_", "type": "uint256", "internalType": "uint256" }
     ],
     "outputs": [
       {
@@ -140,26 +100,19 @@
         "type": "tuple",
         "internalType": "struct IBetRegistry.Market",
         "components": [
+          { "name": "creator", "type": "address", "internalType": "address" },
+          { "name": "endTime", "type": "uint40", "internalType": "uint40" },
           {
-            "name": "creator",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "endTime",
-            "type": "uint40",
-            "internalType": "uint40"
+            "name": "status",
+            "type": "uint8",
+            "internalType": "enum IBetRegistry.MarketStatus"
           },
           {
             "name": "targetPrice",
             "type": "uint256",
             "internalType": "uint256"
           },
-          {
-            "name": "endPrice",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
+          { "name": "endPrice", "type": "uint256", "internalType": "uint256" },
           {
             "name": "totalHigher",
             "type": "uint256",
@@ -175,11 +128,7 @@
             "type": "uint256",
             "internalType": "uint256"
           },
-          {
-            "name": "totalDegen",
-            "type": "uint256",
-            "internalType": "uint256"
-          }
+          { "name": "totalDegen", "type": "uint256", "internalType": "uint256" }
         ]
       }
     ],
@@ -189,114 +138,51 @@
     "type": "function",
     "name": "gracePeriod",
     "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
     "stateMutability": "view"
   },
   {
     "type": "function",
     "name": "isFan",
-    "inputs": [
-      {
-        "name": "",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "bool",
-        "internalType": "bool"
-      }
-    ],
+    "inputs": [{ "name": "", "type": "address", "internalType": "address" }],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
     "stateMutability": "view"
   },
   {
     "type": "function",
     "name": "marketToUserToBet",
     "inputs": [
-      {
-        "name": "marketId",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "user",
-        "type": "address",
-        "internalType": "address"
-      }
+      { "name": "marketId", "type": "uint256", "internalType": "uint256" },
+      { "name": "user", "type": "address", "internalType": "address" }
     ],
     "outputs": [
-      {
-        "name": "amountHigher",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "amountLower",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
+      { "name": "amountHigher", "type": "uint256", "internalType": "uint256" },
+      { "name": "amountLower", "type": "uint256", "internalType": "uint256" }
     ],
     "stateMutability": "view"
   },
   {
     "type": "function",
     "name": "markets",
-    "inputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
+    "inputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
     "outputs": [
+      { "name": "creator", "type": "address", "internalType": "address" },
+      { "name": "endTime", "type": "uint40", "internalType": "uint40" },
       {
-        "name": "creator",
-        "type": "address",
-        "internalType": "address"
+        "name": "status",
+        "type": "uint8",
+        "internalType": "enum IBetRegistry.MarketStatus"
       },
-      {
-        "name": "endTime",
-        "type": "uint40",
-        "internalType": "uint40"
-      },
-      {
-        "name": "targetPrice",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "endPrice",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "totalHigher",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "totalLower",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
+      { "name": "targetPrice", "type": "uint256", "internalType": "uint256" },
+      { "name": "endPrice", "type": "uint256", "internalType": "uint256" },
+      { "name": "totalHigher", "type": "uint256", "internalType": "uint256" },
+      { "name": "totalLower", "type": "uint256", "internalType": "uint256" },
       {
         "name": "totalSteakedDegen",
         "type": "uint256",
         "internalType": "uint256"
       },
-      {
-        "name": "totalDegen",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
+      { "name": "totalDegen", "type": "uint256", "internalType": "uint256" }
     ],
     "stateMutability": "view"
   },
@@ -304,29 +190,15 @@
     "type": "function",
     "name": "owner",
     "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
+    "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
     "stateMutability": "view"
   },
   {
     "type": "function",
     "name": "placeBet",
     "inputs": [
-      {
-        "name": "marketId_",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "amount_",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
+      { "name": "marketId_", "type": "uint256", "internalType": "uint256" },
+      { "name": "amount_", "type": "uint256", "internalType": "uint256" },
       {
         "name": "direction_",
         "type": "uint8",
@@ -341,11 +213,7 @@
     "name": "priceFeed",
     "inputs": [],
     "outputs": [
-      {
-        "name": "",
-        "type": "address",
-        "internalType": "contract IPriceFeed"
-      }
+      { "name": "", "type": "address", "internalType": "contract IPriceFeed" }
     ],
     "stateMutability": "view"
   },
@@ -360,11 +228,7 @@
     "type": "function",
     "name": "resolveMarket",
     "inputs": [
-      {
-        "name": "marketId_",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
+      { "name": "marketId_", "type": "uint256", "internalType": "uint256" }
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
@@ -373,16 +237,8 @@
     "type": "function",
     "name": "setFan",
     "inputs": [
-      {
-        "name": "fan_",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "isFan_",
-        "type": "bool",
-        "internalType": "bool"
-      }
+      { "name": "fan_", "type": "address", "internalType": "address" },
+      { "name": "isFan_", "type": "bool", "internalType": "bool" }
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
@@ -391,11 +247,7 @@
     "type": "function",
     "name": "setGracePeriod",
     "inputs": [
-      {
-        "name": "gracePeriod_",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
+      { "name": "gracePeriod_", "type": "uint256", "internalType": "uint256" }
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
@@ -404,11 +256,7 @@
     "type": "function",
     "name": "setSlashPeriod",
     "inputs": [
-      {
-        "name": "slashPeriod_",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
+      { "name": "slashPeriod_", "type": "uint256", "internalType": "uint256" }
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
@@ -417,11 +265,7 @@
     "type": "function",
     "name": "slash",
     "inputs": [
-      {
-        "name": "marketId_",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
+      { "name": "marketId_", "type": "uint256", "internalType": "uint256" }
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
@@ -430,13 +274,7 @@
     "type": "function",
     "name": "slashPeriod",
     "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
     "stateMutability": "view"
   },
   {
@@ -444,11 +282,7 @@
     "name": "steakedDegen",
     "inputs": [],
     "outputs": [
-      {
-        "name": "",
-        "type": "address",
-        "internalType": "contract IERC4626"
-      }
+      { "name": "", "type": "address", "internalType": "contract IERC4626" }
     ],
     "stateMutability": "view"
   },
@@ -456,11 +290,7 @@
     "type": "function",
     "name": "transferOwnership",
     "inputs": [
-      {
-        "name": "newOwner",
-        "type": "address",
-        "internalType": "address"
-      }
+      { "name": "newOwner", "type": "address", "internalType": "address" }
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
@@ -635,6 +465,12 @@
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
+      },
+      {
+        "name": "status",
+        "type": "uint8",
+        "indexed": false,
+        "internalType": "enum IBetRegistry.MarketStatus"
       }
     ],
     "anonymous": false
@@ -718,60 +554,36 @@
     "type": "error",
     "name": "AddressEmptyCode",
     "inputs": [
-      {
-        "name": "target",
-        "type": "address",
-        "internalType": "address"
-      }
+      { "name": "target", "type": "address", "internalType": "address" }
     ]
   },
   {
     "type": "error",
     "name": "AddressInsufficientBalance",
     "inputs": [
-      {
-        "name": "account",
-        "type": "address",
-        "internalType": "address"
-      }
+      { "name": "account", "type": "address", "internalType": "address" }
     ]
   },
-  {
-    "type": "error",
-    "name": "FailedInnerCall",
-    "inputs": []
-  },
+  { "type": "error", "name": "FailedInnerCall", "inputs": [] },
   {
     "type": "error",
     "name": "OwnableInvalidOwner",
     "inputs": [
-      {
-        "name": "owner",
-        "type": "address",
-        "internalType": "address"
-      }
+      { "name": "owner", "type": "address", "internalType": "address" }
     ]
   },
   {
     "type": "error",
     "name": "OwnableUnauthorizedAccount",
     "inputs": [
-      {
-        "name": "account",
-        "type": "address",
-        "internalType": "address"
-      }
+      { "name": "account", "type": "address", "internalType": "address" }
     ]
   },
   {
     "type": "error",
     "name": "SafeERC20FailedOperation",
     "inputs": [
-      {
-        "name": "token",
-        "type": "address",
-        "internalType": "address"
-      }
+      { "name": "token", "type": "address", "internalType": "address" }
     ]
   }
 ]

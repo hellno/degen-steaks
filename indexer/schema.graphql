@@ -29,7 +29,9 @@ type Market {
   totalSteakedDegen: BigInt!
   betCount: Int!
   degenCollected: BigInt!
+  status: BigInt!
   isResolved: Boolean!
+  hasError: Boolean!
   highWon: Boolean
   endPrice: BigInt
   totalDegen: BigInt

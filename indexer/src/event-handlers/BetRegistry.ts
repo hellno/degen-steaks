@@ -41,7 +41,9 @@ BetRegistryContract_MarketCreated_handler(({ event, context }) => {
     totalSteakedDegen: 0n,
     degenCollected: 0n,
     betCount: 0,
+    status: 0n,
     isResolved: false,
+    hasError: false,
     totalDegen: undefined,
     endPrice: undefined,
     creatorFee: undefined,
@@ -189,20 +191,30 @@ BetRegistryContract_MarketResolved_handler(({ event, context }) => {
     return;
   }
 
-  user = {
-    ...user,
-    creatorFeeReceived: user.creatorFeeReceived + event.params.creatorFee,
-  };
-  context.User.set(user);
-
-  market = {
-    ...market,
-    endPrice: event.params.endPrice,
-    totalDegen: event.params.totalDegen,
-    creatorFee: event.params.creatorFee,
-    isResolved: true,
-    highWon: event.params.endPrice > market.targetPrice,
-  };
+  if (event.params.status === 1) {
+    user = {
+      ...user,
+      creatorFeeReceived: user.creatorFeeReceived + event.params.creatorFee,
+    };
+    context.User.set(user);
+    
+    market = {
+      ...market,
+      status: event.params.status
+      endPrice: event.params.endPrice,
+      totalDegen: event.params.totalDegen,
+      creatorFee: event.params.creatorFee,
+      isResolved: true,
+      highWon: event.params.endPrice > market.targetPrice,
+    }
+  } else {
+    market = {
+      ...market,
+      status: event.params.status,
+      hasError: true,
+      totalDegen: event.params.totalDegen,
+    };
+  }
   context.Market.set(market);
 });
 
