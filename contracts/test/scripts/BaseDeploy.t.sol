@@ -3,7 +3,7 @@ pragma solidity ^0.8.18;
 
 import {Test, console2} from "forge-std/Test.sol";
 import "script/helpers/WithFileHelpers.s.sol";
-import "script/base/Deployment.s.sol";
+import "script/base/BaseDeployment.s.sol";
 
 contract BaseDeployTest is WithFileHelpers, Test {
     uint256 fork;
