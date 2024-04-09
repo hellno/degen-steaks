@@ -99,7 +99,7 @@ contract BetRegistry is IBetRegistry, Ownable2Step {
         degenToken.approve(address(steakedDegen), amount_);
         uint256 steaks = steakedDegen.deposit(amount_, address(this));
 
-        // pay fee to totalStDegen in Market
+        // pay fee to totalSteakedDegen in Market. First bet does not pay fees.
         uint256 feeSteaks = market.totalSteakedDegen == 0 ? 0 : steaks.mulDiv(MARKET_FEE, FEE_DIVISOR);
         market.totalSteakedDegen += feeSteaks;
         steaks -= feeSteaks;
@@ -139,7 +139,7 @@ contract BetRegistry is IBetRegistry, Ownable2Step {
         Market storage market = markets[marketId_];
         require(block.timestamp >= market.endTime, "BetRegistry::resolveMarket: market has not ended.");
         require(block.timestamp >= market.endTime + gracePeriod, "BetRegistry::resolveMarket: grace period not over.");
-        require(market.endPrice == 0, "BetRegistry::resolveMarket: market already resolved.");
+        require(market.status == MarketStatus.OPEN, "BetRegistry::resolveMarket: market already resolved.");
 
         uint32 secondsAgo = uint32(block.timestamp - market.endTime);
         // Try to get a historical price from the price feed
@@ -192,18 +192,18 @@ contract BetRegistry is IBetRegistry, Ownable2Step {
             userMarketShares = marketToUserToBet[marketId_][msg.sender].amountHigher
                 + marketToUserToBet[marketId_][msg.sender].amountLower;
             require(userMarketShares > 0, "BetRegistry::cashOut: Nothing to cash out.");
-            market.totalHigher -= marketToUserToBet[marketId_][msg.sender].amountHigher;
-            market.totalLower -= marketToUserToBet[marketId_][msg.sender].amountLower;
 
             userDegenPayout = market.totalDegen.mulDiv(userMarketShares, totalMarketShares);
 
+            market.totalHigher -= marketToUserToBet[marketId_][msg.sender].amountHigher;
+            market.totalLower -= marketToUserToBet[marketId_][msg.sender].amountLower;
             market.totalDegen -= userDegenPayout;
             marketToUserToBet[marketId_][msg.sender].amountHigher = 0;
             marketToUserToBet[marketId_][msg.sender].amountLower = 0;
         } else if (market.status == MarketStatus.RESOLVED) {
             // When the market got resolved correctly, the winning side receives all shares
-            // winning direction is HIGHER
             if (market.endPrice > market.targetPrice) {
+                // winning direction is HIGHER
                 totalMarketShares = market.totalHigher;
                 userMarketShares = marketToUserToBet[marketId_][msg.sender].amountHigher;
                 require(userMarketShares > 0, "BetRegistry::cashOut: Nothing to cash out.");
@@ -212,6 +212,7 @@ contract BetRegistry is IBetRegistry, Ownable2Step {
                 market.totalHigher -= userMarketShares;
                 market.totalDegen -= userDegenPayout;
             } else {
+                // winning direction is LOWER (even when price is exactly the target price, LOWER wins, per definition)
                 totalMarketShares = market.totalLower;
                 userMarketShares = marketToUserToBet[marketId_][msg.sender].amountLower;
                 require(userMarketShares > 0, "BetRegistry::cashOut: Nothing to cash out.");
@@ -246,6 +247,7 @@ contract BetRegistry is IBetRegistry, Ownable2Step {
         market.totalHigher = 0;
         market.totalLower = 0;
 
+        // distribute fees (creator, slasher, dao, all receive the same amount)
         uint256 creatorFee = totalDegen.mulDiv(CREATOR_FEE, FEE_DIVISOR);
         uint256 slashFee = totalDegen.mulDiv(CREATOR_FEE, FEE_DIVISOR);
         uint256 daoFee = totalDegen.mulDiv(CREATOR_FEE, FEE_DIVISOR);
