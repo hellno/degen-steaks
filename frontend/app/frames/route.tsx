@@ -2,12 +2,6 @@ import { Button } from "frames.js/next";
 import { frames } from "./frames";
 
 const handleRequest = frames(async (ctx) => {
-  // if (!ctx?.message?.isValid) {
-  //   throw new Error("Invalid Frame");
-  // }
-
-  // get latest market here
-
   return {
     image: (
       <div tw="flex flex-col">

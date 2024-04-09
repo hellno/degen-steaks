@@ -8,7 +8,7 @@ import {
 } from "@airstack/frames";
 
 
-const DEFAULT_MARKET_ID = -1;
+export const DEFAULT_MARKET_ID = -1;
 
 // enum PageState {
 //     start = "start",
