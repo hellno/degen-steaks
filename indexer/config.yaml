@@ -2,10 +2,10 @@ name: SteakedDegenIndexer
 description: Indexes Degen Steaks
 networks:
   - id: 8453 # Base
-    start_block: 12674138
+    start_block: 12942531
     contracts:
       - name: BetRegistry
-        address: "0x7C4e621ce078fe39B205f90AEd2C1371794B12A9"
+        address: "0x55a332d75f2BC9937d50084b8D4af7cB9Fa192Fe"
         abi_file_path: ./abi/BetRegistry.json
         handler: ./src/event-handlers/BetRegistry.ts
         events:
@@ -34,7 +34,7 @@ networks:
               - name: User
               - name: Dao
       - name: SteakedDegen
-        address: "0xa523a694A72Eac635F78e7562D754E218E72F933"
+        address: "0xC20e615356D3301bF3eC624585e8c9C88a2096E4"
         abi_file_path: ./abi/SteakedDegen.json
         handler: ./src/event-handlers/SteakedDegen.ts
         events:
