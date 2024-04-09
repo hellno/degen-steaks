@@ -7,13 +7,15 @@ import "openzeppelin/token/ERC20/IERC20.sol";
 import "openzeppelin/token/ERC20/utils/SafeERC20.sol";
 import "openzeppelin/interfaces/IERC4626.sol";
 import "openzeppelin/utils/math/Math.sol";
-import "openzeppelin/access/Ownable.sol";
+import "openzeppelin/access/Ownable2Step.sol";
 
-contract BetRegistry is IBetRegistry, Ownable {
+contract BetRegistry is IBetRegistry, Ownable2Step {
     using SafeERC20 for IERC20;
     using Math for uint256;
 
+    /// @dev market fee gets distributed to all previously existant market participants
     uint256 constant MARKET_FEE = 69 * 1e2; // 0.69%: 69 BPS
+    /// @dev creator fee is paid to the creator of the market, when the market get successfully resolved
     uint256 constant CREATOR_FEE = 69 * 1e2; // 0.69%; 69 BPS
     uint256 constant FEE_DIVISOR = 1e6; // 1% = 1e4: 1 BPS = 1e2
 
@@ -29,7 +31,7 @@ contract BetRegistry is IBetRegistry, Ownable {
     IPriceFeed public priceFeed;
     address public degenUtilityDao;
 
-    mapping(address => bool) public isFan; // haha just kidding, it's a pun. onlyDepositer is a better name.
+    mapping(address => bool) public isFan; // haha just kidding, it's a pun. onlyDepositer would be a better name.
 
     constructor(IERC20 degenToken_, IERC4626 steakedDegen_, IPriceFeed priceFeed_, address degenUtilityDao_)
         Ownable(msg.sender)
@@ -61,17 +63,7 @@ contract BetRegistry is IBetRegistry, Ownable {
         emit SlashPeriodSet(slashPeriod_);
     }
 
-    function getMarket(uint256 marketId_) public view returns (Market memory) {
-        if (marketId_ >= markets.length) {
-            revert("BetRegistry::getMarket: marketId out of range.");
-        }
-        return markets[marketId_];
-    }
-
-    function getBet(uint256 marketId_, address user_) public view returns (Bet memory) {
-        return marketToUserToBet[marketId_][user_];
-    }
-
+    /// @dev creates a market where users can place bets on the price of DEGEN.
     function createMarket(uint40 endTime_, uint256 targetPrice_) public onlyFans returns (uint256) {
         require(endTime_ > block.timestamp, "BetRegistry::createMarket: endTime must be in the future.");
         require(targetPrice_ > 0, "BetRegistry::createMarket: targetPrice must be greater than zero.");
@@ -93,6 +85,8 @@ contract BetRegistry is IBetRegistry, Ownable {
         return markets.length - 1;
     }
 
+    /// @dev places a bet on a market. A user can place multiple bets in either direction on the same market.
+    /// A user cannot revoke a bet.
     function placeBet(uint256 marketId_, uint256 amount_, BetDirection direction_) public {
         require(marketId_ < markets.length, "BetRegistry::placeBet: marketId out of range.");
         require(amount_ >= MIN_BID, "BetRegistry::placeBet: amount must be at least MIN_BID.");
@@ -138,6 +132,9 @@ contract BetRegistry is IBetRegistry, Ownable {
         });
     }
 
+    /// @dev resolves a market by fetching the price from the price feed.
+    /// As prices are fetched by the uniswap v3 oracle, this function may fail if the market is resolved too late.
+    /// A market should be resolved within a few hours.
     function resolveMarket(uint256 marketId_) public {
         Market storage market = markets[marketId_];
         require(block.timestamp >= market.endTime, "BetRegistry::resolveMarket: market has not ended.");
@@ -177,6 +174,9 @@ contract BetRegistry is IBetRegistry, Ownable {
         });
     }
 
+    /// @dev users can cash out their shares after a market has been resolved.
+    /// Usually, one side of the market wins all other funds of the other side.
+    /// If the market is in error state, users can cash out all their shares, minus the already paid fees.
     function cashOut(uint256 marketId_) public {
         Market storage market = markets[marketId_];
         require(market.status != MarketStatus.OPEN, "BetRegistry::cashOut: market not resolved.");
@@ -232,6 +232,8 @@ contract BetRegistry is IBetRegistry, Ownable {
         });
     }
 
+    /// @dev slash unclaimed funds after the grace period and the slash period have passed.
+    /// This function makes sure, there are no locked funds in the smart contract.
     function slash(uint256 marketId_) public {
         Market storage market = markets[marketId_];
         require(
@@ -263,5 +265,16 @@ contract BetRegistry is IBetRegistry, Ownable {
             daoFee: daoFee,
             slasher: msg.sender
         });
+    }
+
+    function getMarket(uint256 marketId_) public view returns (Market memory) {
+        if (marketId_ >= markets.length) {
+            revert("BetRegistry::getMarket: marketId out of range.");
+        }
+        return markets[marketId_];
+    }
+
+    function getBet(uint256 marketId_, address user_) public view returns (Bet memory) {
+        return marketToUserToBet[marketId_][user_];
     }
 }
