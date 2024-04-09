@@ -20,6 +20,7 @@ import {
   renderDegenPriceFromContract,
 } from "./lib/utils";
 import { formatEther, parseEther } from "viem";
+import { fetchMetadata } from "frames.js/next";
 
 const DEFAULT_DEGEN_BETSIZE = "420690000000000000000";
 const DEFAULT_MARKET_ID = -1;
@@ -27,6 +28,14 @@ const baseUrl =
   process.env.NEXT_PUBLIC_VERCEL_URL ||
   process.env.NEXT_PUBLIC_HOST ||
   "http://localhost:3000";
+
+export async function generateMetadata() {
+  return {
+    title: "Degen Steaks",
+    // provide a full URL to your /frames endpoint
+    other: await fetchMetadata(new URL("/frames", baseUrl)),
+  };
+}
 
 enum PageState {
   start = "start",
@@ -428,10 +437,7 @@ export default async function Home({
       </h2>
       <div className="flex flex-col gap-y-4 mt-12">
         <p className="text-2xl">
-          <a
-            className="underline"
-            href="/web/market/1"
-          >
+          <a className="underline" href="/web/market/1">
             Web access to the markets ↗️
           </a>
         </p>
@@ -444,7 +450,7 @@ export default async function Home({
           </a>
         </p>
       </div>
-      <FrameContainer
+      {/* <FrameContainer
         postUrl="/frames"
         pathname="/"
         state={state}
@@ -453,7 +459,7 @@ export default async function Home({
         {renderImage()}
         {await renderButtons()}
         {renderInput()}
-      </FrameContainer>
+      </FrameContainer> */}
     </div>
   );
 }

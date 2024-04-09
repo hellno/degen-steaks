@@ -26,18 +26,7 @@ const MarketOverview = ({ market }: { market: MarketType | undefined }) => {
     status,
     error,
   } = useWriteContract();
-  console.log(
-    "writeContract MarketOverview: hash",
-    hash,
-    "isPending",
-    isPending,
-    "isSuccess",
-    isSuccess,
-    "status",
-    status,
-    "error",
-    error
-  );
+
   useEffect(() => {
     getDegenUsdPrice().then((price) => {
       setCurrentPrice(price);
@@ -105,25 +94,26 @@ const MarketOverview = ({ market }: { market: MarketType | undefined }) => {
     if (!currentSteaks || !bet?.placedBets?.length) {
       return 0;
     }
-    console.log("bet.placedBets", bet.placedBets);
+
     const paidInSteaks = bet.placedBets.reduce(
       (acc, placedBet) => acc + BigInt(placedBet.steaks),
       0n
     );
+
     const pnlRatio = Number((currentSteaks * 10000n) / paidInSteaks) / 10000;
     const pnlPercentage = (pnlRatio - 1) * 100;
     return pnlPercentage;
   };
 
   const renderUserBetDirection = () => {
-    let betDirection;
     const bet = market.bets?.[0];
     if (!bet) {
       return "No bets placed";
     }
 
+    let betDirection: string;
     if (bet.sharesHigher && bet.sharesLower) {
-      return "Both directions";
+      betDirection = "Both directions";
     } else if (bet.sharesHigher) {
       betDirection = "Higher";
     } else {
@@ -131,14 +121,9 @@ const MarketOverview = ({ market }: { market: MarketType | undefined }) => {
     }
     return (
       <div className="flex flex-col gap-2">
-        {market.bets &&
-          market.bets.map((bet) => (
-            <div key={bet.id} className="flex flex-col gap-2">
-              <span className="text-2xl text-gray-900">
-                {bet.sharesHigher > 0 ? "Higher" : "Lower"}
-              </span>
-            </div>
-          ))}
+        <div className="flex flex-col gap-2">
+          <span className="text-2xl text-gray-900">{betDirection}</span>
+        </div>
       </div>
     );
   };
