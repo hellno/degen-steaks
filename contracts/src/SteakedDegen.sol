@@ -19,7 +19,7 @@ contract SteakedDegen is ISteakedDegen, ERC4626, Ownable2Step {
 
     bool isInitialized = false;
 
-    mapping(address => bool) public isFan; // haha just kidding, it's a pun. onlyDepositer is a better name.
+    mapping(address => bool) public isFan; // haha just kidding, it's a pun. onlyDepositer would be a better name.
 
     constructor(string memory name_, string memory symbol_, IERC20 degenToken_, address daoFeeReceiver_)
         ERC20(name_, symbol_)
