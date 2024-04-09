@@ -284,13 +284,6 @@ export default function Page({ params }: { params: { slug: string[] } }) {
           <Button size="lg" onClick={() => window.open(intentUrl, "_blank")}>
             Share on Warpcast
           </Button>
-          {/* <Button
-            size="lg"
-            variant="outline"
-            onClick={() => router.push(`/web/market/${Number(marketId) + 1}`)}
-          >
-            Next Market ➡️
-          </Button> */}
         </div>
       )
     );

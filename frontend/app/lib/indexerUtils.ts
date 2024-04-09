@@ -29,6 +29,14 @@ const BET_FRAGMENT = gql`
         cashedOut
         cashedOutDegen
         cashOutTransaction
+        placedBets {
+            id
+            feeSteaks
+            degen
+            steaks
+            betShares
+            transaction
+        }
     }
 `
 

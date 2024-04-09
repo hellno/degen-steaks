@@ -440,7 +440,7 @@ export default async function Home({
             className="underline"
             href="https://zora.co/collect/base:0xb5935092048f55d61226ec10b72b30e81818b811/1"
           >
-            Zora Early Access Baby Degen Steak NFT ↗️
+            Zora Early Access NFT ↗️
           </a>
         </p>
       </div>

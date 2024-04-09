@@ -15,13 +15,24 @@ export type MarketType = {
 };
 
 export type BetType = {
-    id: number;
+    id: string;
     sharesHigher: bigint;
     sharesLower: bigint;
     cashedOut: boolean;
     cashedOutDegen: bigint;
     cashOutTransaction: string;
+    placedBets?: PlacedBetsType[];
 }
+
+export type PlacedBetsType = {
+    id: string;
+    degen: string;
+    steaks: string;
+    feeSteaks: string;
+    betShares: string;
+    transaction: `0x${string}`;
+}
+
 
 export enum BetDirection {
     HIGHER = 0,

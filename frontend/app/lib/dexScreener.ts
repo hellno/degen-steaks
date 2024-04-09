@@ -7,7 +7,7 @@ export const getDegenUsdPrice = async () => {
         if (!data.pairs) {
             return;
         }
-
+        console.log('price data', data);
         return data.pairs[0].priceUsd;
     } catch (e) {
         console.error('Error fetching Degen price', e);
