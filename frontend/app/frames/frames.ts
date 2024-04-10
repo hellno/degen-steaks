@@ -14,6 +14,7 @@ export const baseUrl =
   process.env.NEXT_PUBLIC_HOST ||
   "http://localhost:3000";
 
+console.log('baseUrl', baseUrl);
 // enum PageState {
 //     start = "start",
 //     decide = "decide",
@@ -68,7 +69,6 @@ export const frames = createFrames<State>({
             },
         }),
     ],
-
-    basePath: "/frames",
+    basePath: `${baseUrl}/frames`,
     initialState,
 });

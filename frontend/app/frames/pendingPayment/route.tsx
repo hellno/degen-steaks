@@ -22,6 +22,7 @@ const getPaymentButton = ({
       <Button
         action="tx"
         target={`${baseUrl}/txdata/placebet?marketId=${marketId}&betSize=${betSize}&betDirection=${betDirection}`}
+        post_url="/pendingPayment"
       >
         Place bet
       </Button>
@@ -31,6 +32,7 @@ const getPaymentButton = ({
       <Button
         action="tx"
         target={`${baseUrl}/txdata/approvedegen?approvalAmount=${betSize}`}
+        post_url="/pendingPayment"
       >
         Approve spending
       </Button>
@@ -38,28 +40,32 @@ const getPaymentButton = ({
   }
 };
 
-const getMarketWebLinkButton = (marketId: string): React.ReactElement => {
-  return (
-    <Button action="link" target={`${baseUrl}/web/market/${marketId}`}>
-      Web
-    </Button>
-  );
-};
+const getMarketWebLinkButton = (marketId: string): React.ReactElement => (
+  <Button action="link" target={`${baseUrl}/web/market/${marketId}`}>
+    Web
+  </Button>
+);
+
+const renderTransactionLinkButton = (transactionId: string) => (
+  <Button action="link" target={`https://www.onceupon.gg/tx/${transactionId}`}>
+    View transaction
+  </Button>
+);
 
 export const POST = frames(async (ctx) => {
+  const transactionId = ctx.message?.transactionId;
   const betDirectionFromSearchparams = ctx.searchParams
     .betDirection as unknown as BetDirection;
   const betDirection = ctx.state.betDirection || betDirectionFromSearchparams;
   const userAddresses = getUserAddressesFromContext(ctx);
   const hasAllowance = await hasAnyDegenAllowance(userAddresses);
-  console.log('hasAllowance', hasAllowance);
 
   if (betDirection === undefined) {
     return {
       image: <div tw="flex">No bet direction - something went wrong</div>,
       buttons: [
         <Button action="post" target="/">
-          Go home
+          Home 🏠
         </Button>,
       ],
     };
@@ -133,12 +139,14 @@ export const POST = frames(async (ctx) => {
     image: getImageForPendingPayment(),
     buttons: [
       getPaymentButton(updatedState),
-      getMarketWebLinkButton(ctx.state.marketId.toString()),
+      transactionId
+        ? renderTransactionLinkButton(transactionId)
+        : getMarketWebLinkButton(ctx.state.marketId.toString()),
       <Button action="post" target="/pendingPayment">
         Refresh 🔄
       </Button>,
       <Button action="post" target="/">
-        Go home
+        Home 🏠
       </Button>,
     ],
     imageOptions: {

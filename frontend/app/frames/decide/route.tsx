@@ -24,6 +24,8 @@ const handleRequest = frames(async (ctx) => {
 
   console.log("ctx.message", ctx.message);
   const marketData = await getMarketDataFromContext(ctx);
+  const timeDelta = marketData?.endTime ? marketData.endTime * 1000 - new Date().getTime() : 0;
+  const hasEnded = timeDelta < 0;
 
   const updatedState = {
     ...currentState,
@@ -55,7 +57,6 @@ const handleRequest = frames(async (ctx) => {
       );
     }
     console.log("marketData", marketData);
-    const timeDelta = marketData.endTime * 1000 - new Date().getTime();
   
     const marketEndDescription =
       timeDelta > 0
@@ -90,11 +91,20 @@ const handleRequest = frames(async (ctx) => {
     );
   };
 
-  return {
-    state: updatedState,
-    image: getImageForMarket(),
-    textInput: `${formatEther(BigInt(DEFAULT_DEGEN_BETSIZE))}`,
-    buttons: [
+  const getButtonsForMarket = () => {
+    if (hasEnded) {
+      return [
+        <Button
+          action="post"
+          target={{
+            pathname: "/",
+          }}
+        >
+          Home 🏠
+        </Button>,
+      ]
+    }
+    return [
       <Button
         action="post"
         target={{
@@ -113,7 +123,14 @@ const handleRequest = frames(async (ctx) => {
       >
         Higher 🔼
       </Button>,
-    ],
+    ]
+  };
+
+  return {
+    state: updatedState,
+    image: getImageForMarket(),
+    textInput: !hasEnded && `${formatEther(BigInt(DEFAULT_DEGEN_BETSIZE))}`,
+    buttons: getButtonsForMarket(),
     imageOptions: {
       aspectRatio: "1:1",
     },

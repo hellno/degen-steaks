@@ -29,11 +29,7 @@ const handleRequest = frames(async (ctx) => {
       </div>
     ),
     buttons: [
-      <Button
-        key="viewMarket"
-        action="post"
-        target={{ pathname: "/decide", query: { foo: "bar" } }}
-      >
+      <Button key="viewMarket" action="post" target="/decide">
         Start 🥩🔥
       </Button>,
       <Button key="learnMore" action="post" target="/learnMore">
