@@ -61,7 +61,7 @@ const handleRequest = frames(async (ctx: any) => {
         ? `Ends in ${convertMillisecondsToDelta(timeDelta)}.`
         : `This market is closed. It ended ${convertMillisecondsToDelta(
             timeDelta
-          )} ago.`;
+          )} ${timeDelta ? 'ago' : ''}`;
 
     return (
       <div tw="flex flex-col">
