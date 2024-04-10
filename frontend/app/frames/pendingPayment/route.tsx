@@ -91,7 +91,6 @@ export const POST = frames(async (ctx: any) => {
 
   const marketData = await getMarketDataFromContext(ctx);
   const hasBets = marketData && marketData?.bets && marketData?.bets.length > 0;
-  console.log('market data in pendingPayment', marketData)
   const getImageForPendingPayment = () => {
     const { hasAllowance, betSize, betDirection } = updatedState;
     const youAreHere = " ← You are here";
@@ -100,7 +99,6 @@ export const POST = frames(async (ctx: any) => {
       <div tw="flex flex-col">
         <div tw="flex flex-col self-center text-center justify-center items-center">
           <p tw="text-7xl">Start steaking your $DEGEN</p>
-          <p tw="text-6xl">in two steps</p>
           <div tw="flex flex-col text-5xl">
             <p
               tw={clsx(
@@ -111,6 +109,7 @@ export const POST = frames(async (ctx: any) => {
             >
               1. Approve $DEGEN {!hasAllowance && youAreHere}
             </p>
+            <p tw="text-gray-500 -mt-8">2. Refresh</p>
             <p
               tw={clsx(
                 hasAllowance
@@ -118,12 +117,13 @@ export const POST = frames(async (ctx: any) => {
                   : "text-gray-500"
               )}
             >
-              2. Place bet {hasAllowance && youAreHere}
+              3. Place bet {hasAllowance && youAreHere}
             </p>
+            <p tw="text-gray-500 -mt-8">4. Check out the market</p>
           </div>
         </div>
         {betSize && betDirection !== undefined ? (
-          <div tw="flex flex-col mt-36">
+          <div tw="flex flex-col mt-20">
             <span>
               Your bet: {formatEther(BigInt(betSize))} $DEGEN{" "}
               {betDirection === BetDirection.LOWER ? "below" : "above"}{" "}
@@ -146,16 +146,15 @@ export const POST = frames(async (ctx: any) => {
     state: updatedState,
     image: getImageForPendingPayment(),
     buttons: [
-      hasBets ? getViewMarketButton() : getPaymentButton(updatedState),
-      transactionId
-        ? renderTransactionLinkButton(transactionId)
-        : getMarketWebLinkButton(ctx.state.marketId.toString()),
+      getPaymentButton(updatedState),
+      hasBets ? getViewMarketButton() : undefined,
+      transactionId ? renderTransactionLinkButton(transactionId) : undefined,
       <Button action="post" target="/pendingPayment">
         Refresh 🔄
       </Button>,
-      <Button action="post" target="/">
-        Home 🏠
-      </Button>,
+      // <Button action="post" target="/">
+      //   Home 🏠
+      // </Button>,
     ],
     imageOptions: {
       aspectRatio: "1:1",
