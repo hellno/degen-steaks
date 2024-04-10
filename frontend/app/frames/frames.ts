@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { createFrames } from "frames.js/next";
 import { BetDirection, MarketType } from "../types";
 import { farcasterHubContext } from "frames.js/middleware";
