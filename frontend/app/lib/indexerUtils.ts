@@ -51,17 +51,17 @@ const getDefaultOpenMarket = async (addresses: string[] = []): Promise<MarketTyp
     const query = gql`
         ${MARKET_FRAGMENT}
         ${BET_FRAGMENT}
-        query Market ($addresses: [String!]) {
+        query Market {
             Market (where: {isResolved: {_eq: false}}, order_by: {endTime: desc}, limit: 1) {
                 ...MarketFragment
-                bets (where:{user_id:{_in: $addresses}}) {
+                bets ${getBetsConditionForAddresses(addresses)} {
                     ...BetFragment
                 }
             }
 
         }
     `;
-    const vars = { addresses };
+    const vars = { };
     return (await runGraphqlRequest(query, vars, 'Market'))?.[0] as MarketType;
 }
 
@@ -76,20 +76,35 @@ const getActiveMarkets = async ({ limit, offset }: { limit: number, offset: numb
     return await runGraphqlRequest(query, {}, 'Market') as MarketType[];
 };
 
+const getBetsConditionForAddresses = (addresses: string[]): string => {
+    let betsCondition = '';
+    if (addresses.length === 1) {
+        betsCondition = `{user_id: {_ilike: "${addresses[0]}"}}`;
+    } else if (addresses.length > 1) {
+        betsCondition = `{_or: [${addresses.map((address) => `{user_id: {_ilike: "${address}"}}`).join(',')}]}`;
+    }
+    if (betsCondition) {
+        betsCondition = `(where: ${betsCondition})`;
+    }
+    return betsCondition;
+}
+
 const getMarket = async (marketId: string, addresses: string[] = []): Promise<MarketType> => {
+    console.log('getMarket', marketId, addresses)
+
     const query = gql`
         ${MARKET_FRAGMENT}
         ${BET_FRAGMENT}
-        query Market ($marketId: String!, $addresses: [String!]) {
+        query Market ($marketId: String!) {
             Market (where : {id: {_eq: $marketId}}) {
             ...MarketFragment
-                bets (where:{user_id:{_in: $addresses}}) {
+                bets ${getBetsConditionForAddresses(addresses)} {
                     ...BetFragment
                 }
             }
         }
     `;
-    const vars = { marketId, addresses };
+    const vars = { marketId };
     return (await runGraphqlRequest(query, vars, 'Market'))?.[0] as MarketType;
 }
 

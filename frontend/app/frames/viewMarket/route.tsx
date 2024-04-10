@@ -8,7 +8,7 @@ import {
   getUserWasRight,
   renderDegenPriceFromContract,
 } from "@/app/lib/utils";
-import { MarketType } from "@/app/types";
+import { BetType, MarketType } from "@/app/types";
 import { formatEther } from "viem";
 import { getProgressBar } from "@/app/components/FrameUI";
 import { getMarketDataFromContext } from "@/app/lib/framesUtils";
@@ -26,6 +26,30 @@ const handleRequest = frames(async (ctx) => {
   const updatedState = {
     ...currentState,
     marketId: marketData?.id || DEFAULT_MARKET_ID,
+  };
+
+  const renderBets = (bets: BetType[]) => {
+    if (!bets || !bets.length || !bets[0]?.placedBets) return null;
+    const allDegenSum = bets[0]?.placedBets.reduce(
+      (acc, bet) => acc + Number(bet.degen),
+      0
+    );
+    return (
+      <div tw="flex flex-col mt-10">
+        <p tw="text-5xl">Your bet:</p>
+        <div tw="flex flex-col">
+          {bets.map((bet) => (
+            <div tw="flex flex-row">
+              <p tw="text-5xl">
+                {formatEther(BigInt(allDegenSum))} DEGEN{" "}
+                {bet.sharesHigher === 0 ? "below" : "above"}{" "}
+                {renderDegenPriceFromContract(BigInt(marketData.targetPrice))}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   };
 
   const getImageForMarket = () => {
@@ -83,11 +107,12 @@ const handleRequest = frames(async (ctx) => {
               b: 100 * Number(sharesHigher),
             })}
           </div>
-          <div tw="flex mt-24">
+          <div tw="flex mt-20">
             <p tw="text-5xl">
               {formatEther(BigInt(marketData.degenCollected))} DEGEN steaked
             </p>
           </div>
+          {renderBets(bets)}
         </div>
       </div>
     );

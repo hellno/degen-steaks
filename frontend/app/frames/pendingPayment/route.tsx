@@ -40,6 +40,12 @@ const getPaymentButton = ({
   }
 };
 
+const getViewMarketButton = (): React.ReactElement => (
+  <Button action="post" target="/viewMarket">
+    View market
+  </Button>
+);
+
 const getMarketWebLinkButton = (marketId: string): React.ReactElement => (
   <Button action="link" target={`${baseUrl}/web/market/${marketId}`}>
     Web
@@ -84,6 +90,8 @@ export const POST = frames(async (ctx) => {
   };
 
   const marketData = await getMarketDataFromContext(ctx);
+  const hasBets = marketData && marketData?.bets && marketData?.bets.length > 0;
+  console.log('market data in pendingPayment', marketData)
   const getImageForPendingPayment = () => {
     const { hasAllowance, betSize, betDirection } = updatedState;
     const youAreHere = " ← You are here";
@@ -138,7 +146,7 @@ export const POST = frames(async (ctx) => {
     state: updatedState,
     image: getImageForPendingPayment(),
     buttons: [
-      getPaymentButton(updatedState),
+      hasBets ? getViewMarketButton() : getPaymentButton(updatedState),
       transactionId
         ? renderTransactionLinkButton(transactionId)
         : getMarketWebLinkButton(ctx.state.marketId.toString()),
