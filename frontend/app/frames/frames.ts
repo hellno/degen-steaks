@@ -36,7 +36,7 @@ const initialState: State = {
     hasAllowance: undefined,
 };
 
-export const frames = createFrames<State>({
+export const frames: any = createFrames<State>({
     middleware: [
         farcasterHubContext({
             hubHttpUrl: "https://nemes.farcaster.xyz:2281",
@@ -47,27 +47,27 @@ export const frames = createFrames<State>({
             //     },
             // },
         }),
-        allowList({
-            apiKey: process.env.AIRSTACK_API_KEY as string,
-            criteria: {
-                and: [
-                    [
-                        // must hold early access NFT release on Base
-                        AllowListCriteria.TOKEN_MINT, {
-                            address: "0xb5935092048f55d61226ec10b72b30e81818b811",
-                            chain: TokenBlockchain.Base,
-                        }
-                    ],
-                    [
-                        // must hold DEGEN on Base
-                        AllowListCriteria.TOKEN_HOLD, {
-                            chain: TokenBlockchain.Base,
-                            address: "0x4c17ff12d9a925a0dec822a8cbf06f46c6268553",
-                        }
-                    ]
-                ],
-            },
-        }),
+        // allowList({
+        //     apiKey: process.env.AIRSTACK_API_KEY as string,
+        //     criteria: {
+        //         and: [
+        //             [
+        //                 // must hold early access NFT release on Base
+        //                 AllowListCriteria.TOKEN_MINT, {
+        //                     address: "0xb5935092048f55d61226ec10b72b30e81818b811",
+        //                     chain: TokenBlockchain.Base,
+        //                 }
+        //             ],
+        //             [
+        //                 // must hold DEGEN on Base
+        //                 AllowListCriteria.TOKEN_HOLD, {
+        //                     chain: TokenBlockchain.Base,
+        //                     address: "0x4c17ff12d9a925a0dec822a8cbf06f46c6268553",
+        //                 }
+        //             ]
+        //         ],
+        //     },
+        // }),
     ],
     basePath: `${baseUrl}/frames`,
     initialState,

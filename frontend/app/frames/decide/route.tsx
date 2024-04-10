@@ -1,8 +1,6 @@
 /* eslint-disable react/jsx-key */
 import { frames, DEFAULT_DEGEN_BETSIZE, DEFAULT_MARKET_ID } from "../frames";
 import { Button } from "frames.js/next";
-import { getFrameMessage } from "frames.js";
-import { getDefaultOpenMarket, getMarket } from "../../lib/indexerUtils";
 import {
   convertMillisecondsToDelta,
   getUserWasRight,
@@ -10,10 +8,10 @@ import {
 } from "@/app/lib/utils";
 import { BetDirection } from "@/app/types";
 import { formatEther } from "viem";
-import { getProgressBar, getProgressbarFromMarketData } from "@/app/components/FrameUI";
+import { getProgressbarFromMarketData } from "@/app/components/FrameUI";
 import { getMarketDataFromContext } from "@/app/lib/framesUtils";
 
-const handleRequest = frames(async (ctx) => {
+const handleRequest = frames(async (ctx: any) => {
   const currentState = ctx.state;
 
   // get latest market data
@@ -91,7 +89,7 @@ const handleRequest = frames(async (ctx) => {
     );
   };
 
-  const getButtonsForMarket = () => {
+  const getButtonsForMarket = (): any => {
     if (hasEnded) {
       return [
         <Button
@@ -129,7 +127,7 @@ const handleRequest = frames(async (ctx) => {
   return {
     state: updatedState,
     image: getImageForMarket(),
-    textInput: !hasEnded && `${formatEther(BigInt(DEFAULT_DEGEN_BETSIZE))}`,
+    textInput: hasEnded ? undefined : `${formatEther(BigInt(DEFAULT_DEGEN_BETSIZE))}`,
     buttons: getButtonsForMarket(),
     imageOptions: {
       aspectRatio: "1:1",

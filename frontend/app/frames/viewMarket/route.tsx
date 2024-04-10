@@ -13,7 +13,7 @@ import { formatEther } from "viem";
 import { getProgressBar } from "@/app/components/FrameUI";
 import { getMarketDataFromContext } from "@/app/lib/framesUtils";
 
-const handleRequest = frames(async (ctx) => {
+const handleRequest = frames(async (ctx: any) => {
   const currentState = ctx.state;
 
   // get latest market data
@@ -28,7 +28,7 @@ const handleRequest = frames(async (ctx) => {
     marketId: marketData?.id || DEFAULT_MARKET_ID,
   };
 
-  const renderBets = (bets: BetType[]) => {
+  const renderBets = (bets: BetType[] | undefined) => {
     if (!bets || !bets.length || !bets[0]?.placedBets) return null;
     const allDegenSum = bets[0]?.placedBets.reduce(
       (acc, bet) => acc + Number(bet.degen),

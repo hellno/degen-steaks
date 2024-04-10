@@ -2,7 +2,7 @@
 import { baseUrl, frames } from "../frames";
 import { Button } from "frames.js/next";
 
-export const POST = frames(async (ctx) => {
+export const POST = frames(async () => {
   return {
     image: (
       <div tw="flex flex-col">

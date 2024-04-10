@@ -58,7 +58,7 @@ const renderTransactionLinkButton = (transactionId: string) => (
   </Button>
 );
 
-export const POST = frames(async (ctx) => {
+export const POST = frames(async (ctx: any) => {
   const transactionId = ctx.message?.transactionId;
   const betDirectionFromSearchparams = ctx.searchParams
     .betDirection as unknown as BetDirection;

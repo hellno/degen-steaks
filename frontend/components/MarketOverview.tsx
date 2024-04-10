@@ -79,13 +79,13 @@ const MarketOverview = ({ market }: { market: MarketType | undefined }) => {
 
   const getBetCurrentSteaks = (bet: BetType) => {
     let betSize;
-    if (bet.sharesHigher > 0) {
+    if (bet.sharesHigher !== "0") {
       betSize =
-        (bet.sharesHigher / market.totalSharesHigher) *
-        market.totalSteakedDegen;
+        (BigInt(bet.sharesHigher) / BigInt(market.totalSharesHigher)) *
+        BigInt(market.totalSteakedDegen);
     } else {
       betSize =
-        (bet.sharesLower / market.totalSharesLower) * market.totalSteakedDegen;
+        (BigInt(bet.sharesLower) / BigInt(market.totalSharesLower)) * BigInt(market.totalSteakedDegen);
     }
     return BigInt(betSize);
   };

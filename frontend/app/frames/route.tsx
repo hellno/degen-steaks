@@ -7,7 +7,7 @@ import {
 import { formatEther } from "viem";
 import { getDefaultOpenMarket } from "../lib/indexerUtils";
 
-const handleRequest = frames(async (ctx) => {
+const handleRequest = frames(async () => {
   const marketData = await getDefaultOpenMarket([]);
 
   return {
