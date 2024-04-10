@@ -9,19 +9,30 @@ export type MarketType = {
     totalSteakedDegen: bigint;
     startTime: number;
     endTime: number;
-    degenCollected: bigint;
+    degenCollected: string;
     targetPrice: bigint;
     bets?: BetType[];
 };
 
 export type BetType = {
-    id: number;
-    sharesHigher: bigint;
-    sharesLower: bigint;
+    id: string;
+    sharesHigher: string;
+    sharesLower: string;
     cashedOut: boolean;
     cashedOutDegen: bigint;
     cashOutTransaction: string;
+    placedBets?: PlacedBetsType[];
 }
+
+export type PlacedBetsType = {
+    id: string;
+    degen: string;
+    steaks: string;
+    feeSteaks: string;
+    betShares: string;
+    transaction: `0x${string}`;
+}
+
 
 export enum BetDirection {
     HIGHER = 0,

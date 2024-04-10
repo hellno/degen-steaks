@@ -21,7 +21,7 @@ export function convertMillisecondsToDelta(milliseconds: number): string {
     if (days > 0) timeString += `${days} days, `;
     if (hours > 0) timeString += `${hours} hours, `;
     if (minutes > 0) timeString += `${minutes} minutes, `;
-    if (seconds > 0) timeString += `${seconds} seconds`;
+    // if (seconds > 0) timeString += `${seconds} seconds`;
     return timeString.replace(/, $/, '');
 };
 
@@ -38,6 +38,6 @@ export const getUserWasRight = (market: MarketType): boolean | undefined => {
     const bet = market.bets?.[0];
     if (!bet) return undefined;
 
-    const userDirection = bet.sharesHigher > 0 ? BetDirection.HIGHER : BetDirection.LOWER;
+    const userDirection = bet.sharesHigher !== "0" ? BetDirection.HIGHER : BetDirection.LOWER;
     return market.highWon === (userDirection === BetDirection.HIGHER);
 }
