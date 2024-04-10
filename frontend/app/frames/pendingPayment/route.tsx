@@ -2,7 +2,7 @@
 import { formatEther, parseEther } from "viem";
 import { DEFAULT_DEGEN_BETSIZE, State, baseUrl, frames } from "../frames";
 import { Button } from "frames.js/next";
-import { BetDirection } from "@/app/types";
+import { BetDirection, BetType } from "@/app/types";
 import { renderDegenPriceFromContract } from "@/app/lib/utils";
 import clsx from "clsx";
 import {
@@ -91,6 +91,31 @@ export const POST = frames(async (ctx: any) => {
 
   const marketData = await getMarketDataFromContext(ctx);
   const hasBets = marketData && marketData?.bets && marketData?.bets.length > 0;
+  
+  const renderBets = (bets: BetType[] | undefined) => {
+    if (!bets || !bets.length || !bets[0]?.placedBets) return null;
+    const allDegenSum = bets[0]?.placedBets.reduce(
+      (acc, bet) => acc + Number(bet.degen),
+      0
+    );
+    return (
+      <div tw="flex flex-col mt-4">
+        <p tw="text-3xl">Your bet in this market:</p>
+        <div tw="flex flex-col -mt-16">
+          {bets.map((bet) => (
+            <div tw="flex flex-row">
+              <p tw="text-3xl">
+                {formatEther(BigInt(allDegenSum))} DEGEN{" "}
+                {bet.sharesHigher === "0" ? "Lower" : "Higher"}{" "}
+                {renderDegenPriceFromContract(BigInt(marketData.targetPrice))}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+  
   const getImageForPendingPayment = () => {
     const { hasAllowance, betSize, betDirection } = updatedState;
     const youAreHere = " ← You are here";
@@ -103,7 +128,7 @@ export const POST = frames(async (ctx: any) => {
             <p
               tw={clsx(
                 !hasAllowance
-                  ? "p-4 bg-green-400 rounded-lg underline"
+                  ? "py-6 px-8 bg-green-400 rounded-xl shadow-lg"
                   : "text-gray-500"
               )}
             >
@@ -113,7 +138,7 @@ export const POST = frames(async (ctx: any) => {
             <p
               tw={clsx(
                 hasAllowance
-                  ? "p-4 bg-green-400 rounded-lg underline"
+                  ? "py-6 px-8 bg-green-400 rounded-xl shadow-lg"
                   : "text-gray-500"
               )}
             >
@@ -139,6 +164,7 @@ export const POST = frames(async (ctx: any) => {
             <span tw="mt-4">Refresh to check allowance or bet status</span>
           </div>
         ) : null}
+        {renderBets(marketData?.bets)}
       </div>
     );
   };
