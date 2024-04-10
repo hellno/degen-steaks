@@ -9,7 +9,7 @@ export type MarketType = {
     totalSteakedDegen: bigint;
     startTime: number;
     endTime: number;
-    degenCollected: bigint;
+    degenCollected: string;
     targetPrice: bigint;
     bets?: BetType[];
 };

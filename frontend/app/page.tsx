@@ -44,23 +44,6 @@ enum PageState {
   view_market = "view_market",
 }
 
-const renderPaymentButton = async (state: State): Promise<any> => {
-  if (state.hasAllowance) {
-    const { marketId, betSize, betDirection } = state;
-    return {
-      label: "Place bet",
-      action: "tx",
-      target: `${baseUrl}/txdata/placebet?marketId=${marketId}&betSize=${betSize}&betDirection=${betDirection}`,
-    };
-  } else {
-    const { betSize } = state;
-    return {
-      label: "Approve",
-      action: "tx",
-      target: `${baseUrl}/txdata/approvedegen?approvalAmount=${betSize}`,
-    };
-  }
-};
 
 const renderMarketWebLinkButton = async (state: State): Promise<any> => {
   return {
@@ -83,9 +66,9 @@ const stateToButtons: { [key in PageState]: any[] } = {
   [PageState.start]: [{ label: "Start 🥩🔥" }],
   [PageState.decide]: [{ label: "Below 🔽" }, { label: "Above 🔼" }],
   [PageState.pending_payment]: [
-    renderPaymentButton,
+    // renderPaymentButton,
     { label: "Refresh 🔄" },
-    renderMarketWebLinkButton,
+    // renderMarketWebLinkButton,
     { label: "Back 🏠" },
   ],
   [PageState.view_market]: [{ label: "Refresh 🔄" }, { label: "Back 🏠" }],
@@ -195,7 +178,7 @@ export default async function Home({
     }
   }
 
-  if (marketData.bets && marketData.bets.length) {
+  if (marketData?.bets && marketData.bets.length) {
     state.pageState = PageState.view_market;
   }
 

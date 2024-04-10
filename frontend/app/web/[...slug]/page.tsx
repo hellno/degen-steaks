@@ -585,7 +585,7 @@ export default function Page({ params }: { params: { slug: string[] } }) {
 
         {/* FAQs */}
         <div
-          id="#faq"
+          id="faq"
           className="mx-auto max-w-2xl divide-y divide-gray-900/10 px-6 pb-8 sm:pb-24 sm:pt-12 lg:max-w-7xl lg:px-8 lg:pb-32"
         >
           <h2 className="text-2xl font-bold leading-10 tracking-tight text-gray-900">
@@ -624,16 +624,12 @@ export default function Page({ params }: { params: { slug: string[] } }) {
               }}
             />
           </div>
-          <div className="mx-auto max-w-2xl text-center">
+          <div className="mx-auto max-w-2xl text-center mb-36">
             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
               Get more out of your $DEGEN
               <br />
               Start using DEGEN steaks 🔥🥩 today.
             </h2>
-            <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-gray-600">
-              Incididunt sint fugiat pariatur cupidatat consectetur sit cillum
-              anim id veniam aliqua proident excepteur commodo do ea.
-            </p>
           </div>
         </div>
       </main>

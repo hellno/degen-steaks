@@ -7,8 +7,12 @@ import {
     allowListFramesjsMiddleware as allowList,
 } from "@airstack/frames";
 
-
+export const DEFAULT_DEGEN_BETSIZE = "420690000000000000000";
 export const DEFAULT_MARKET_ID = -1;
+export const baseUrl =
+  process.env.NEXT_PUBLIC_VERCEL_URL ||
+  process.env.NEXT_PUBLIC_HOST ||
+  "http://localhost:3000";
 
 // enum PageState {
 //     start = "start",
@@ -17,7 +21,7 @@ export const DEFAULT_MARKET_ID = -1;
 //     view_market = "view_market",
 // }
 
-type State = {
+export type State = {
     // pageState: PageState;
     marketId: number;
     hasAllowance?: boolean;
