@@ -42,7 +42,7 @@ const handleRequest = frames(async (ctx) => {
             <div tw="flex flex-row">
               <p tw="text-5xl">
                 {formatEther(BigInt(allDegenSum))} DEGEN{" "}
-                {bet.sharesHigher === 0 ? "below" : "above"}{" "}
+                {bet.sharesHigher === "0" ? "Lower" : "Higher"}{" "}
                 {renderDegenPriceFromContract(BigInt(marketData.targetPrice))}
               </p>
             </div>

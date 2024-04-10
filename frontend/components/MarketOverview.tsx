@@ -112,9 +112,9 @@ const MarketOverview = ({ market }: { market: MarketType | undefined }) => {
     }
 
     let betDirection: string;
-    if (bet.sharesHigher && bet.sharesLower) {
+    if (bet.sharesHigher !== "0" && bet.sharesLower !== "0") {
       betDirection = "Both directions";
-    } else if (bet.sharesHigher) {
+    } else if (bet.sharesHigher !== "0") {
       betDirection = "Higher";
     } else {
       betDirection = "Lower";
@@ -206,6 +206,10 @@ const MarketOverview = ({ market }: { market: MarketType | undefined }) => {
           {renderData(
             "Threshold price",
             renderDegenPriceFromContract(market.targetPrice)
+          )}
+          {market.endPrice !== undefined && renderData(
+            "End price",
+            renderDegenPriceFromContract(market.endPrice)
           )}
           {currentPrice && renderData("Current price", `$${currentPrice}`)}
           {renderData(

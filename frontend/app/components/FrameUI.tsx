@@ -37,7 +37,7 @@ export const getProgressBar = ({ a, b }: { a: number; b: number }) => {
         >
           {a ? (
             <div tw="flex justify-center items-center w-full font-bold text-gray-100">
-              {aPercentage.toFixed(2)}% lower
+              {aPercentage.toFixed(2)}%
             </div>
           ) : null}
         </div>
@@ -50,7 +50,7 @@ export const getProgressBar = ({ a, b }: { a: number; b: number }) => {
         >
           {b ? (
             <div tw="flex justify-center items-center w-full font-bold text-gray-100">
-              {bPercentage.toFixed(2)}% higher
+              {bPercentage.toFixed(2)}%
             </div>
           ) : null}
         </div>

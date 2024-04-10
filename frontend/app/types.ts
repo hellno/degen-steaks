@@ -16,8 +16,8 @@ export type MarketType = {
 
 export type BetType = {
     id: string;
-    sharesHigher: bigint;
-    sharesLower: bigint;
+    sharesHigher: string;
+    sharesLower: string;
     cashedOut: boolean;
     cashedOutDegen: bigint;
     cashOutTransaction: string;
