@@ -24,9 +24,8 @@ import { CHAIN } from "@/app/lib/rainbowkit";
 import { useRouter } from "next/navigation";
 
 const baseUrl =
-  process.env.NEXT_PUBLIC_VERCEL_URL ||
-  process.env.NEXT_PUBLIC_HOST ||
-  "http://localhost:3000";
+  // process.env.NEXT_PUBLIC_VERCEL_URL ||
+  process.env.NEXT_PUBLIC_HOST || "http://localhost:3000";
 
 const navigation = [
   { name: "FAQ", href: "#faq" },

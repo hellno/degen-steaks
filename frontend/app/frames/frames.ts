@@ -10,9 +10,9 @@ import {
 export const DEFAULT_DEGEN_BETSIZE = "420690000000000000000";
 export const DEFAULT_MARKET_ID = -1;
 export const baseUrl =
-  process.env.NEXT_PUBLIC_VERCEL_URL ||
-  process.env.NEXT_PUBLIC_HOST ||
-  "http://localhost:3000";
+    //   process.env.NEXT_PUBLIC_VERCEL_URL ||
+    process.env.NEXT_PUBLIC_HOST ||
+    "http://localhost:3000";
 
 console.log('baseUrl', baseUrl);
 // enum PageState {
