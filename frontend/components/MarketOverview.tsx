@@ -34,7 +34,7 @@ const MarketOverview = ({ market }: { market: MarketType | undefined }) => {
   }, []);
 
   if (!market) return null;
-  console.log("market", market);
+  // console.log("market", market);
 
   const timeDelta = market.endTime * 1000 - new Date().getTime();
   const marketEndDescription =

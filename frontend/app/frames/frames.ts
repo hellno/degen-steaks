@@ -47,27 +47,18 @@ export const frames: any = createFrames<State>({
             //     },
             // },
         }),
-        // allowList({
-        //     apiKey: process.env.AIRSTACK_API_KEY as string,
-        //     criteria: {
-        //         and: [
-        //             [
-        //                 // must hold early access NFT release on Base
-        //                 AllowListCriteria.TOKEN_MINT, {
-        //                     address: "0xb5935092048f55d61226ec10b72b30e81818b811",
-        //                     chain: TokenBlockchain.Base,
-        //                 }
-        //             ],
-        //             [
-        //                 // must hold DEGEN on Base
-        //                 AllowListCriteria.TOKEN_HOLD, {
-        //                     chain: TokenBlockchain.Base,
-        //                     address: "0x4c17ff12d9a925a0dec822a8cbf06f46c6268553",
-        //                 }
-        //             ]
-        //         ],
-        //     },
-        // }),
+        allowList({
+            apiKey: process.env.NEXT_PUBLIC_AIRSTACK_API_KEY as string,
+            criteria: {
+                or: [
+                    // Only allow holders of this token on Base
+                    [AllowListCriteria.TOKEN_MINT, {
+                        chain: TokenBlockchain.Base,
+                        address: "0xb5935092048F55d61226EC10B72b30E81818b811",
+                    }],
+                ],
+            },
+        }),
     ],
     basePath: `${baseUrl}/frames`,
     initialState,

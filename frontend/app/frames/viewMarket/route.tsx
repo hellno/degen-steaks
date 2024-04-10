@@ -90,7 +90,7 @@ const handleRequest = frames(async (ctx: any) => {
         ? `Ends in ${convertMillisecondsToDelta(timeDelta)}`
         : `Ended ${convertMillisecondsToDelta(timeDelta)} ago`;
 
-    console.log("marketData", marketData);
+    // console.log("marketData", marketData);
 
     return (
       <div tw="flex flex-col">
