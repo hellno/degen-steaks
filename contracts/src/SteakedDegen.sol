@@ -6,9 +6,9 @@ import "./interfaces/ISteakedDegen.sol";
 import "openzeppelin/token/ERC20/IERC20.sol";
 import "openzeppelin/token/ERC20/utils/SafeERC20.sol";
 import "openzeppelin/token/ERC20/extensions/ERC4626.sol";
-import "openzeppelin/access/Ownable.sol";
+import "openzeppelin/access/Ownable2Step.sol";
 
-contract SteakedDegen is ISteakedDegen, ERC4626, Ownable {
+contract SteakedDegen is ISteakedDegen, ERC4626, Ownable2Step {
     using SafeERC20 for IERC20;
 
     uint256 public steakFee = 69 * 1e2; // 0.69%
@@ -19,7 +19,7 @@ contract SteakedDegen is ISteakedDegen, ERC4626, Ownable {
 
     bool isInitialized = false;
 
-    mapping(address => bool) public isFan; // haha just kidding, it's a pun. onlyDepositer is a better name.
+    mapping(address => bool) public isFan; // haha just kidding, it's a pun. onlyDepositer would be a better name.
 
     constructor(string memory name_, string memory symbol_, IERC20 degenToken_, address daoFeeReceiver_)
         ERC20(name_, symbol_)
@@ -59,10 +59,11 @@ contract SteakedDegen is ISteakedDegen, ERC4626, Ownable {
     }
 
     /**
-     * @dev See {IERC4626-deposit}.
+     * @dev See {IERC4626-deposit}. But this deposit function does NOT comply with the ERC4626 standard.
      * This is a complete override of deposit and _deposit.
      * A steak fee is taken _before_ the deposit to be paid to all other token holders.
      * The fee increases the totalAssets in the pool. This increases the price for all share token holders.
+     * A deposit can only be made by authorized actors (fans).
      */
     function deposit(uint256 assets, address receiver)
         public

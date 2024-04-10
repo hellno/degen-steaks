@@ -10,6 +10,7 @@ import {
   BetRegistryContract_MarketSlashed_handler,
   BetRegistryContract_MarketSlashed_loader,
 } from "../../generated/src/Handlers.gen";
+import { BetDirection } from "../../generated/src/Enums.gen";
 
 BetRegistryContract_MarketCreated_loader(({ event, context }) => {
   context.Market.load(event.params.id.toString(), {});
@@ -40,7 +41,9 @@ BetRegistryContract_MarketCreated_handler(({ event, context }) => {
     totalSteakedDegen: 0n,
     degenCollected: 0n,
     betCount: 0,
+    status: 0n,
     isResolved: false,
+    hasError: false,
     totalDegen: undefined,
     endPrice: undefined,
     creatorFee: undefined,
@@ -80,7 +83,7 @@ BetRegistryContract_BetPlaced_handler(({ event, context }) => {
   if (market === undefined) {
     context.log.error(
       "BetRegistry::BetPlaced: Market not found: " +
-        event.params.marketId.toString()
+      event.params.marketId.toString()
     );
     return;
   }
@@ -97,6 +100,9 @@ BetRegistryContract_BetPlaced_handler(({ event, context }) => {
       sharesLower: 0n,
       cashedOut: false,
       cashedOutDegen: undefined,
+      investedDegen: 0n,
+      investedSteaksHigher: 0n,
+      investedSteaksLower: 0n,
       cashOutTransaction: undefined,
     };
   }
@@ -109,8 +115,8 @@ BetRegistryContract_BetPlaced_handler(({ event, context }) => {
     degenCollected: market.degenCollected + event.params.degen,
   };
 
-  if (event.params.direction === 0n) {
-    // BetDirection is HIGHER
+  const direction: BetDirection = event.params.direction.toString() === "0" ? "HIGHER" : "LOWER";
+  if (direction === "HIGHER") {
     market = {
       ...market,
       totalSharesHigher: market.totalSharesHigher + event.params.betShares,
@@ -119,6 +125,8 @@ BetRegistryContract_BetPlaced_handler(({ event, context }) => {
     bet = {
       ...bet,
       sharesHigher: bet.sharesHigher + event.params.betShares,
+      investedDegen: bet.investedDegen + event.params.degen,
+      investedSteaksHigher: bet.investedSteaksHigher + event.params.steaks,
     };
   } else {
     // BetDirection is LOWER
@@ -126,10 +134,12 @@ BetRegistryContract_BetPlaced_handler(({ event, context }) => {
       ...market,
       totalSharesLower: market.totalSharesLower + event.params.betShares,
     };
-
+    
     bet = {
       ...bet,
       sharesLower: bet.sharesLower + event.params.betShares,
+      investedDegen: bet.investedDegen + event.params.degen,
+      investedSteaksLower: bet.investedSteaksLower + event.params.steaks,
     };
   }
 
@@ -147,11 +157,11 @@ BetRegistryContract_BetPlaced_handler(({ event, context }) => {
     bet_id: bet.id,
     market_id: market.id,
     betShares: event.params.betShares,
-    direction: event.params.direction,
     degen: event.params.degen,
     steaks: event.params.steaks,
     feeSteaks: event.params.feeSteaks,
     transaction: event.transactionHash,
+    direction,
   };
 
   context.PlacedBet.set(placedBet);
@@ -159,7 +169,7 @@ BetRegistryContract_BetPlaced_handler(({ event, context }) => {
 
 BetRegistryContract_MarketResolved_loader(({ event, context }) => {
   context.Market.load(event.params.marketId.toString(), {
-    loaders: { loadCreator: true },
+    // loaders: { loadCreator: true },
   });
 });
 
@@ -168,7 +178,7 @@ BetRegistryContract_MarketResolved_handler(({ event, context }) => {
   if (market === undefined) {
     context.log.error(
       "BetRegistry::MarketResolved: Market not found: " +
-        event.params.marketId.toString()
+      event.params.marketId.toString()
     );
     return;
   }
@@ -181,20 +191,32 @@ BetRegistryContract_MarketResolved_handler(({ event, context }) => {
     return;
   }
 
-  user = {
-    ...user,
-    creatorFeeReceived: user.creatorFeeReceived + event.params.creatorFee,
-  };
-  context.User.set(user);
-
-  market = {
-    ...market,
-    endPrice: event.params.endPrice,
-    totalDegen: event.params.totalDegen,
-    creatorFee: event.params.creatorFee,
-    isResolved: true,
-    highWon: event.params.endPrice > market.targetPrice,
-  };
+  if (event.params.status === 1n) {
+    // Market Resolved successfully
+    user = {
+      ...user,
+      creatorFeeReceived: user.creatorFeeReceived + event.params.creatorFee,
+    };
+    context.User.set(user);
+    
+    market = {
+      ...market,
+      status: event.params.status,
+      endPrice: event.params.endPrice,
+      totalDegen: event.params.totalDegen,
+      creatorFee: event.params.creatorFee,
+      isResolved: true,
+      highWon: event.params.endPrice > market.targetPrice,
+    }
+  } else {
+    // Market had price error
+    market = {
+      ...market,
+      status: event.params.status,
+      hasError: true,
+      totalDegen: event.params.totalDegen,
+    };
+  }
   context.Market.set(market);
 });
 
@@ -212,7 +234,7 @@ BetRegistryContract_BetCashedOut_handler(({ event, context }) => {
   if (market === undefined) {
     context.log.error(
       "BetRegistry::BetCashedOut: Market not found: " +
-        event.params.marketId.toString()
+      event.params.marketId.toString()
     );
     return;
   }
@@ -231,9 +253,9 @@ BetRegistryContract_BetCashedOut_handler(({ event, context }) => {
   if (bet === undefined) {
     context.log.error(
       "BetRegistry::BetCashedOut: Bet not found: " +
-        event.params.marketId.toString() +
-        "-" +
-        event.params.user
+      event.params.marketId.toString() +
+      "-" +
+      event.params.user
     );
     return;
   }
@@ -274,7 +296,7 @@ BetRegistryContract_BetCashedOut_handler(({ event, context }) => {
 
 BetRegistryContract_MarketSlashed_loader(({ event, context }) => {
   context.Market.load(event.params.marketId.toString(), {
-    loaders: { loadCreator: true },
+    // loaders: { loadCreator: true },
   });
   context.User.load(event.params.slasher);
   context.Dao.load("1");
@@ -285,7 +307,7 @@ BetRegistryContract_MarketSlashed_handler(({ event, context }) => {
   if (market === undefined) {
     context.log.error(
       "BetRegistry::MarketSlashed: Market not found: " +
-        event.params.marketId.toString()
+      event.params.marketId.toString()
     );
     return;
   }

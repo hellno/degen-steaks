@@ -41,7 +41,7 @@
       { "name": "endTime_", "type": "uint40", "internalType": "uint40" },
       { "name": "targetPrice_", "type": "uint256", "internalType": "uint256" }
     ],
-    "outputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
     "stateMutability": "nonpayable"
   },
   {
@@ -103,6 +103,11 @@
           { "name": "creator", "type": "address", "internalType": "address" },
           { "name": "endTime", "type": "uint40", "internalType": "uint40" },
           {
+            "name": "status",
+            "type": "uint8",
+            "internalType": "enum IBetRegistry.MarketStatus"
+          },
+          {
             "name": "targetPrice",
             "type": "uint256",
             "internalType": "uint256"
@@ -163,6 +168,11 @@
     "outputs": [
       { "name": "creator", "type": "address", "internalType": "address" },
       { "name": "endTime", "type": "uint40", "internalType": "uint40" },
+      {
+        "name": "status",
+        "type": "uint8",
+        "internalType": "enum IBetRegistry.MarketStatus"
+      },
       { "name": "targetPrice", "type": "uint256", "internalType": "uint256" },
       { "name": "endPrice", "type": "uint256", "internalType": "uint256" },
       { "name": "totalHigher", "type": "uint256", "internalType": "uint256" },
@@ -244,12 +254,28 @@
   },
   {
     "type": "function",
+    "name": "setSlashPeriod",
+    "inputs": [
+      { "name": "slashPeriod_", "type": "uint256", "internalType": "uint256" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "slash",
     "inputs": [
       { "name": "marketId_", "type": "uint256", "internalType": "uint256" }
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "slashPeriod",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
   },
   {
     "type": "function",
@@ -439,6 +465,12 @@
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
+      },
+      {
+        "name": "status",
+        "type": "uint8",
+        "indexed": false,
+        "internalType": "enum IBetRegistry.MarketStatus"
       }
     ],
     "anonymous": false
@@ -501,6 +533,19 @@
         "type": "address",
         "indexed": true,
         "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "SlashPeriodSet",
+    "inputs": [
+      {
+        "name": "slashPeriod",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
       }
     ],
     "anonymous": false

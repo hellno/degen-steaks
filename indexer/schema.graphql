@@ -1,3 +1,8 @@
+enum BetDirection {
+  HIGHER
+  LOWER
+}
+
 type Dao {
   id: ID!
   totalDegenFee: BigInt!
@@ -24,7 +29,9 @@ type Market {
   totalSteakedDegen: BigInt!
   betCount: Int!
   degenCollected: BigInt!
+  status: BigInt!
   isResolved: Boolean!
+  hasError: Boolean!
   highWon: Boolean
   endPrice: BigInt
   totalDegen: BigInt
@@ -43,6 +50,9 @@ type Bet {
   cashedOut: Boolean
   cashOutTransaction: String
   cashedOutDegen: BigInt
+  investedDegen: BigInt!
+  investedSteaksHigher: BigInt!
+  investedSteaksLower: BigInt!
   placedBets: [PlacedBet!]! @derivedFrom(field: "bet")
 }
 
@@ -55,6 +65,6 @@ type PlacedBet {
   steaks: BigInt!
   feeSteaks: BigInt!
   betShares: BigInt!
-  direction: BigInt!
+  direction: BetDirection!
   transaction: String!
 }

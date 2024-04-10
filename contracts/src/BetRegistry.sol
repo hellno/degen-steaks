@@ -7,13 +7,15 @@ import "openzeppelin/token/ERC20/IERC20.sol";
 import "openzeppelin/token/ERC20/utils/SafeERC20.sol";
 import "openzeppelin/interfaces/IERC4626.sol";
 import "openzeppelin/utils/math/Math.sol";
-import "openzeppelin/access/Ownable.sol";
+import "openzeppelin/access/Ownable2Step.sol";
 
-contract BetRegistry is IBetRegistry, Ownable {
+contract BetRegistry is IBetRegistry, Ownable2Step {
     using SafeERC20 for IERC20;
     using Math for uint256;
 
+    /// @dev market fee gets distributed to all previously existant market participants
     uint256 constant MARKET_FEE = 69 * 1e2; // 0.69%: 69 BPS
+    /// @dev creator fee is paid to the creator of the market, when the market get successfully resolved
     uint256 constant CREATOR_FEE = 69 * 1e2; // 0.69%; 69 BPS
     uint256 constant FEE_DIVISOR = 1e6; // 1% = 1e4: 1 BPS = 1e2
 
@@ -29,7 +31,7 @@ contract BetRegistry is IBetRegistry, Ownable {
     IPriceFeed public priceFeed;
     address public degenUtilityDao;
 
-    mapping(address => bool) public isFan; // haha just kidding, it's a pun. onlyDepositer is a better name.
+    mapping(address => bool) public isFan; // haha just kidding, it's a pun. onlyDepositer would be a better name.
 
     constructor(IERC20 degenToken_, IERC4626 steakedDegen_, IPriceFeed priceFeed_, address degenUtilityDao_)
         Ownable(msg.sender)
@@ -61,17 +63,7 @@ contract BetRegistry is IBetRegistry, Ownable {
         emit SlashPeriodSet(slashPeriod_);
     }
 
-    function getMarket(uint256 marketId_) public view returns (Market memory) {
-        if (marketId_ >= markets.length) {
-            revert("BetRegistry::getMarket: marketId out of range.");
-        }
-        return markets[marketId_];
-    }
-
-    function getBet(uint256 marketId_, address user_) public view returns (Bet memory) {
-        return marketToUserToBet[marketId_][user_];
-    }
-
+    /// @dev creates a market where users can place bets on the price of DEGEN.
     function createMarket(uint40 endTime_, uint256 targetPrice_) public onlyFans returns (uint256) {
         require(endTime_ > block.timestamp, "BetRegistry::createMarket: endTime must be in the future.");
         require(targetPrice_ > 0, "BetRegistry::createMarket: targetPrice must be greater than zero.");
@@ -93,6 +85,8 @@ contract BetRegistry is IBetRegistry, Ownable {
         return markets.length - 1;
     }
 
+    /// @dev places a bet on a market. A user can place multiple bets in either direction on the same market.
+    /// A user cannot revoke a bet.
     function placeBet(uint256 marketId_, uint256 amount_, BetDirection direction_) public {
         require(marketId_ < markets.length, "BetRegistry::placeBet: marketId out of range.");
         require(amount_ >= MIN_BID, "BetRegistry::placeBet: amount must be at least MIN_BID.");
@@ -105,7 +99,7 @@ contract BetRegistry is IBetRegistry, Ownable {
         degenToken.approve(address(steakedDegen), amount_);
         uint256 steaks = steakedDegen.deposit(amount_, address(this));
 
-        // pay fee to totalStDegen in Market
+        // pay fee to totalSteakedDegen in Market. First bet does not pay fees.
         uint256 feeSteaks = market.totalSteakedDegen == 0 ? 0 : steaks.mulDiv(MARKET_FEE, FEE_DIVISOR);
         market.totalSteakedDegen += feeSteaks;
         steaks -= feeSteaks;
@@ -138,11 +132,14 @@ contract BetRegistry is IBetRegistry, Ownable {
         });
     }
 
+    /// @dev resolves a market by fetching the price from the price feed.
+    /// As prices are fetched by the uniswap v3 oracle, this function may fail if the market is resolved too late.
+    /// A market should be resolved within a few hours.
     function resolveMarket(uint256 marketId_) public {
         Market storage market = markets[marketId_];
         require(block.timestamp >= market.endTime, "BetRegistry::resolveMarket: market has not ended.");
         require(block.timestamp >= market.endTime + gracePeriod, "BetRegistry::resolveMarket: grace period not over.");
-        require(market.endPrice == 0, "BetRegistry::resolveMarket: market already resolved.");
+        require(market.status == MarketStatus.OPEN, "BetRegistry::resolveMarket: market already resolved.");
 
         uint32 secondsAgo = uint32(block.timestamp - market.endTime);
         // Try to get a historical price from the price feed
@@ -177,6 +174,9 @@ contract BetRegistry is IBetRegistry, Ownable {
         });
     }
 
+    /// @dev users can cash out their shares after a market has been resolved.
+    /// Usually, one side of the market wins all other funds of the other side.
+    /// If the market is in error state, users can cash out all their shares, minus the already paid fees.
     function cashOut(uint256 marketId_) public {
         Market storage market = markets[marketId_];
         require(market.status != MarketStatus.OPEN, "BetRegistry::cashOut: market not resolved.");
@@ -192,18 +192,18 @@ contract BetRegistry is IBetRegistry, Ownable {
             userMarketShares = marketToUserToBet[marketId_][msg.sender].amountHigher
                 + marketToUserToBet[marketId_][msg.sender].amountLower;
             require(userMarketShares > 0, "BetRegistry::cashOut: Nothing to cash out.");
-            market.totalHigher -= marketToUserToBet[marketId_][msg.sender].amountHigher;
-            market.totalLower -= marketToUserToBet[marketId_][msg.sender].amountLower;
 
             userDegenPayout = market.totalDegen.mulDiv(userMarketShares, totalMarketShares);
 
+            market.totalHigher -= marketToUserToBet[marketId_][msg.sender].amountHigher;
+            market.totalLower -= marketToUserToBet[marketId_][msg.sender].amountLower;
             market.totalDegen -= userDegenPayout;
             marketToUserToBet[marketId_][msg.sender].amountHigher = 0;
             marketToUserToBet[marketId_][msg.sender].amountLower = 0;
         } else if (market.status == MarketStatus.RESOLVED) {
             // When the market got resolved correctly, the winning side receives all shares
-            // winning direction is HIGHER
             if (market.endPrice > market.targetPrice) {
+                // winning direction is HIGHER
                 totalMarketShares = market.totalHigher;
                 userMarketShares = marketToUserToBet[marketId_][msg.sender].amountHigher;
                 require(userMarketShares > 0, "BetRegistry::cashOut: Nothing to cash out.");
@@ -212,6 +212,7 @@ contract BetRegistry is IBetRegistry, Ownable {
                 market.totalHigher -= userMarketShares;
                 market.totalDegen -= userDegenPayout;
             } else {
+                // winning direction is LOWER (even when price is exactly the target price, LOWER wins, per definition)
                 totalMarketShares = market.totalLower;
                 userMarketShares = marketToUserToBet[marketId_][msg.sender].amountLower;
                 require(userMarketShares > 0, "BetRegistry::cashOut: Nothing to cash out.");
@@ -232,6 +233,8 @@ contract BetRegistry is IBetRegistry, Ownable {
         });
     }
 
+    /// @dev slash unclaimed funds after the grace period and the slash period have passed.
+    /// This function makes sure, there are no locked funds in the smart contract.
     function slash(uint256 marketId_) public {
         Market storage market = markets[marketId_];
         require(
@@ -244,6 +247,7 @@ contract BetRegistry is IBetRegistry, Ownable {
         market.totalHigher = 0;
         market.totalLower = 0;
 
+        // distribute fees (creator, slasher, dao, all receive the same amount)
         uint256 creatorFee = totalDegen.mulDiv(CREATOR_FEE, FEE_DIVISOR);
         uint256 slashFee = totalDegen.mulDiv(CREATOR_FEE, FEE_DIVISOR);
         uint256 daoFee = totalDegen.mulDiv(CREATOR_FEE, FEE_DIVISOR);
@@ -263,5 +267,16 @@ contract BetRegistry is IBetRegistry, Ownable {
             daoFee: daoFee,
             slasher: msg.sender
         });
+    }
+
+    function getMarket(uint256 marketId_) public view returns (Market memory) {
+        if (marketId_ >= markets.length) {
+            revert("BetRegistry::getMarket: marketId out of range.");
+        }
+        return markets[marketId_];
+    }
+
+    function getBet(uint256 marketId_, address user_) public view returns (Bet memory) {
+        return marketToUserToBet[marketId_][user_];
     }
 }
