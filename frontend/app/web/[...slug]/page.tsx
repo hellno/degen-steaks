@@ -24,9 +24,8 @@ import { CHAIN } from "@/app/lib/rainbowkit";
 import { useRouter } from "next/navigation";
 
 const baseUrl =
-  process.env.NEXT_PUBLIC_VERCEL_URL ||
-  process.env.NEXT_PUBLIC_HOST ||
-  "http://localhost:3000";
+  // process.env.NEXT_PUBLIC_VERCEL_URL ||
+  process.env.NEXT_PUBLIC_HOST || "http://localhost:3000";
 
 const navigation = [
   { name: "FAQ", href: "#faq" },
@@ -122,9 +121,9 @@ export default function Page({ params }: { params: { slug: string[] } }) {
     getDegenAllowanceForAddress(address).then((allowance) => {
       setAllowance(allowance);
     });
-  }, [address]); 
+  }, [address]);
 
-  const waitUntilAllowanceUpdated = async () => {
+  const waitUntilAllowanceUpdated = useCallback(async () => {
     let startAllowance = allowance;
 
     const interval = setInterval(() => {
@@ -135,7 +134,7 @@ export default function Page({ params }: { params: { slug: string[] } }) {
     }, 1000);
 
     return () => clearInterval(interval);
-  };
+  }, [allowance, updateAllowance]);
 
   const {
     status: allowanceTransactionStatus,
@@ -143,13 +142,6 @@ export default function Page({ params }: { params: { slug: string[] } }) {
   } = useWaitForTransactionReceipt({ hash: writeAllowanceHash });
   const { status: betTransactionStatus, error: betTransactionError } =
     useWaitForTransactionReceipt({ hash: writeBetHash });
-
-  // console.log("writeContract", writeAllowanceStatus, writeAllowanceError);
-  // console.log(
-  //   "transactionStatus",
-  //   allowanceTransactionStatus,
-  //   allowanceTransactionError
-  // );
 
   useEffect(() => {
     if (isConnected && chainId !== CHAIN.id) {
@@ -165,19 +157,17 @@ export default function Page({ params }: { params: { slug: string[] } }) {
 
   useEffect(() => {
     if (pageState === State.start && writeAllowanceStatus === "success") {
-      // we call updateAllowance, but it might not be updated yet
-
       waitUntilAllowanceUpdated().then(() => {
         setPageState(State.pending_bet);
       });
-    } else if (
-      pageState === State.pending_bet &&
-      writeBetStatus === "success"
-    ) {
+    }
+  }, [pageState, writeAllowanceStatus, waitUntilAllowanceUpdated]);
+
+  useEffect(() => {
+    if (pageState === State.pending_bet && writeBetStatus === "success") {
       setPageState(State.view_market);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allowanceTransactionStatus, betTransactionStatus]);
+  }, [pageState, writeBetStatus]);
 
   useEffect(() => {
     updateAllowance();
@@ -207,7 +197,7 @@ export default function Page({ params }: { params: { slug: string[] } }) {
     } else {
       updateToDefaultMarket();
     }
-  }, [marketId, address, pageState]);
+  }, [marketId, address, pageState, router]);
 
   useEffect(() => {
     if (allowance > 0n) {
@@ -289,7 +279,7 @@ export default function Page({ params }: { params: { slug: string[] } }) {
 
     return (
       pageState === State.view_market && (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-row gap-4">
           <Button size="lg" onClick={() => window.open(intentUrl, "_blank")}>
             Share on Warpcast
           </Button>
@@ -494,10 +484,10 @@ export default function Page({ params }: { params: { slug: string[] } }) {
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
               <div className="mx-auto max-w-2xl text-center">
                 <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-                  Want to earn more $DEGEN?
+                  Want to get more out of your $DEGEN?
                 </h1>
-                <p className="mt-2 lg:mt-6 text-lg leading-8 text-gray-600">
-                  Degen Steaks is Base x Degen x Prediction Market
+                <p className="mt-2 text-lg lg:mt-4 lg:text-xl leading-8 text-gray-600">
+                  Degen Steaks 🥩🔥 is Base x Degen x Prediction Market
                 </p>
                 {renderCtaButtons()}
               </div>
@@ -593,7 +583,10 @@ export default function Page({ params }: { params: { slug: string[] } }) {
         </div>
 
         {/* FAQs */}
-        <div className="mx-auto max-w-2xl divide-y divide-gray-900/10 px-6 pb-8 sm:pb-24 sm:pt-12 lg:max-w-7xl lg:px-8 lg:pb-32">
+        <div
+          id="faq"
+          className="mx-auto max-w-2xl divide-y divide-gray-900/10 px-6 pb-8 sm:pb-24 sm:pt-12 lg:max-w-7xl lg:px-8 lg:pb-32"
+        >
           <h2 className="text-2xl font-bold leading-10 tracking-tight text-gray-900">
             Frequently asked questions
           </h2>
@@ -630,16 +623,12 @@ export default function Page({ params }: { params: { slug: string[] } }) {
               }}
             />
           </div>
-          <div className="mx-auto max-w-2xl text-center">
+          <div className="mx-auto max-w-2xl text-center mb-36">
             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
               Get more out of your $DEGEN
               <br />
               Start using DEGEN steaks 🔥🥩 today.
             </h2>
-            <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-gray-600">
-              Incididunt sint fugiat pariatur cupidatat consectetur sit cillum
-              anim id veniam aliqua proident excepteur commodo do ea.
-            </p>
           </div>
         </div>
       </main>

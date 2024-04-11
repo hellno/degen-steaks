@@ -7,14 +7,17 @@ import { BetType, MarketType } from "@/app/types";
 import MarketBetRatioBar from "./MarketBetRatioBar";
 import { formatEther, parseEther } from "viem";
 import { Button } from "./ui/button";
-import { useChainId, useWriteContract } from "wagmi";
+import { useAccount, useChainId, useWriteContract } from "wagmi";
 import { betRegistryAbi, betRegistryAddress } from "@/app/const/betRegistryAbi";
 import { useEffect, useState } from "react";
 import { getDegenUsdPrice } from "@/app/lib/dexScreener";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import clsx from "clsx";
 
 const MarketOverview = ({ market }: { market: MarketType | undefined }) => {
   const [currentPrice, setCurrentPrice] = useState<number>(0);
   const chainId = useChainId();
+  const { isConnected } = useAccount();
   const {
     data: hash,
     isPending,
@@ -31,6 +34,7 @@ const MarketOverview = ({ market }: { market: MarketType | undefined }) => {
   }, []);
 
   if (!market) return null;
+  // console.log("market", market);
 
   const timeDelta = market.endTime * 1000 - new Date().getTime();
   const marketEndDescription =
@@ -64,31 +68,89 @@ const MarketOverview = ({ market }: { market: MarketType | undefined }) => {
     });
   };
 
-  const renderResolveButton = () => (
-    <Button variant="secondary" size="lg" onClick={() => onResolveMarket()}>
-      {isPending ? "Resolve market..." : "Resolve market"}
-    </Button>
-  );
+  const renderResolveButton = () =>
+    isConnected ? (
+      <Button variant="secondary" size="lg" onClick={() => onResolveMarket()}>
+        {isPending ? "Resolve market..." : "Resolve market"}
+      </Button>
+    ) : (
+      <ConnectButton accountStatus="avatar" />
+    );
 
-  const getBetSize = (bet: BetType) => {
-    const shares = bet.sharesHigher > 0 ? bet.sharesHigher : bet.sharesLower;
-    const betSize = Number(shares / allShares * market.degenCollected).toFixed(2);
-    return betSize;
-  }
-  const renderUserBets = () => (
+  const getBetCurrentSteaks = (bet: BetType) => {
+    let betSize;
+    if (bet.sharesHigher !== "0") {
+      betSize =
+        (BigInt(bet.sharesHigher) / BigInt(market.totalSharesHigher)) *
+        BigInt(market.totalSteakedDegen);
+    } else {
+      betSize =
+        (BigInt(bet.sharesLower) / BigInt(market.totalSharesLower)) * BigInt(market.totalSteakedDegen);
+    }
+    return BigInt(betSize);
+  };
+
+  const getBetPnlPercentage = (bet: BetType, currentSteaks: bigint): number => {
+    if (!currentSteaks || !bet?.placedBets?.length) {
+      return 0;
+    }
+
+    const paidInSteaks = bet.placedBets.reduce(
+      (acc, placedBet) => acc + BigInt(placedBet.steaks),
+      0n
+    );
+
+    const pnlRatio = Number((currentSteaks * 10000n) / paidInSteaks) / 10000;
+    const pnlPercentage = (pnlRatio - 1) * 100;
+    return pnlPercentage;
+  };
+
+  const renderUserBetDirection = () => {
+    const bet = market.bets?.[0];
+    if (!bet) {
+      return "No bets placed";
+    }
+
+    let betDirection: string;
+    if (bet.sharesHigher !== "0" && bet.sharesLower !== "0") {
+      betDirection = "Both directions";
+    } else if (bet.sharesHigher !== "0") {
+      betDirection = "Higher";
+    } else {
+      betDirection = "Lower";
+    }
+    return (
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2">
+          <span className="text-2xl text-gray-900">{betDirection}</span>
+        </div>
+      </div>
+    );
+  };
+
+  const renderUserDegenSteakAmount = () => (
     <div className="flex flex-col gap-2">
       {market.bets &&
-        market.bets.map((bet) => (
-          <div key={bet.id} className="flex flex-col gap-2">
-            <span className="text-2xl text-gray-600">
-              {bet.sharesHigher > 0 ? "Higher" : "Lower"}
-            </span>
-            <span className="text-xl text-gray-600 truncate">
-              {getBetSize(bet)}{" "}
-              $DEGEN
-            </span>
-          </div>
-        ))}
+        market.bets.map((bet) => {
+          const currentSteaks = getBetCurrentSteaks(bet);
+          const pnl = getBetPnlPercentage(bet, currentSteaks);
+
+          return (
+            <div key={bet.id} className="flex flex-col gap-2">
+              <span className="text-2xl text-gray-900">
+                {Number(formatEther(currentSteaks)).toFixed(4)} 🥩🥩🥩
+              </span>
+              <span
+                className={clsx(
+                  pnl >= 0 ? "font-semibold text-green-600" : "text-red-600",
+                  "text-sm"
+                )}
+              >
+                {pnl.toFixed(4)}%
+              </span>
+            </div>
+          );
+        })}
     </div>
   );
 
@@ -114,13 +176,10 @@ const MarketOverview = ({ market }: { market: MarketType | undefined }) => {
     <div className="mt-12 mx-auto max-w-7xl px-2 lg:px-8">
       <div className="mx-auto max-w-2xl lg:max-w-none">
         <div className="text-center">
-          {/* <h2 className="text-xl font-bold tracking-tight text-gray-900 sm:text-2xl">
-            Latest DEGEN steaks 🔥🥩 bet
-          </h2> */}
           <p className="text-lg leading-8 text-gray-800">
             {timeDelta < 0 ? "This market is closed." : ""}{" "}
-            {timeDelta < 0 && !market?.bets?.length
-              ? "Place your bets below"
+            {timeDelta > 0 && !market?.bets?.length
+              ? "Place your bets below."
               : ""}
             The bet {marketEndDescription}
           </p>
@@ -148,21 +207,25 @@ const MarketOverview = ({ market }: { market: MarketType | undefined }) => {
             "Threshold price",
             renderDegenPriceFromContract(market.targetPrice)
           )}
-          {currentPrice && renderData(
-            "Current price",
-            `$${currentPrice}`
+          {market.endPrice !== undefined && renderData(
+            "End price",
+            renderDegenPriceFromContract(market.endPrice)
           )}
+          {currentPrice && renderData("Current price", `$${currentPrice}`)}
           {renderData(
             "start time",
             new Date(market.startTime * 1000).toString().split("(")[0] || ""
           )}
           {renderData(
-            "DEGEN steaked",
+            "DEGEN in pool",
             formatEther(BigInt(market.degenCollected)).toString()
           )}
           {renderData("Market ID", market.id.toString())}
           {market?.bets?.length
-            ? renderData("Your bet", renderUserBets())
+            ? renderData("Your bet", renderUserBetDirection())
+            : null}
+          {market?.bets?.length
+            ? renderData("Your DEGEN steaks", renderUserDegenSteakAmount())
             : null}
           {market.isResolved &&
             getUserWasRight(market) &&

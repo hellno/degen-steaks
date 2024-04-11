@@ -5,16 +5,12 @@ import { encodeFunctionData } from "viem";
 
 
 
-type GeneratePlaceBetData = {
+type GenerateCashOutBetData = {
   marketId: string;
-  betSize: string;
-  betDirection: string;
 }
 
-const generatePlaceBetData = (data: GeneratePlaceBetData): TransactionTargetResponse  & { attribution: boolean } => {
-  const { marketId, betSize, betDirection } = data;
-  // console.log('generatePlaceBetData', data)
-  // console.log('as args', [BigInt(marketId), BigInt(betSize), Number(betDirection)])
+const generateCashOutBetData = (data: GenerateCashOutBetData): TransactionTargetResponse & { attribution: boolean } => {
+  const { marketId } = data;
   return {
     chainId: "eip155:8453",
     method: "eth_sendTransaction",
@@ -25,8 +21,8 @@ const generatePlaceBetData = (data: GeneratePlaceBetData): TransactionTargetResp
       value: "0",
       data: encodeFunctionData({
         abi: betRegistryAbi,
-        functionName: 'placeBet',
-        args: [BigInt(marketId), BigInt(betSize), Number(betDirection)],
+        functionName: 'cashOut',
+        args: [BigInt(marketId)],
       })
     },
   };
@@ -37,14 +33,12 @@ export function POST(
 ): NextResponse<{ error: string } | TransactionTargetResponse> {
   const searchParams = req.nextUrl.searchParams
   const marketId = searchParams.get('marketId')
-  const betSize = searchParams.get('betSize')
-  const betDirection = searchParams.get('betDirection')
 
-  if (!marketId || !betSize || !betDirection) {
+  if (!marketId) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 
-  const placeBetData = generatePlaceBetData({ marketId, betSize, betDirection });
-  console.log('POST /txdata/placebet req', placeBetData);
+  const placeBetData = generateCashOutBetData({ marketId });
+  console.log('POST /txdata/cashOut req', placeBetData);
   return NextResponse.json(placeBetData);
 }
