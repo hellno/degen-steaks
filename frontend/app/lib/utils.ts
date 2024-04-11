@@ -39,5 +39,6 @@ export const getUserWasRight = (market: MarketType): boolean | undefined => {
     if (!bet) return undefined;
 
     const userDirection = bet.sharesHigher !== "0" ? BetDirection.HIGHER : BetDirection.LOWER;
-    return market.highWon === (userDirection === BetDirection.HIGHER);
+    const didVoteBoth = bet.sharesHigher !== "0" && bet.sharesLower !== "0";
+    return didVoteBoth || market.highWon === (userDirection === BetDirection.HIGHER);
 }

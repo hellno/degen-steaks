@@ -12,7 +12,6 @@ import { getProgressbarFromMarketData } from "@/app/components/FrameUI";
 import { getMarketDataFromContext } from "@/app/lib/framesUtils";
 
 const handleRequest = frames(async (ctx: any) => {
-  console.log('decide ctx', ctx)
   if (ctx.isAllowed !== undefined && !ctx.isAllowed) {
     return {
       image: (
@@ -86,7 +85,6 @@ const handleRequest = frames(async (ctx: any) => {
         </div>
       );
     }
-    // console.log("marketData", marketData);
 
     const marketEndDescription =
       timeDelta > 0
@@ -122,12 +120,10 @@ const handleRequest = frames(async (ctx: any) => {
   const getButtonsForMarket = (): any => {
     if (hasEnded) {
       return [
-        <Button
-          action="post"
-          target={{
-            pathname: "/",
-          }}
-        >
+        <Button action="post" target="/viewMarket">
+          View market
+        </Button>,
+        <Button action="post" target="/">
           Home 🏠
         </Button>,
       ];
@@ -140,7 +136,7 @@ const handleRequest = frames(async (ctx: any) => {
           query: { betDirection: BetDirection.LOWER },
         }}
       >
-        Lower 🔽
+        🔽 LOWER
       </Button>,
       <Button
         action="post"
@@ -149,7 +145,7 @@ const handleRequest = frames(async (ctx: any) => {
           query: { betDirection: BetDirection.HIGHER },
         }}
       >
-        Higher 🔼
+        🔼 HIGHER
       </Button>,
     ];
   };

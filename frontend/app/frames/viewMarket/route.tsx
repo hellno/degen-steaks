@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-key */
-import { frames, DEFAULT_MARKET_ID } from "../frames";
+import { frames, DEFAULT_MARKET_ID, baseUrl } from "../frames";
 import { Button } from "frames.js/next";
 import { getFrameMessage } from "frames.js";
 import { getDefaultOpenMarket, getMarket } from "../../lib/indexerUtils";
@@ -10,18 +10,18 @@ import {
 } from "@/app/lib/utils";
 import { BetType, MarketType } from "@/app/types";
 import { formatEther } from "viem";
-import { getProgressBar, getProgressbarFromMarketData } from "@/app/components/FrameUI";
+import {
+  getProgressBar,
+  getProgressbarFromMarketData,
+  renderTransactionLinkButton,
+} from "@/app/components/FrameUI";
 import { getMarketDataFromContext } from "@/app/lib/framesUtils";
 
 const handleRequest = frames(async (ctx: any) => {
   const currentState = ctx.state;
-
-  // get latest market data
-  // update the state
-  // if (!ctx?.message?.isValid) {
-  //   throw new Error("Invalid Frame");
-  // }
   const marketData = await getMarketDataFromContext(ctx);
+  const transactionId = ctx.message?.transactionId;
+  const userHasWon = getUserWasRight(marketData);
 
   const updatedState = {
     ...currentState,
@@ -63,14 +63,24 @@ const handleRequest = frames(async (ctx: any) => {
       return (
         <div tw="flex flex-col">
           <div tw="flex flex-col self-center text-center justify-center items-center">
-            <p tw="text-7xl">DEGEN steak is done 🔥🧑🏽‍🍳</p>
-            <p tw="text-5xl">
-              Price was {renderDegenPriceFromContract(endPrice)}{" "}
-              {renderDegenPriceFromContract(targetPrice)}-{">"}{" "}
+            <p tw="text-7xl">$DEGEN Steaks are done 🔥🧑🏽‍🍳</p>
+            <p tw="text-5xl w-2/3">
+              Final price was {renderDegenPriceFromContract(endPrice)} which is{" "}
+              {highWon ? "⬆️ higher" : "⬇️ lower"} than{" "}
+              {renderDegenPriceFromContract(targetPrice)}
               {highWon || "TBD"}
             </p>
             {userWasRight !== undefined && (
-              <p tw="text-6xl">You {userWasRight ? "won 🤩" : "lost 🫡"} </p>
+              <p tw="text-8xl">You {userWasRight ? "won 🤩" : "lost 🫡"} </p>
+            )}
+            {userWasRight && (
+              <div tw="flex flex-col text-center items-center self-center">
+                <p tw="text-5xl mt-4">
+                  🎉 Congratulations! 🎉
+                </p><p tw="text-5xl -mt-4">
+                  Claim your winnings below
+                </p>
+              </div>
             )}
           </div>
         </div>
@@ -78,13 +88,6 @@ const handleRequest = frames(async (ctx: any) => {
     }
 
     const timeDelta = marketData.endTime * 1000 - new Date().getTime();
-    const sharesLower =
-      marketData.totalSharesLower /
-      (marketData.totalSharesLower + marketData.totalSharesHigher);
-    const sharesHigher =
-      marketData.totalSharesHigher /
-      (marketData.totalSharesLower + marketData.totalSharesHigher);
-
     const marketEndDescription =
       timeDelta > 0
         ? `Ends in ${convertMillisecondsToDelta(timeDelta)}`
@@ -99,9 +102,7 @@ const handleRequest = frames(async (ctx: any) => {
             {renderDegenPriceFromContract(BigInt(marketData.targetPrice))}
           </p>
           {marketEndDescription}
-          <div tw="flex mt-24">
-            {getProgressbarFromMarketData(marketData)}
-          </div>
+          <div tw="flex mt-24">{getProgressbarFromMarketData(marketData)}</div>
           <div tw="flex mt-20">
             <p tw="text-5xl">
               {formatEther(BigInt(marketData.degenCollected))} DEGEN steaked
@@ -117,9 +118,33 @@ const handleRequest = frames(async (ctx: any) => {
     state: updatedState,
     image: getImageForMarket(),
     buttons: [
-      <Button action="post" target={{ pathname: "/viewMarket" }}>
-        Refresh
-      </Button>,
+      userHasWon && (
+        <Button
+          action="tx"
+          target={`${baseUrl}/txdata/cashOut?marketId=${marketData.id}`}
+          post_url="/viewMarket"
+        >
+          Claim winnings
+        </Button>
+      ),
+      transactionId ? (
+        renderTransactionLinkButton(transactionId)
+      ) : (
+        <Button action="post" target={{ pathname: "/viewMarket" }}>
+          🔄 Refresh
+        </Button>
+      ),
+      marketData.id && (
+        <Button
+          action="post"
+          target={{
+            pathname: "/viewMarket",
+            query: { marketId: marketData.id - 1 },
+          }}
+        >
+          ⬅️ Previous Market
+        </Button>
+      ),
       <Button action="post" target="/">
         Back 🏡
       </Button>,

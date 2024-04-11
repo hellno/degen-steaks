@@ -52,12 +52,6 @@ const getMarketWebLinkButton = (marketId: string): React.ReactElement => (
   </Button>
 );
 
-const renderTransactionLinkButton = (transactionId: string) => (
-  <Button action="link" target={`https://www.onceupon.gg/tx/${transactionId}`}>
-    View transaction
-  </Button>
-);
-
 export const POST = frames(async (ctx: any) => {
   const transactionId = ctx.message?.transactionId;
   const betDirectionFromSearchparams = ctx.searchParams

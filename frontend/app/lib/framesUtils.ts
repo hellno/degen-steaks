@@ -14,12 +14,15 @@ export const getUserAddressesFromContext = (ctx: any) => {
 }
 
 export const getMarketDataFromContext = async (ctx: any) => {
-    console.log('ctx.state', ctx.state)
+    // console.log('ctx.state', ctx.state)
+    const marketIdFromQuery = ctx.searchParams.marketId;
     const { marketId } = ctx.state;
     const userAddresses = getUserAddressesFromContext(ctx);
 
     let marketData: MarketType;
-    if (marketId === DEFAULT_MARKET_ID) {
+    if (marketIdFromQuery) {
+        marketData = await getMarket(marketIdFromQuery, userAddresses);
+    } else if (marketId === DEFAULT_MARKET_ID) {
         marketData = await getDefaultOpenMarket(userAddresses);
     } else {
         marketData = await getMarket(marketId.toString(), userAddresses);

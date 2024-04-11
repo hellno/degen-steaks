@@ -1,5 +1,12 @@
 import clsx from "clsx";
 import { MarketType } from "../types";
+import { Button } from "frames.js/next";
+
+export const renderTransactionLinkButton = (transactionId: string) => (
+  <Button action="link" target={`https://www.onceupon.gg/tx/${transactionId}`}>
+    View transaction
+  </Button>
+);
 
 export const getProgressbarFromMarketData = (marketData: MarketType) => {
   let sharesLower =
