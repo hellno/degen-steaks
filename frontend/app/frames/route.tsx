@@ -35,6 +35,9 @@ const handleRequest = frames(async () => {
       <Button key="learnMore" action="post" target="/learnMore">
         Learn More ➡️
       </Button>,
+      <Button key="viewMarket" action="post" target="/viewMarket">
+        Latest market
+      </Button>,
     ],
     imageOptions: {
       aspectRatio: "1:1",

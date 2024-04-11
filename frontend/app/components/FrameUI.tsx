@@ -1,6 +1,12 @@
 import clsx from "clsx";
-import { MarketType } from "../types";
+import { BetType, MarketType } from "../types";
 import { Button } from "frames.js/next";
+import {
+  convertMillisecondsToDelta,
+  getUserWasRight,
+  renderDegenPriceFromContract,
+} from "@/app/lib/utils";
+import { formatEther } from "viem";
 
 export const renderTransactionLinkButton = (transactionId: string) => (
   <Button action="link" target={`https://www.onceupon.gg/tx/${transactionId}`}>
@@ -65,6 +71,98 @@ export const getProgressBar = ({ a, b }: { a: number; b: number }) => {
             </div>
           ) : null}
         </div>
+      </div>
+    </div>
+  );
+};
+
+
+export const getImageForMarket = (marketData: MarketType, showPastBets: boolean) => {
+  if (!marketData) {
+    return <div tw="flex">Loading...</div>;
+  }
+  const { isResolved, endPrice, targetPrice, highWon, bets } = marketData;
+  if (isResolved && endPrice) {
+    const userWasRight = getUserWasRight(marketData);
+
+    return (
+      <div tw="flex flex-col">
+        <div tw="flex flex-col self-center text-center justify-center items-center">
+          <p tw="text-7xl">$DEGEN Steaks are done 🔥🧑🏽‍🍳</p>
+          <p tw="text-5xl w-2/3">
+            Final price was {renderDegenPriceFromContract(endPrice)} which is{" "}
+            {highWon ? "⬆️ higher" : "⬇️ lower"} than{" "}
+            {renderDegenPriceFromContract(targetPrice)}
+            {highWon || "TBD"}
+          </p>
+          {userWasRight !== undefined && (
+            <p tw="text-8xl">You {userWasRight ? "won 🤩" : "lost 🫡"} </p>
+          )}
+          {userWasRight && (
+            <div tw="flex flex-col text-center items-center self-center">
+              <p tw="text-5xl mt-4">
+                🎉 Congratulations! 🎉
+              </p><p tw="text-5xl -mt-4">
+                Claim your winnings below
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  const timeDelta = marketData.endTime * 1000 - new Date().getTime();
+  const marketEndDescription =
+    timeDelta > 0
+      ? `Ends in ${convertMillisecondsToDelta(timeDelta)}`
+      : `Ended ${convertMillisecondsToDelta(timeDelta)} ago`;
+
+  return (
+    <div tw="flex flex-col">
+      <div tw="flex flex-col self-center text-center justify-center items-center">
+        <p tw="text-5xl">Will the $DEGEN price be</p>
+        <p>⬆️ higher or ⬇️ lower</p>
+        <p tw="text-7xl">
+          {renderDegenPriceFromContract(BigInt(marketData.targetPrice))}
+        </p>
+        {marketEndDescription}
+        <div tw="flex mt-24">{getProgressbarFromMarketData(marketData)}</div>
+        <div tw="flex -mt-8">
+          <p tw="text-3xl">
+            bet distribution
+          </p>
+        </div>
+        <div tw="flex mt-12">
+          <p tw="text-5xl">
+            {formatEther(BigInt(marketData.degenCollected))} DEGEN steaked
+          </p>
+        </div>
+        {showPastBets && renderBets(marketData, bets)}
+      </div>
+    </div>
+  );
+};
+
+export const renderBets = (marketData: MarketType, bets: BetType[] | undefined) => {
+  if (!bets || !bets.length || !bets[0]?.placedBets) return null;
+  const allDegenSum = bets[0]?.placedBets.reduce(
+    (acc, bet) => acc + Number(bet.degen),
+    0
+  );
+  return (
+    <div tw="flex flex-col">
+      <p tw="text-5xl">Your bet:</p>
+      <div tw="flex flex-col">
+        {bets.map((bet) => (
+          <div tw="flex flex-row" key={`bet-${bet.id}`}>
+            <p tw="text-5xl">
+              {formatEther(BigInt(allDegenSum))} DEGEN{" "}
+              {bet.sharesHigher === "0" ? "Lower" : "Higher"}{" "}
+              {renderDegenPriceFromContract(BigInt(marketData.targetPrice))}
+            </p>
+          </div>
+        ))}
       </div>
     </div>
   );

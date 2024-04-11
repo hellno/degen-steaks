@@ -114,7 +114,7 @@ export const POST = frames(async (ctx: any) => {
   const getImageForPendingPayment = () => {
     const { hasAllowance, betSize, betDirection } = updatedState;
     const youAreHere = " ← You are here";
-
+    
     return (
       <div tw="flex flex-col">
         <div tw="flex flex-col self-center text-center justify-center items-center">
@@ -123,23 +123,25 @@ export const POST = frames(async (ctx: any) => {
             <p
               tw={clsx(
                 !hasAllowance
-                  ? "py-6 px-8 bg-green-400 rounded-xl shadow-lg"
-                  : "text-gray-500"
+                  ? "py-6 bg-green-400 rounded-xl shadow-lg"
+                  : "text-gray-500",
+                  "px-8"
               )}
             >
               1. Approve $DEGEN {!hasAllowance && youAreHere}
             </p>
-            <p tw="text-gray-500 -mt-8">2. Refresh</p>
+            <p tw="text-gray-500 px-8 -mt-8">2. Refresh</p>
             <p
               tw={clsx(
                 hasAllowance
-                  ? "py-6 px-8 bg-green-400 rounded-xl shadow-lg"
-                  : "text-gray-500"
+                  ? "py-6 bg-green-400 rounded-xl shadow-lg"
+                  : "text-gray-500",
+                  "px-8 -mt-8"
               )}
             >
               3. Place bet {hasAllowance && youAreHere}
             </p>
-            <p tw="text-gray-500 -mt-8">4. Check out the market</p>
+            <p tw="text-gray-500 px-8 -mt-8">4. Check out the market</p>
           </div>
         </div>
         {betSize && betDirection !== undefined ? (
@@ -156,7 +158,6 @@ export const POST = frames(async (ctx: any) => {
             <span tw="mt-4">
               🤯 You will lose your funds if you bet on the wrong side! 🤯
             </span>
-            <span tw="mt-4">Refresh to check allowance or bet status</span>
           </div>
         ) : null}
         {renderBets(marketData?.bets)}
