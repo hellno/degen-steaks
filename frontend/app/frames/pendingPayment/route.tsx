@@ -10,6 +10,7 @@ import {
   getUserAddressesFromContext,
 } from "@/app/lib/framesUtils";
 import { hasAnyDegenAllowance } from "@/app/lib/onchainUtils";
+import { renderTransactionLinkButton } from "@/app/components/FrameUI";
 
 const getPaymentButton = ({
   marketId,
