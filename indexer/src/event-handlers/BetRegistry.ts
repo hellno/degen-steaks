@@ -191,7 +191,7 @@ BetRegistryContract_MarketResolved_handler(({ event, context }) => {
     return;
   }
 
-  if (event.params.status === 1n) {
+  if (event.params.status == 1n) {
     // Market Resolved successfully
     user = {
       ...user,
