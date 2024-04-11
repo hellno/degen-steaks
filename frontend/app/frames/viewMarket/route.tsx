@@ -10,7 +10,7 @@ import {
 } from "@/app/lib/utils";
 import { BetType, MarketType } from "@/app/types";
 import { formatEther } from "viem";
-import { getProgressBar } from "@/app/components/FrameUI";
+import { getProgressBar, getProgressbarFromMarketData } from "@/app/components/FrameUI";
 import { getMarketDataFromContext } from "@/app/lib/framesUtils";
 
 const handleRequest = frames(async (ctx: any) => {
@@ -90,8 +90,6 @@ const handleRequest = frames(async (ctx: any) => {
         ? `Ends in ${convertMillisecondsToDelta(timeDelta)}`
         : `Ended ${convertMillisecondsToDelta(timeDelta)} ago`;
 
-    // console.log("marketData", marketData);
-
     return (
       <div tw="flex flex-col">
         <div tw="flex flex-col self-center text-center justify-center items-center">
@@ -102,10 +100,7 @@ const handleRequest = frames(async (ctx: any) => {
           </p>
           {marketEndDescription}
           <div tw="flex mt-24">
-            {getProgressBar({
-              a: 100 * Number(sharesLower),
-              b: 100 * Number(sharesHigher),
-            })}
+            {getProgressbarFromMarketData(marketData)}
           </div>
           <div tw="flex mt-20">
             <p tw="text-5xl">

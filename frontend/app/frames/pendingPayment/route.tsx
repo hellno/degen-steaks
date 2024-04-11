@@ -173,11 +173,11 @@ export const POST = frames(async (ctx: any) => {
     image: getImageForPendingPayment(),
     buttons: [
       getPaymentButton(updatedState),
-      hasBets ? getViewMarketButton() : undefined,
       transactionId ? renderTransactionLinkButton(transactionId) : undefined,
       <Button action="post" target="/pendingPayment">
         Refresh 🔄
       </Button>,
+      getViewMarketButton(),
       // <Button action="post" target="/">
       //   Home 🏠
       // </Button>,

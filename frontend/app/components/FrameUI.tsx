@@ -15,14 +15,13 @@ export const getProgressbarFromMarketData = (marketData: MarketType) => {
   }
 
   return getProgressBar({
-    a: 100 * Number(sharesLower),
-    b: 100 * Number(sharesHigher),
+    a: 100 * Number(sharesHigher),
+    b: 100 * Number(sharesLower),
   });
 };
 
 export const getProgressBar = ({ a, b }: { a: number; b: number }) => {
   if (!a && !b) return null;
-
   const aPercentage = (a / (a + b)) * 100;
   const bPercentage = (b / (a + b)) * 100;
   return (
@@ -37,7 +36,7 @@ export const getProgressBar = ({ a, b }: { a: number; b: number }) => {
         >
           {a ? (
             <div tw="flex justify-center items-center w-full font-bold text-gray-100">
-              {aPercentage.toFixed(2)}%
+              {aPercentage.toFixed(0)}%
             </div>
           ) : null}
         </div>
@@ -50,7 +49,7 @@ export const getProgressBar = ({ a, b }: { a: number; b: number }) => {
         >
           {b ? (
             <div tw="flex justify-center items-center w-full font-bold text-gray-100">
-              {bPercentage.toFixed(2)}%
+              {bPercentage.toFixed(0)}%
             </div>
           ) : null}
         </div>
