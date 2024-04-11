@@ -29,34 +29,39 @@ export const getProgressbarFromMarketData = (marketData: MarketType) => {
 
 export const getProgressBar = ({ a, b }: { a: number; b: number }) => {
   if (!a && !b) return null;
+
   const aPercentage = (a / (a + b)) * 100;
   const bPercentage = (b / (a + b)) * 100;
+  const shouldRenderA = aPercentage > 1 && a + b > 0;
+  const shouldRenderB = bPercentage > 1 && a + b > 0;
   return (
     <div tw="flex justify-center px-12">
       <div tw="flex h-24 rounded-lg">
         <div
           tw={clsx(
-            b ? "rounded-l-full" : "rounded-full",
+            shouldRenderB ? "rounded-l-full" : "rounded-full",
             "flex border-gray-500 w-full bg-green-400"
           )}
-          style={{ width: `${a + b > 0 ? (a / (a + b)) * 100 : 0}%` }}
+          style={{ width: `${shouldRenderA ? (a / (a + b)) * 100 : 0}%` }}
         >
-          {a ? (
+          {aPercentage > 5 ? (
             <div tw="flex justify-center items-center w-full font-bold text-gray-100">
-              {aPercentage.toFixed(0)}%
+              {aPercentage > 20 && `${aPercentage.toFixed(0)}%`}
+              {aPercentage > 40 && " ⬆️ HIGHER"}
             </div>
           ) : null}
         </div>
         <div
           tw={clsx(
-            a ? "rounded-r-full" : "rounded-full",
+            shouldRenderA ? "rounded-r-full" : "rounded-full",
             "flex w-full bg-red-500"
           )}
-          style={{ width: `${a + b > 0 ? (b / (a + b)) * 100 : 0}%` }}
+          style={{ width: `${shouldRenderB ? (b / (a + b)) * 100 : 0}%` }}
         >
-          {b ? (
+          {bPercentage > 5 ? (
             <div tw="flex justify-center items-center w-full font-bold text-gray-100">
-              {bPercentage.toFixed(0)}%
+              {bPercentage > 20 && `${bPercentage.toFixed(0)}%`}
+              {bPercentage > 40 && " ⬇️ LOWER"}
             </div>
           ) : null}
         </div>

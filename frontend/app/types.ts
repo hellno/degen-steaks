@@ -35,8 +35,8 @@ export type PlacedBetsType = {
 
 
 export enum BetDirection {
-    HIGHER = 0,
-    LOWER = 1,
+    HIGHER = "0",
+    LOWER = "1",
 }
 
 export enum UserWasRight {

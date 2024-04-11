@@ -101,7 +101,7 @@ export const POST = frames(async (ctx: any) => {
             <div tw="flex flex-row">
               <p tw="text-3xl">
                 {formatEther(BigInt(allDegenSum))} DEGEN{" "}
-                {bet.sharesHigher === "0" ? "Lower" : "Higher"}{" "}
+                {bet.sharesHigher === "0" ? "⬇️ Lower" : "⬆️ Higher"}{" "}
                 {renderDegenPriceFromContract(BigInt(marketData.targetPrice))}
               </p>
             </div>
@@ -146,7 +146,7 @@ export const POST = frames(async (ctx: any) => {
           <div tw="flex flex-col mt-20">
             <span>
               Your bet: {formatEther(BigInt(betSize))} $DEGEN{" "}
-              {betDirection === BetDirection.LOWER ? "below" : "above"}{" "}
+              {betDirection === BetDirection.LOWER ? "⬇️ Lower" : "⬆️ Higher"}{" "}
               {renderDegenPriceFromContract(BigInt(marketData.targetPrice))} on{" "}
             </span>
             <span>

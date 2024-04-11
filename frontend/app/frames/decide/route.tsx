@@ -97,7 +97,7 @@ const handleRequest = frames(async (ctx: any) => {
       <div tw="flex flex-col">
         <div tw="flex flex-col self-center text-center justify-center items-center">
           <p tw="text-8xl">Will the $DEGEN price</p>
-          <p tw="text-5xl">go above 🔼 or below 🔽</p>
+          <p tw="text-5xl">go ⬆️ HIGHER or ⬇️ LOWER</p>
           <p tw="text-8xl">
             {renderDegenPriceFromContract(BigInt(marketData.targetPrice))}
           </p>
