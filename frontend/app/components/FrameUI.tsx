@@ -140,7 +140,7 @@ export const getImageForMarket = (
             {formatEther(BigInt(marketData.degenCollected))} DEGEN steaked
           </p>
         </div>
-        {<p tw="text-5xl">🔥 max potential return {maxMultiplier}% 🔥</p>}
+        {maxMultiplier && <p tw="text-5xl">🔥 max potential return {maxMultiplier.toFixed(2)}% 🔥</p>}
         {showPastBets && renderBets(marketData)}
       </div>
     </div>

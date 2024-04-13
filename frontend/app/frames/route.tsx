@@ -26,7 +26,7 @@ const handleRequest = frames(async () => {
             {formatEther(BigInt(marketData.degenCollected))} $DEGEN steaked
           </p>
           <p tw="text-5xl -mt-6">in latest market</p>
-          {<p tw="text-5xl">🔥 max potential return {maxMultiplier}% 🔥</p>}
+          {maxMultiplier && <p tw="text-5xl">🔥 max potential return {maxMultiplier.toFixed(2)}% 🔥</p>}
         </div>
       </div>
     ),
