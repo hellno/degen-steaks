@@ -1,14 +1,15 @@
 import { Button } from "frames.js/next";
 import { DEFAULT_MARKET_ID, frames } from "./frames";
 import {
-  getProgressBar,
   getProgressbarFromMarketData,
 } from "../components/FrameUI";
 import { formatEther } from "viem";
 import { getDefaultOpenMarket } from "../lib/indexerUtils";
+import { getMaxMultiplierForMarket } from "../lib/utils";
 
 const handleRequest = frames(async () => {
   const marketData = await getDefaultOpenMarket([]);
+  const maxMultiplier = getMaxMultiplierForMarket(marketData);
 
   return {
     image: (
@@ -19,12 +20,13 @@ const handleRequest = frames(async () => {
           </p>
           <p tw="text-5xl">Steak it and earn today!</p>
         </div>
-        <div tw="flex w-2/3">{getProgressBar({ a: 69, b: 31 })}</div>
+        <div tw="flex w-full">{getProgressbarFromMarketData(marketData)}</div>
         <div tw="flex flex-col mt-24 items-center">
           <p tw="text-5xl">
             {formatEther(BigInt(marketData.degenCollected))} $DEGEN steaked
           </p>
           <p tw="text-5xl -mt-6">in latest market</p>
+          {<p tw="text-5xl">🔥 max potential return {maxMultiplier}% 🔥</p>}
         </div>
       </div>
     ),

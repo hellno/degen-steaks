@@ -61,7 +61,7 @@ const getDefaultOpenMarket = async (addresses: string[] = []): Promise<MarketTyp
 
         }
     `;
-    const vars = { };
+    const vars = {};
     return (await runGraphqlRequest(query, vars, 'Market'))?.[0] as MarketType;
 }
 
@@ -77,21 +77,16 @@ const getActiveMarkets = async ({ limit, offset }: { limit: number, offset: numb
 };
 
 const getBetsConditionForAddresses = (addresses: string[]): string => {
-    let betsCondition = '';
-    if (addresses.length === 1) {
-        betsCondition = `{user_id: {_ilike: "${addresses[0]}"}}`;
-    } else if (addresses.length > 1) {
-        betsCondition = `{_or: [${addresses.map((address) => `{user_id: {_ilike: "${address}"}}`).join(',')}]}`;
-    }
-    if (betsCondition) {
-        betsCondition = `(where: ${betsCondition})`;
+    let betsCondition;
+    if (addresses.length <= 1) {
+        betsCondition = `(where: {user_id: {_ilike: "${addresses?.[0] || ''}"}})`;
+    } else {
+        betsCondition = `(where: {_or: [${addresses.map((address) => `{user_id: {_ilike: "${address}"}}`).join(',')}]})`;
     }
     return betsCondition;
-}
+};
 
 const getMarket = async (marketId: string, addresses: string[] = []): Promise<MarketType> => {
-    console.log('getMarket', marketId, addresses)
-
     const query = gql`
         ${MARKET_FRAGMENT}
         ${BET_FRAGMENT}

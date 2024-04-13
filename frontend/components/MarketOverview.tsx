@@ -42,9 +42,9 @@ const MarketOverview = ({ market }: { market: MarketType | undefined }) => {
       ? `ends in ${convertMillisecondsToDelta(timeDelta)}.`
       : `ended ${convertMillisecondsToDelta(timeDelta)} ago.`;
 
-  const allShares = market.totalSharesLower + market.totalSharesHigher;
-  const sharesLower = market.totalSharesLower / allShares;
-  const sharesHigher = market.totalSharesHigher / allShares;
+  const allShares = BigInt(market.totalSharesLower) + BigInt(market.totalSharesHigher);
+  const sharesLower = BigInt(market.totalSharesLower) / allShares;
+  const sharesHigher = BigInt(market.totalSharesHigher) / allShares;
 
   const renderData = (label: string, value: string | React.ReactNode) => (
     <div className="flex flex-col bg-gray-400/5 p-8">
@@ -85,7 +85,8 @@ const MarketOverview = ({ market }: { market: MarketType | undefined }) => {
         BigInt(market.totalSteakedDegen);
     } else {
       betSize =
-        (BigInt(bet.sharesLower) / BigInt(market.totalSharesLower)) * BigInt(market.totalSteakedDegen);
+        (BigInt(bet.sharesLower) / BigInt(market.totalSharesLower)) *
+        BigInt(market.totalSteakedDegen);
     }
     return BigInt(betSize);
   };
@@ -207,10 +208,11 @@ const MarketOverview = ({ market }: { market: MarketType | undefined }) => {
             "Threshold price",
             renderDegenPriceFromContract(market.targetPrice)
           )}
-          {market.endPrice !== undefined && renderData(
-            "End price",
-            renderDegenPriceFromContract(market.endPrice)
-          )}
+          {market.endPrice !== undefined &&
+            renderData(
+              "End price",
+              renderDegenPriceFromContract(market.endPrice)
+            )}
           {currentPrice && renderData("Current price", `$${currentPrice}`)}
           {renderData(
             "start time",

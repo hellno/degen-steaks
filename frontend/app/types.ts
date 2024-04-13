@@ -4,8 +4,8 @@ export type MarketType = {
     endPrice: bigint;
     totalDegen: bigint;
     highWon: boolean;
-    totalSharesHigher: bigint;
-    totalSharesLower: bigint;
+    totalSharesHigher: string;
+    totalSharesLower: string;
     totalSteakedDegen: bigint;
     startTime: number;
     endTime: number;

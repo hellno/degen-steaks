@@ -3,6 +3,7 @@ import { BetType, MarketType } from "../types";
 import { Button } from "frames.js/next";
 import {
   convertMillisecondsToDelta,
+  getMaxMultiplierForMarket,
   getUserWasRight,
   renderDegenPriceFromContract,
 } from "@/app/lib/utils";
@@ -15,21 +16,24 @@ export const renderTransactionLinkButton = (transactionId: string) => (
 );
 
 export const getProgressbarFromMarketData = (marketData: MarketType) => {
-  let sharesLower =
-    marketData.totalSharesLower /
-    (marketData.totalSharesLower + marketData.totalSharesHigher);
-  let sharesHigher =
-    marketData.totalSharesHigher /
-    (marketData.totalSharesLower + marketData.totalSharesHigher);
+  const sharesHigher = Number(
+    formatEther(BigInt(marketData.totalSharesHigher))
+  );
+  const sharesLower = Number(formatEther(BigInt(marketData.totalSharesLower)));
 
-  if (!sharesLower && !sharesHigher) {
-    sharesLower = 69n;
-    sharesHigher = 31n;
+  let ratioHigher: number, ratioLower: number;
+  if (sharesHigher || sharesLower) {
+    const allShares = sharesHigher + sharesLower;
+    ratioHigher = sharesHigher / allShares;
+    ratioLower = sharesLower / allShares;
+  } else {
+    ratioLower = 69;
+    ratioHigher = 31;
   }
 
   return getProgressBar({
-    a: 100 * Number(sharesHigher),
-    b: 100 * Number(sharesLower),
+    a: 100 * ratioHigher,
+    b: 100 * ratioLower,
   });
 };
 
@@ -52,8 +56,8 @@ export const getProgressBar = ({ a, b }: { a: number; b: number }) => {
         >
           {aPercentage > 5 ? (
             <div tw="flex justify-center items-center w-full font-bold text-gray-100">
-              {aPercentage > 20 && `${aPercentage.toFixed(0)}%`}
-              {aPercentage > 40 && " ⬆️ HIGHER"}
+              {aPercentage > 20 && `${aPercentage.toFixed(0)}% ⬆️`}
+              {aPercentage > 40 && " HIGHER"}
             </div>
           ) : null}
         </div>
@@ -66,8 +70,8 @@ export const getProgressBar = ({ a, b }: { a: number; b: number }) => {
         >
           {bPercentage > 5 ? (
             <div tw="flex justify-center items-center w-full font-bold text-gray-100">
-              {bPercentage > 20 && `${bPercentage.toFixed(0)}%`}
-              {bPercentage > 40 && " ⬇️ LOWER"}
+              {bPercentage > 20 && `${bPercentage.toFixed(0)}% ⬇️`}
+              {bPercentage > 40 && " LOWER"}
             </div>
           ) : null}
         </div>
@@ -76,12 +80,14 @@ export const getProgressBar = ({ a, b }: { a: number; b: number }) => {
   );
 };
 
-
-export const getImageForMarket = (marketData: MarketType, showPastBets: boolean) => {
+export const getImageForMarket = (
+  marketData: MarketType,
+  showPastBets: boolean
+) => {
   if (!marketData) {
     return <div tw="flex">Loading...</div>;
   }
-  const { isResolved, endPrice, targetPrice, highWon, bets } = marketData;
+  const { isResolved, endPrice, targetPrice, highWon } = marketData;
   if (isResolved && endPrice) {
     const userWasRight = getUserWasRight(marketData);
 
@@ -100,11 +106,8 @@ export const getImageForMarket = (marketData: MarketType, showPastBets: boolean)
           )}
           {userWasRight && (
             <div tw="flex flex-col text-center items-center self-center">
-              <p tw="text-5xl mt-4">
-                🎉 Congratulations! 🎉
-              </p><p tw="text-5xl -mt-4">
-                Claim your winnings below
-              </p>
+              <p tw="text-5xl mt-4">🎉 Congratulations! 🎉</p>
+              <p tw="text-5xl -mt-4">Claim your winnings below</p>
             </div>
           )}
         </div>
@@ -117,6 +120,7 @@ export const getImageForMarket = (marketData: MarketType, showPastBets: boolean)
     timeDelta > 0
       ? `Ends in ${convertMillisecondsToDelta(timeDelta)}`
       : `Ended ${convertMillisecondsToDelta(timeDelta)} ago`;
+  const maxMultiplier = getMaxMultiplierForMarket(marketData);
 
   return (
     <div tw="flex flex-col">
@@ -129,22 +133,22 @@ export const getImageForMarket = (marketData: MarketType, showPastBets: boolean)
         {marketEndDescription}
         <div tw="flex mt-24">{getProgressbarFromMarketData(marketData)}</div>
         <div tw="flex -mt-8">
-          <p tw="text-3xl">
-            bet distribution
-          </p>
+          <p tw="text-3xl">bet distribution</p>
         </div>
         <div tw="flex mt-12">
           <p tw="text-5xl">
             {formatEther(BigInt(marketData.degenCollected))} DEGEN steaked
           </p>
         </div>
-        {showPastBets && renderBets(marketData, bets)}
+        {<p tw="text-5xl">🔥 max potential return {maxMultiplier}% 🔥</p>}
+        {showPastBets && renderBets(marketData)}
       </div>
     </div>
   );
 };
 
-export const renderBets = (marketData: MarketType, bets: BetType[] | undefined) => {
+export const renderBets = (marketData: MarketType) => {
+  const bets = marketData.bets;
   if (!bets || !bets.length || !bets[0]?.placedBets) return null;
   const allDegenSum = bets[0]?.placedBets.reduce(
     (acc, bet) => acc + Number(bet.degen),
@@ -152,14 +156,13 @@ export const renderBets = (marketData: MarketType, bets: BetType[] | undefined) 
   );
   return (
     <div tw="flex flex-col">
-      <p tw="text-5xl">Your bet:</p>
-      <div tw="flex flex-col">
+      <p tw="text-5xl">Your bet</p>
+      <div tw="flex flex-col -mt-14">
         {bets.map((bet) => (
           <div tw="flex flex-row" key={`bet-${bet.id}`}>
             <p tw="text-5xl">
-              {formatEther(BigInt(allDegenSum))} DEGEN{" "}
-              {bet.sharesHigher === "0" ? "Lower" : "Higher"}{" "}
-              {renderDegenPriceFromContract(BigInt(marketData.targetPrice))}
+              {formatEther(BigInt(allDegenSum))} DEGEN on{" "}
+              {bet.sharesHigher !== "0" ? "⬆️ HIGHER" : "⬇️ LOWER"}
             </p>
           </div>
         ))}
