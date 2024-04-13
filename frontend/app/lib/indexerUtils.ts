@@ -87,8 +87,6 @@ const getBetsConditionForAddresses = (addresses: string[]): string => {
 };
 
 const getMarket = async (marketId: string, addresses: string[] = []): Promise<MarketType> => {
-    console.log('getMarket', marketId, addresses)
-
     const query = gql`
         ${MARKET_FRAGMENT}
         ${BET_FRAGMENT}

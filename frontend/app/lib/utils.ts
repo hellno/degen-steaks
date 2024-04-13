@@ -51,7 +51,7 @@ export const getUserCashedOutAmountFromMarket = (market: MarketType): number => 
     return Number(formatEther(cashedOutSum));
 }
 
-// calcualte the max earning for a potential bet based on the current market state in percent
+// calculate the max earning for a potential bet based on the current market state in percent
 export const getMaxMultiplierForMarket = (market: MarketType): number => {
     if (market.isResolved) return 0;
     if (market.totalSharesHigher === "0" || market.totalSharesLower === "0") return 0;
@@ -60,6 +60,5 @@ export const getMaxMultiplierForMarket = (market: MarketType): number => {
     const lowShares = BigInt(market.totalSharesLower);
     const totalShares = highShares + lowShares;
     const divisor = highShares > lowShares ? lowShares : highShares;
-
-    return Number((totalShares * 10000n) / divisor) / 10000 * 100;
+    return ((Number((totalShares * 10000n) / divisor) / 10000) - 1) * 100;
 }
