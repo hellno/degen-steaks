@@ -75,11 +75,10 @@ export const POST = frames(async (ctx: any) => {
     ...state,
     hasAllowance,
     betDirection,
-    betSize: state.betSize || newBetSize.toString(),
+    betSize: newBetSize.toString() || state.betSize,
   };
 
   const marketData = await getMarketDataFromContext(ctx);
-  const hasBets = marketData && marketData?.bets && marketData?.bets.length > 0;
 
   const renderBets = (bets: BetType[] | undefined) => {
     if (!bets || !bets.length || !bets[0]?.placedBets) return null;
