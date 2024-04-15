@@ -29,7 +29,7 @@ const handleRequest = frames(async (ctx: any) => {
           🔄 Refresh
         </Button>
       ),
-      market.id && (
+      market.id > 4 && (
         <Button
           action="post"
           target={{
