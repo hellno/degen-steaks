@@ -95,7 +95,7 @@ export const getImageForMarket = ({
   const { isResolved, endPrice, targetPrice, highWon } = market;
   if (isResolved && endPrice) {
     const userWasRight = getUserWasRight(market);
-    console.log(market);
+    // console.log(market);
     return (
       <div tw="flex flex-col">
         <div tw="flex flex-col self-center text-center justify-center items-center">

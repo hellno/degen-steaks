@@ -8,7 +8,6 @@ import { getDefaultOpenMarket, getMarket } from "../lib/indexerUtils";
 import { MarketType } from "../types";
 
 const handleRequest = frames(async (ctx: any) => {
-  console.log("handleRequest mainRoute.tsx", ctx);
   const marketIdFromSearchParams = ctx.searchParams?.marketId as string;
   let market: MarketType;
   if (marketIdFromSearchParams) {

@@ -47,12 +47,6 @@ const getViewMarketButton = (): React.ReactElement => (
   </Button>
 );
 
-const getMarketWebLinkButton = (marketId: string): React.ReactElement => (
-  <Button action="link" target={`${baseUrl}/web/market/${marketId}`}>
-    Web
-  </Button>
-);
-
 export const POST = frames(async (ctx: any) => {
   const transactionId = ctx.message?.transactionId;
   const betDirectionFromSearchParams = ctx.searchParams
@@ -86,7 +80,7 @@ export const POST = frames(async (ctx: any) => {
 
   const marketData = await getMarketDataFromContext(ctx);
   const hasBets = marketData && marketData?.bets && marketData?.bets.length > 0;
-  
+
   const renderBets = (bets: BetType[] | undefined) => {
     if (!bets || !bets.length || !bets[0]?.placedBets) return null;
     const allDegenSum = bets[0]?.placedBets.reduce(
@@ -110,11 +104,11 @@ export const POST = frames(async (ctx: any) => {
       </div>
     );
   };
-  
+
   const getImageForPendingPayment = () => {
     const { hasAllowance, betSize, betDirection } = updatedState;
     const youAreHere = " ← You are here";
-    
+
     return (
       <div tw="flex flex-col">
         <div tw="flex flex-col self-center text-center justify-center items-center">
@@ -125,7 +119,7 @@ export const POST = frames(async (ctx: any) => {
                 !hasAllowance
                   ? "py-6 bg-green-400 rounded-xl shadow-lg"
                   : "text-gray-500",
-                  "px-8"
+                "px-8"
               )}
             >
               1. Approve $DEGEN {!hasAllowance && youAreHere}
@@ -136,7 +130,7 @@ export const POST = frames(async (ctx: any) => {
                 hasAllowance
                   ? "py-6 bg-green-400 rounded-xl shadow-lg"
                   : "text-gray-500",
-                  "px-8 -mt-8"
+                "px-8 -mt-8"
               )}
             >
               3. Place bet {hasAllowance && youAreHere}

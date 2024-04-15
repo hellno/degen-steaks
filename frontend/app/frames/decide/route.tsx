@@ -46,7 +46,6 @@ const handleRequest = frames(async (ctx: any) => {
   //   throw new Error("Invalid Frame");
   // }
 
-  console.log("/deicde ctx.message", ctx.message);
   const market = await getMarketDataFromContext(ctx);
   const timeDelta = market?.endTime
     ? market.endTime * 1000 - new Date().getTime()
