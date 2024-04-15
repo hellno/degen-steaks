@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { createFrames } from "frames.js/next";
-import { BetDirection, MarketType } from "../types";
+import { BetDirection } from "../types";
 import { farcasterHubContext } from "frames.js/middleware";
 import {
     TokenBlockchain,
@@ -8,7 +8,7 @@ import {
     allowListFramesjsMiddleware as allowList,
 } from "@airstack/frames";
 
-export const DEFAULT_DEGEN_BETSIZE = "690690000000000000000";
+export const DEFAULT_DEGEN_BETSIZE = "3000000000000000000000";
 export const DEFAULT_MARKET_ID = -1;
 export const baseUrl =
     //   process.env.NEXT_PUBLIC_VERCEL_URL ||

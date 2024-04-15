@@ -26,7 +26,7 @@ export function convertMillisecondsToDelta(milliseconds: number): string {
 };
 
 const DEGEN_CONTRACT_MULTIPLIER = 1000000;
-export const renderDegenPriceFromContract = (price: bigint): string => price ? `$${Number(formatEther(BigInt(price) * BigInt(DEGEN_CONTRACT_MULTIPLIER))).toFixed(8)}` : "TBD";
+export const renderDegenPriceFromContract = (price: bigint): string => price ? `$${Number(formatEther(BigInt(price) * BigInt(DEGEN_CONTRACT_MULTIPLIER))).toFixed(5)}` : "TBD";
 
 export const cn = (...classes: (string | boolean | undefined)[]): string => {
     return classes.filter(Boolean).join(' ');
@@ -47,7 +47,7 @@ export const getUserCashedOutAmountFromMarket = (market: MarketType): number => 
     if (!market.isResolved) return 0;
     if (!market.bets || !market.bets.length) return 0;
 
-    const cashedOutSum = market.bets.reduce((acc, bet) => acc + BigInt(bet.cashedOutDegen), 0n);
+    const cashedOutSum = market.bets.reduce((acc, bet) => acc + BigInt(bet.cashedOutDegen || 0), 0n);
     return Number(formatEther(cashedOutSum));
 }
 

@@ -55,9 +55,9 @@ const getMarketWebLinkButton = (marketId: string): React.ReactElement => (
 
 export const POST = frames(async (ctx: any) => {
   const transactionId = ctx.message?.transactionId;
-  const betDirectionFromSearchparams = ctx.searchParams
+  const betDirectionFromSearchParams = ctx.searchParams
     .betDirection as unknown as BetDirection;
-  const betDirection = ctx.state.betDirection || betDirectionFromSearchparams;
+  const betDirection = ctx.state.betDirection || betDirectionFromSearchParams;
   const userAddresses = getUserAddressesFromContext(ctx);
   const hasAllowance = await hasAnyDegenAllowance(userAddresses);
 

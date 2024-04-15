@@ -1,14 +1,11 @@
 /* eslint-disable react/jsx-key */
 import { frames, DEFAULT_DEGEN_BETSIZE, DEFAULT_MARKET_ID } from "../frames";
 import { Button } from "frames.js/next";
-import {
-  convertMillisecondsToDelta,
-  getUserWasRight,
-  renderDegenPriceFromContract,
-} from "@/app/lib/utils";
 import { BetDirection } from "@/app/types";
 import { formatEther } from "viem";
-import { getImageForMarket, getProgressbarFromMarketData } from "@/app/components/FrameUI";
+import {
+  getImageForMarket,
+} from "@/app/components/FrameUI";
 import { getMarketDataFromContext } from "@/app/lib/framesUtils";
 
 const handleRequest = frames(async (ctx: any) => {
@@ -49,16 +46,16 @@ const handleRequest = frames(async (ctx: any) => {
   //   throw new Error("Invalid Frame");
   // }
 
-  // console.log("ctx.message", ctx.message);
-  const marketData = await getMarketDataFromContext(ctx);
-  const timeDelta = marketData?.endTime
-    ? marketData.endTime * 1000 - new Date().getTime()
+  console.log("/deicde ctx.message", ctx.message);
+  const market = await getMarketDataFromContext(ctx);
+  const timeDelta = market?.endTime
+    ? market.endTime * 1000 - new Date().getTime()
     : 0;
   const hasEnded = timeDelta < 0;
 
   const updatedState = {
     ...currentState,
-    marketId: marketData?.id || DEFAULT_MARKET_ID,
+    marketId: market?.id || DEFAULT_MARKET_ID,
   };
 
   const getButtonsForMarket = (): any => {
@@ -96,7 +93,7 @@ const handleRequest = frames(async (ctx: any) => {
 
   return {
     state: updatedState,
-    image: getImageForMarket(marketData, false),
+    image: getImageForMarket({ market: market, showPastBets: false }),
     textInput: hasEnded
       ? undefined
       : `${formatEther(BigInt(DEFAULT_DEGEN_BETSIZE))}`,
