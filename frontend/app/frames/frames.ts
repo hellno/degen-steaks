@@ -33,7 +33,6 @@ export type State = {
 };
 
 const initialState: State = {
-    // pageState: PageState.start,
     marketId: DEFAULT_MARKET_ID,
     hasAllowance: undefined,
 };
@@ -41,13 +40,12 @@ const initialState: State = {
 export const frames: any = createFrames<State>({
     middleware: [
         farcasterHubContext({
-            hubHttpUrl: "https://nemes.farcaster.xyz:2281",
-            // hubRequestOptions: {
-            //     headers: {
-            //         "Content-Type": "application/json",
-            //         "api_key": "",
-            //     },
-            // },
+            hubHttpUrl: "https://hubs.airstack.xyz",
+            hubRequestOptions: {
+                headers: {
+                    "x-airstack-hubs": process.env.NEXT_PUBLIC_AIRSTACK_API_KEY as string,
+                },
+            },
         }),
         allowList({
             apiKey: process.env.NEXT_PUBLIC_AIRSTACK_API_KEY as string,
