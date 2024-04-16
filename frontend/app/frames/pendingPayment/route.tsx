@@ -66,16 +66,17 @@ export const POST = frames(async (ctx: any) => {
     };
   }
 
-  const newBetSize = ctx.message?.inputText
-    ? parseEther(ctx.message.inputText)
-    : BigInt(DEFAULT_DEGEN_BETSIZE);
   const state = ctx.state as State;
+  const newBetSize =
+    (ctx.message?.inputText && parseEther(ctx.message.inputText)) ||
+    state.betSize ||
+    BigInt(DEFAULT_DEGEN_BETSIZE);
 
   const updatedState = {
     ...state,
     hasAllowance,
     betDirection,
-    betSize: newBetSize.toString() || state.betSize,
+    betSize: newBetSize.toString(),
   };
 
   const marketData = await getMarketDataFromContext(ctx);
