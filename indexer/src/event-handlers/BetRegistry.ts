@@ -169,7 +169,7 @@ BetRegistryContract_BetPlaced_handler(({ event, context }) => {
 
 BetRegistryContract_MarketResolved_loader(({ event, context }) => {
   context.Market.load(event.params.marketId.toString(), {
-    // loaders: { loadCreator: true },
+    loaders: { loadCreator: true },
   });
 });
 
@@ -296,7 +296,7 @@ BetRegistryContract_BetCashedOut_handler(({ event, context }) => {
 
 BetRegistryContract_MarketSlashed_loader(({ event, context }) => {
   context.Market.load(event.params.marketId.toString(), {
-    // loaders: { loadCreator: true },
+    loaders: { loadCreator: true },
   });
   context.User.load(event.params.slasher);
   context.Dao.load("1");
