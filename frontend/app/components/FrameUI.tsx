@@ -1,9 +1,8 @@
 import clsx from "clsx";
-import { BetType, MarketType } from "../types";
+import { MarketType } from "../types";
 import { Button } from "frames.js/next";
 import {
   convertMillisecondsToDelta,
-  getMaxMultiplierForMarket,
   getUserCashedOutAmountFromMarket,
   getUserWasRight,
   renderDegenPriceFromContract,
@@ -130,7 +129,6 @@ export const getImageForMarket = ({
     timeDelta > 0
       ? `Ends in ${convertMillisecondsToDelta(timeDelta)}`
       : `Ended ${convertMillisecondsToDelta(timeDelta)} ago`;
-  const maxMultiplier = getMaxMultiplierForMarket(market);
 
   return (
     <div tw="flex flex-col">
@@ -150,11 +148,6 @@ export const getImageForMarket = ({
             {formatEther(BigInt(market.degenCollected))} DEGEN steaked
           </p>
         </div>
-        {!!maxMultiplier && (
-          <p tw="text-5xl">
-            🔥 max potential return {maxMultiplier.toFixed(2)}% 🔥
-          </p>
-        )}
         {showPastBets && renderBets(market)}
       </div>
     </div>
